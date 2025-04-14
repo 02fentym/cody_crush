@@ -1,8 +1,28 @@
 {% extends "main.html" %}
 
 {% block content %}
-<details>
-    <summary>Unit 1</summary>
-    Put quizzes here in list
-</details>
+
+{% for unit in units %}
+<div>
+    <details {% if unit.id == 1 %} open {% endif %}>
+        <summary>{{unit.title}}</summary>
+
+        <div>
+            <ul>
+                {% for lesson in unit.lesson_set.all %}
+                <div>
+                    <li><a href="{% url 'start-quiz' lesson.id %}">{{lesson.title}}</a></li>
+                </div>
+                {% endfor %}
+
+                {% if not unit.lesson_set.exists %}
+                <li>No lessons available</li>
+                {% endif %}
+            </ul>
+        </div>
+
+    </details>
+</div>
+{% endfor %}
+
 {% endblock %}
