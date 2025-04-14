@@ -47,8 +47,16 @@ def take_quiz(request, quiz_id):
         quiz.grade = round(grade, 2)
         quiz.save()
 
-        return redirect("home")
+        return redirect("quiz-results", quiz.id)
 
 
     context = {"quiz": quiz, "questions": questions}
     return render(request, "base/quiz.html", context)
+
+
+def quiz_results(request, quiz_id):
+    quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
+    answers = Answer.objects.filter(quiz=quiz)
+
+    context = {"quiz": quiz, "answers": answers}
+    return render(request, "base/quiz_results.html", context)

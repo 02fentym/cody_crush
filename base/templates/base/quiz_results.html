@@ -1,0 +1,52 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<div>
+    {% for answer in answers %}
+
+    <div>
+        <h5>{{forloop.counter}}) {{answer.question.prompt}}</h5>
+
+        {% if answer.selected_choice == "a" and answer.question.correct_choice == "a" %}
+        ✅
+        {% elif answer.selected_choice == "a" and answer.question.correct_choice != "a" %}
+        ❌
+        {% elif answer.question.correct_choice == "a" %}
+        →
+        {% endif %}
+        a) {{answer.question.choice_a}}<br>
+
+        {% if answer.selected_choice == "b" and answer.question.correct_choice == "b" %}
+        ✅
+        {% elif answer.selected_choice == "b" and answer.question.correct_choice != "b" %}
+        ❌
+        {% elif answer.question.correct_choice == "b" %}
+        →
+        {% endif %}
+        b) {{answer.question.choice_b}}<br>
+
+        {% if answer.selected_choice == "c" and answer.question.correct_choice == "c" %}
+        ✅
+        {% elif answer.selected_choice == "c" and answer.question.correct_choice != "c" %}
+        ❌
+        {% elif answer.question.correct_choice == "c" %}
+        →
+        {% endif %}
+        c) {{answer.question.choice_c}}<br>
+
+        {% if answer.selected_choice == "d" and answer.question.correct_choice == "d" %}
+        ✅
+        {% elif answer.selected_choice == "d" and answer.question.correct_choice != "d" %}
+        ❌
+        {% elif answer.question.correct_choice == "d" %}
+        →
+        {% endif %}
+        d) {{answer.question.choice_d}}<br>
+
+    </div>
+
+    {% endfor %}
+</div>
+
+{% endblock %}
