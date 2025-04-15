@@ -58,5 +58,5 @@ def quiz_results(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
     answers = Answer.objects.filter(quiz=quiz)
 
-    context = {"quiz": quiz, "answers": answers}
+    context = {"quiz": quiz, "answers": answers, "choices": choices}
     return render(request, "base/quiz_results.html", context)
