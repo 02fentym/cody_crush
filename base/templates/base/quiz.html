@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<h1>{{lesson.title}} Quiz</h1>
+<h1>{{quiz.lesson.title}} Quiz</h1>
 
 
 <form method="POST" action="">
@@ -12,24 +12,25 @@
         {% for question in questions %}
 
         <div>
-            <h5>{{forloop.counter}}) {{question.prompt|safe}}</h5>
+            <p>{{forloop.counter}}) {{question.prompt|safe}}</p>
 
             <div>
                 <input type="radio" name="q{{question.id}}" value="a">
-                a) {{question.choice_a|safe}}<br>
+                a) {{question.choice_a|safe}}
             </div>
             <div>
                 <input type="radio" name="q{{question.id}}" value="b">
-                b) {{question.choice_b|safe}}<br>
+                b) {{question.choice_b|safe}}
             </div>
             <div>
                 <input type="radio" name="q{{question.id}}" value="c">
-                c) {{question.choice_c|safe}}<br>
+                c) {{question.choice_c|safe}}
             </div>
             <div>
                 <input type="radio" name="q{{question.id}}" value="d">
-                d) {{question.choice_d|safe}}<br>
+                d) {{question.choice_d|safe}}
             </div>
+            <hr>
         </div>
 
         {% endfor %}

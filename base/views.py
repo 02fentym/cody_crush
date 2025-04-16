@@ -1,13 +1,78 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Unit, Lesson, Question, Quiz, Answer
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from .models import Unit, Lesson, Question, Quiz, Answer, Profile
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from .forms import UserForm
 
 # Create your views here.
+
+def login_user(request):
+    page = "login"
+
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    if request.method == "POST":
+        username = request.POST.get("username").lower()
+        password = request.POST.get("password")
+        
+        try:
+            user = User.objects.get(username=username)
+        except:
+            messages.error(request, "User does not exist")
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect("home")
+        else:
+            messages.error(request, "Password is incorrect")
+
+    context = {"page": page}
+    return render(request, "base/login_register.html", context)
+
+
+def register_user(request):
+    page = "register"
+    form = UserForm()
+
+    if request.method == "POST":
+        form = UserForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.username = user.username.lower()
+            user.save()
+
+            role = form.cleaned_data.get("role")
+            Profile.objects.create(user=user, role=role)
+
+            login(request, user)
+            return redirect("home")
+        else:
+            messages.error(request, "An error occurred during registration")
+
+    context = {"page": page, "form": form}
+    return render(request, "base/login_register.html", context)
+
+
+def logout_user(request):
+    logout(request)
+    return redirect("login")
+
+
 def home(request):
     units = Unit.objects.all()
     lessons = Lesson.objects.all()
 
     context = {"units": units, "lessons": lessons}
-    return render(request, "base/student_home.html", context)
+
+    if request.user.profile.role == "teacher":
+        return render(request, "base/teacher_home.html", context)
+    else:
+        return render(request, "base/student_home.html", context)
+
 
 def start_quiz(request, lesson_id):
     lesson = Lesson.objects.get(id=lesson_id)
@@ -58,5 +123,5 @@ def quiz_results(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
     answers = Answer.objects.filter(quiz=quiz)
 
-    context = {"quiz": quiz, "answers": answers, "choices": choices}
+    context = {"quiz": quiz, "answers": answers}
     return render(request, "base/quiz_results.html", context)
