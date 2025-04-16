@@ -5,6 +5,7 @@ from .models import Unit, Lesson, Question, Quiz, Answer, Profile
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .forms import UserForm
+from .decorators import allowed_roles
 
 # Create your views here.
 
@@ -73,7 +74,8 @@ def home(request):
     else:
         return render(request, "base/student_home.html", context)
 
-
+@allowed_roles(["student"])
+@login_required(login_url="login")
 def start_quiz(request, lesson_id):
     lesson = Lesson.objects.get(id=lesson_id)
     questions = lesson.question_set.all().order_by("?") #randomizes the order of the questions
@@ -86,6 +88,8 @@ def start_quiz(request, lesson_id):
     return redirect("take-quiz", quiz_id=quiz.id)
 
 
+@allowed_roles(["student"])
+@login_required(login_url="login")
 def take_quiz(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
     questions = quiz.questions.all()
