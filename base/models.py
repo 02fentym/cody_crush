@@ -36,6 +36,7 @@ class Question(models.Model):
         max_length=1,
         choices=[('a', 'A'), ('b', 'B'), ('c', 'C'), ('d', 'D')]
     )
+    #explanation = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:

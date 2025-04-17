@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 from .forms import UserForm
 from .decorators import allowed_roles
 
+import csv, io
+
 # Create your views here.
 
 def login_user(request):
@@ -74,6 +76,7 @@ def home(request):
     else:
         return render(request, "base/student_home.html", context)
 
+
 @allowed_roles(["student"])
 @login_required(login_url="login")
 def start_quiz(request, lesson_id):
@@ -123,9 +126,38 @@ def take_quiz(request, quiz_id):
     return render(request, "base/quiz.html", context)
 
 
+@allowed_roles(["student"])
+@login_required(login_url="login")
 def quiz_results(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
     answers = Answer.objects.filter(quiz=quiz)
 
     context = {"quiz": quiz, "answers": answers}
     return render(request, "base/quiz_results.html", context)
+
+
+@allowed_roles(["teacher"])
+@login_required(login_url="login")
+def upload_questions(request):
+    if request.method == "POST":
+        file = request.FILES["file"]
+        data = file.read().decode("utf-8")
+        csv_file = io.StringIO(data)
+        reader = csv.DictReader(csv_file)
+
+        for row in reader:
+            lesson_id = row["lesson_id"]
+            lesson = Lesson.objects.get(id=lesson_id)
+            Question.objects.create(
+                lesson=lesson,
+                prompt=row["prompt"],
+                choice_a=row["choice_a"],
+                choice_b=row["choice_b"],
+                choice_c=row["choice_c"],
+                choice_d=row["choice_d"],
+                correct_choice=row["correct_choice"].lower()
+            )
+    
+    context = {}
+
+    return render(request, "base/upload_questions.html", context)
