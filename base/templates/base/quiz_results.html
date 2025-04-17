@@ -6,7 +6,7 @@
     {% for answer in answers %}
 
     <div>
-        <h5>{{forloop.counter}}) {{answer.question.prompt}}</h5>
+        <p>{{forloop.counter}}) {{answer.question.prompt|safe}}</p>
 
         {% if answer.selected_choice == "a" and answer.question.correct_choice == "a" %}
         ✅
@@ -15,7 +15,7 @@
         {% elif answer.question.correct_choice == "a" %}
         →
         {% endif %}
-        a) {{answer.question.choice_a}}<br>
+        a) {{answer.question.choice_a|safe}}<br>
 
         {% if answer.selected_choice == "b" and answer.question.correct_choice == "b" %}
         ✅
@@ -24,7 +24,7 @@
         {% elif answer.question.correct_choice == "b" %}
         →
         {% endif %}
-        b) {{answer.question.choice_b}}<br>
+        b) {{answer.question.choice_b|safe}}<br>
 
         {% if answer.selected_choice == "c" and answer.question.correct_choice == "c" %}
         ✅
@@ -33,7 +33,7 @@
         {% elif answer.question.correct_choice == "c" %}
         →
         {% endif %}
-        c) {{answer.question.choice_c}}<br>
+        c) {{answer.question.choice_c|safe}}<br>
 
         {% if answer.selected_choice == "d" and answer.question.correct_choice == "d" %}
         ✅
@@ -42,7 +42,7 @@
         {% elif answer.question.correct_choice == "d" %}
         →
         {% endif %}
-        d) {{answer.question.choice_d}}<br>
+        d) {{answer.question.choice_d|safe}}<br>
 
     </div>
 
