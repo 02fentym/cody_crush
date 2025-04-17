@@ -9,14 +9,14 @@
 
         <div>
             <ul>
-                {% for lesson in unit.lesson_set.all %}
+                {% for topic in unit.topic_set.all %}
                 <div>
-                    <li><a href="{% url 'start-quiz' lesson.id %}">{{lesson.title}}</a></li>
+                    <li><a href="{% url 'start-quiz' topic.id %}">{{topic.title}}</a></li>
                 </div>
                 {% endfor %}
 
-                {% if not unit.lesson_set.exists %}
-                <li>No lessons available</li>
+                {% if not unit.topic.exists %}
+                <li>No topics available</li>
                 {% endif %}
             </ul>
         </div>

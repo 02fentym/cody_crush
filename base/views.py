@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import Unit, Lesson, Question, Quiz, Answer, Profile
+from .models import Unit, Topic, Question, Quiz, Answer, Profile
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .forms import UserForm
@@ -67,9 +67,9 @@ def logout_user(request):
 
 def home(request):
     units = Unit.objects.all()
-    lessons = Lesson.objects.all()
+    topics = Topic.objects.all()
 
-    context = {"units": units, "lessons": lessons}
+    context = {"units": units, "topics": topics}
 
     if request.user.profile.role == "teacher":
         return render(request, "base/teacher_home.html", context)
@@ -79,12 +79,12 @@ def home(request):
 
 @allowed_roles(["student"])
 @login_required(login_url="login")
-def start_quiz(request, lesson_id):
-    lesson = Lesson.objects.get(id=lesson_id)
-    questions = lesson.question_set.all().order_by("?") #randomizes the order of the questions
+def start_quiz(request, topic_id):
+    topic = Topic.objects.get(id=topic_id)
+    questions = topic.question_set.all().order_by("?")[:5] #randomizes the order of the questions
     quiz = Quiz.objects.create(
         student=request.user,
-        lesson=lesson,
+        topic=topic,
         grade=None
     )
     quiz.questions.set(questions) # can only set many-to-many fields after the quiz is created in the DB
@@ -139,17 +139,27 @@ def quiz_results(request, quiz_id):
 @allowed_roles(["teacher"])
 @login_required(login_url="login")
 def upload_questions(request):
+    errors = []
+
     if request.method == "POST":
+        errors = []
         file = request.FILES["file"]
         data = file.read().decode("utf-8")
         csv_file = io.StringIO(data)
         reader = csv.DictReader(csv_file)
 
-        for row in reader:
-            lesson_id = row["lesson_id"]
-            lesson = Lesson.objects.get(id=lesson_id)
+        for i, row in enumerate(reader, start=2):
+            # validate the data first
+            result = question_data_validation(i, row)
+            if result != "":
+                errors.append(result)
+                continue
+
+            # add the question to the database
+            topic_id = row["topic_id"]
+            topic = Topic.objects.get(id=topic_id)
             Question.objects.create(
-                lesson=lesson,
+                topic=topic,
                 prompt=row["prompt"],
                 choice_a=row["choice_a"],
                 choice_b=row["choice_b"],
@@ -157,7 +167,25 @@ def upload_questions(request):
                 choice_d=row["choice_d"],
                 correct_choice=row["correct_choice"].lower()
             )
+        if not errors:
+            messages.success(request, "Questions uploaded successfully.")
+
     
-    context = {}
+    context = {"errors": errors}
 
     return render(request, "base/upload_questions.html", context)
+
+
+def question_data_validation(i, row):
+    topic_id = row["topic_id"]
+    try:
+        topic = Topic.objects.get(id=topic_id)
+    except Topic.DoesNotExist:
+        return f"Row {i}: topic ID {row['topic_id']} does not exist."
+    
+    required_fields = ["prompt", "choice_a", "choice_b", "choice_c", "choice_d", "correct_choice"]
+    for field in required_fields:
+        if not row.get(field):
+            return f"Row {i}: Missing value for {field}"
+    
+    return ""

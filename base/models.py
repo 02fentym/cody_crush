@@ -7,26 +7,26 @@ class Profile(models.Model):
     role = models.CharField(max_length=10, choices=[('student', 'Student'), ('teacher', 'Teacher')])
 
     def __str__(self):
-        return self.role
+        return f"{self.user.username} ({self.role.title()})"
 
 
 class Unit(models.Model):
     title = models.CharField(max_length=200)
 
     def __str__(self):
-        return f"Title: {self.title}"
+        return self.title
 
 
-class Lesson(models.Model):
+class Topic(models.Model):
     title = models.CharField(max_length=200)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Unit: {self.unit.title} Title: {self.title}"
-    
+        return f"{self.unit.title} - {self.title}"
 
+    
 class Question(models.Model):
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
     prompt = models.TextField(null=True, blank=True)
     choice_a = models.TextField()
     choice_b = models.TextField()
@@ -43,19 +43,19 @@ class Question(models.Model):
         ordering = ['-created']
 
     def __str__(self):
-        return self.prompt[0:50]
+        return f"{self.topic.title}: {self.prompt[:40]}"
 
 
 
 class Quiz(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE)
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now=True)
     grade = models.FloatField(null=True, blank=True)
     questions = models.ManyToManyField(Question)
 
     def __str__(self):
-        return f"Quiz: {self.lesson} Grade: {self.grade}"
+        return f"{self.topic.title} Quiz for {self.student.username}"
     
 
 class Answer(models.Model):
@@ -68,4 +68,4 @@ class Answer(models.Model):
     is_correct = models.BooleanField(null=True, blank=True)
 
     def __str__(self):
-        return f"Q: {self.question.id}, Selected: {self.selected_choice}, Correct: {self.is_correct}"
+        return f"Answer to '{self.question.prompt[:30]}...' by {self.quiz.student.username}"
