@@ -1,15 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import Unit, Topic, Question, Quiz, Answer, Profile
+from .models import Unit, Topic, Question, Quiz, Answer, Profile, Course
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .forms import UserForm
+from .forms import UserForm, CourseForm
 from .decorators import allowed_roles
 
 import csv, io
 
-# Create your views here.
+###################### GENERIC VIEWS
 
 def login_user(request):
     page = "login"
@@ -65,16 +65,26 @@ def logout_user(request):
     return redirect("login")
 
 
-def home(request):
-    units = Unit.objects.all()
-    topics = Topic.objects.all()
+@login_required(login_url="login")
+def home_selector(request):
+    role = request.user.profile.role
 
-    context = {"units": units, "topics": topics}
-
-    if request.user.profile.role == "teacher":
-        return render(request, "base/teacher_home.html", context)
+    if role == "teacher":
+        return redirect("teacher-home")
+    elif role == "student":
+        return redirect("student-home")
     else:
-        return render(request, "base/student_home.html", context)
+        return redirect("login")  # or raise an error
+
+
+
+###################### STUDENT VIEWS
+
+@allowed_roles(["student"])
+@login_required(login_url="login")
+def student_home(request):
+    context = {}
+    return render(request, "base/student_home.html", context)
 
 
 @allowed_roles(["student"])
@@ -134,6 +144,40 @@ def quiz_results(request, quiz_id):
 
     context = {"quiz": quiz, "answers": answers}
     return render(request, "base/quiz_results.html", context)
+
+
+
+
+
+###################### TEACHER VIEWS
+
+@allowed_roles(["teacher"])
+@login_required(login_url="login")
+def teacher_home(request):
+    units = Unit.objects.all()
+    topics = Topic.objects.all()
+
+    context = {"units": units, "topics": topics}
+
+    return render(request, "base/teacher_home.html", context)
+
+
+@allowed_roles(["teacher"])
+@login_required(login_url="login")
+def create_course(request):
+    form = CourseForm()
+
+    if request.method == "POST":
+        form = CourseForm(request.POST)
+        if form.is_valid():
+            course = form.save(commit=False)
+            course.teacher = request.user
+            course.save()
+    else:
+        form = CourseForm()
+
+    context = {"form": form}
+    return render(request, "base/create_course.html", context)
 
 
 @allowed_roles(["teacher"])

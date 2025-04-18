@@ -1,0 +1,15 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<h2>Create a New Course</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    {{form.as_p}}
+    <input type="submit" value="Submit"/>
+</form>
+
+<a href="{% url 'teacher-home' %}">← Back to Dashboard</a>
+
+{% endblock %}

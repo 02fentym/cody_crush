@@ -2,8 +2,22 @@
 
 {% block content %}
 
-<h1>Teacher View</h1>
+<h1>Your Courses</h1>
 
-<h3><a href="{% url 'upload-questions' %}">Upload Questions</a></h3>
+{% if courses %}
+<ul>
+    {% for course in courses %}
+    <li>
+        <strong>{{ course.title }}</strong><br>
+        {{ course.description|default:"No description." }}<br>
+        <a href="{% url 'course_detail' course.id %}">Open</a>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>You have no courses yet. Start by creating one!</p>
+{% endif %}
+
+<a href="{% url 'create-course' %}" class="btn">+ Create New Course</a>
 
 {% endblock %}

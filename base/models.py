@@ -10,16 +10,33 @@ class Profile(models.Model):
         return f"{self.user.username} ({self.role.title()})"
 
 
-class Unit(models.Model):
+class Course(models.Model):
     title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    teacher = models.ForeignKey(User, on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return self.title
+    
+
+class Unit(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
         return self.title
 
 
 class Topic(models.Model):
-    title = models.CharField(max_length=200)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
         return f"{self.unit.title} - {self.title}"
@@ -37,7 +54,8 @@ class Question(models.Model):
         choices=[('a', 'A'), ('b', 'B'), ('c', 'C'), ('d', 'D')]
     )
     #explanation = models.TextField()
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
 
     class Meta:
         ordering = ['-created']
@@ -50,9 +68,10 @@ class Question(models.Model):
 class Quiz(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE)
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now=True)
     grade = models.FloatField(null=True, blank=True)
     questions = models.ManyToManyField(Question)
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
         return f"{self.topic.title} Quiz for {self.student.username}"
@@ -66,6 +85,8 @@ class Answer(models.Model):
         choices=[('a', 'A'), ('b', 'B'), ('c', 'C'), ('d', 'D')]
     )
     is_correct = models.BooleanField(null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True, null=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
         return f"Answer to '{self.question.prompt[:30]}...' by {self.quiz.student.username}"
