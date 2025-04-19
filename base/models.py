@@ -11,8 +11,16 @@ class Profile(models.Model):
 
 
 class Course(models.Model):
+    LANGUAGE_CHOICES = [
+        ('python', 'Python'),
+        ('java', 'Java'),
+        ('cpp', 'C++'),
+        # Add more if needed
+    ]
+
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES, default='python')  # ← Add this
     teacher = models.ForeignKey(User, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True, null=True)
     updated = models.DateTimeField(auto_now=True, null=True)
@@ -53,7 +61,12 @@ class Question(models.Model):
         max_length=1,
         choices=[('a', 'A'), ('b', 'B'), ('c', 'C'), ('d', 'D')]
     )
-    #explanation = models.TextField()
+    explanation = models.TextField()
+    language = models.CharField(
+        max_length=20,
+        choices=Course.LANGUAGE_CHOICES,
+        default='python'
+    )
     created = models.DateTimeField(auto_now_add=True, null=True)
     updated = models.DateTimeField(auto_now=True, null=True)
 

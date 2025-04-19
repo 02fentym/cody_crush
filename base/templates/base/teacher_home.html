@@ -5,15 +5,23 @@
 <h1>Your Courses</h1>
 
 {% if courses %}
-<ul>
-    {% for course in courses %}
-    <li>
-        <strong>{{ course.title }}</strong><br>
-        {{ course.description|default:"No description." }}<br>
-        <a href="{% url 'course_detail' course.id %}">Open</a>
-    </li>
-    {% endfor %}
-</ul>
+{% for course in courses %}
+<div>
+    <strong>{{ course.title }}</strong><br>
+    {{ course.description|default:"No description." }}<br>
+
+    <details>
+        <summary>{{ course.title }}</summary>
+        <div>
+            {% for unit in course.unit_set.all %}
+            <p>{{ unit.title }}</p>
+            {% endfor %}
+        </div>
+    </details>
+
+</div>
+{% endfor %}
+<br>
 {% else %}
 <p>You have no courses yet. Start by creating one!</p>
 {% endif %}

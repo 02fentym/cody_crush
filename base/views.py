@@ -154,10 +154,11 @@ def quiz_results(request, quiz_id):
 @allowed_roles(["teacher"])
 @login_required(login_url="login")
 def teacher_home(request):
+    courses = Course.objects.all()
     units = Unit.objects.all()
     topics = Topic.objects.all()
 
-    context = {"units": units, "topics": topics}
+    context = {"courses": courses, "units": units, "topics": topics}
 
     return render(request, "base/teacher_home.html", context)
 
@@ -209,7 +210,9 @@ def upload_questions(request):
                 choice_b=row["choice_b"],
                 choice_c=row["choice_c"],
                 choice_d=row["choice_d"],
-                correct_choice=row["correct_choice"].lower()
+                correct_choice=row["correct_choice"].lower(),
+                explanation=row["explanation"],
+                language=row["language"]
             )
         if not errors:
             messages.success(request, "Questions uploaded successfully.")
@@ -227,7 +230,7 @@ def question_data_validation(i, row):
     except Topic.DoesNotExist:
         return f"Row {i}: topic ID {row['topic_id']} does not exist."
     
-    required_fields = ["prompt", "choice_a", "choice_b", "choice_c", "choice_d", "correct_choice"]
+    required_fields = ["prompt", "choice_a", "choice_b", "choice_c", "choice_d", "correct_choice", "explanation"]
     for field in required_fields:
         if not row.get(field):
             return f"Row {i}: Missing value for {field}"
