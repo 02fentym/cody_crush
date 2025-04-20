@@ -4,28 +4,43 @@
 
 <h1>Your Courses</h1>
 
-{% if courses %}
 {% for course in courses %}
-<div>
-    <strong>{{ course.title }}</strong><br>
-    {{ course.description|default:"No description." }}<br>
-
+<div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; background-color: #fefefe;">
     <details>
-        <summary>{{ course.title }}</summary>
-        <div>
+        <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer;">
+            {{ course.title }} ({{ course.language|title }})
+        </summary>
+
+        <div style="margin-top: 12px; padding-left: 16px;">
+            {% if course.unit_set.exists %}
             {% for unit in course.unit_set.all %}
-            <p>{{ unit.title }}</p>
+            <div style="margin-bottom: 8px; padding-left: 8px;">
+                <details>
+                    <summary style="font-weight: 600;">{{ unit.title }}</summary>
+                    {% if unit.topic_set.exists %}
+                    {% for topic in unit.topic_set.all %}
+                    <div style="margin-bottom: 8px; padding-left: 8px;">
+                        <details>
+                            <summary style="font-weight: normal;">{{ topic.title }}</summary>
+                        </details>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p style="color: #888;">No topics yet.</p>
+                    {% endif %}
+                </details>
+            </div>
             {% endfor %}
+            {% else %}
+            <p style="color: #888;">No units yet.</p>
+            {% endif %}
         </div>
     </details>
-
 </div>
 {% endfor %}
-<br>
-{% else %}
-<p>You have no courses yet. Start by creating one!</p>
-{% endif %}
-
-<a href="{% url 'create-course' %}" class="btn">+ Create New Course</a>
+<a href="{% url 'create-course' %}" title="Create New Course"
+    style="display: inline-block; font-size: 24px; font-weight: bold; text-decoration: none; padding: 6px 12px; border: 1px solid #ccc; border-radius: 50%; background-color: #f0f0f0; color: #333; text-align: center;">
+    +
+</a>
 
 {% endblock %}
