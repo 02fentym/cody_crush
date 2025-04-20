@@ -4,6 +4,7 @@
 
 <h1>Your Courses</h1>
 
+<!-- Courses dropdown-->
 {% for course in courses %}
 <div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; background-color: #fefefe;">
     <details>
@@ -13,11 +14,15 @@
 
         <div style="margin-top: 12px; padding-left: 16px;">
             {% if course.unit_set.exists %}
+
+            <!-- Units dropdown-->
             {% for unit in course.unit_set.all %}
             <div style="margin-bottom: 8px; padding-left: 8px;">
                 <details>
                     <summary style="font-weight: 600;">{{ unit.title }}</summary>
                     {% if unit.topic_set.exists %}
+
+                    <!-- Topics dropdown-->
                     {% for topic in unit.topic_set.all %}
                     <div style="margin-bottom: 8px; padding-left: 8px;">
                         <details>
@@ -25,12 +30,14 @@
                         </details>
                     </div>
                     {% endfor %}
+
                     {% else %}
                     <p style="color: #888;">No topics yet.</p>
                     {% endif %}
                 </details>
             </div>
             {% endfor %}
+
             {% else %}
             <p style="color: #888;">No units yet.</p>
             {% endif %}
@@ -38,9 +45,35 @@
     </details>
 </div>
 {% endfor %}
-<a href="{% url 'create-course' %}" title="Create New Course"
-    style="display: inline-block; font-size: 24px; font-weight: bold; text-decoration: none; padding: 6px 12px; border: 1px solid #ccc; border-radius: 50%; background-color: #f0f0f0; color: #333; text-align: center;">
-    +
-</a>
+
+<!-- Create New Course -->
+<details style="margin-bottom: 20px;">
+    <summary title="Create New Course"
+        style="display: inline-block; font-size: 24px; font-weight: bold; text-decoration: none; padding: 6px 12px; border: 1px solid #ccc; border-radius: 50%; background-color: #f0f0f0; color: #333; text-align: center; cursor: pointer;">
+        +
+    </summary>
+
+    <form method="POST" action=""
+        style="margin-top: 12px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        {% csrf_token %}
+
+        <label for="title" style="margin-bottom: 0;">Title:</label>
+        <input type="text" name="title" required style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;">
+
+        <label for="language" style="margin-bottom: 0;">Language:</label>
+        <select name="language" required style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="cpp">C++</option>
+        </select>
+
+        <button type="submit"
+            style="padding: 6px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Create
+        </button>
+    </form>
+
+</details>
+
 
 {% endblock %}

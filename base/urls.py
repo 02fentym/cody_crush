@@ -18,5 +18,4 @@ urlpatterns = [
 
     # teacher
     path("upload-questions/", views.upload_questions, name="upload-questions"),
-    path("create-course/", views.create_course, name="create-course"),
 ]

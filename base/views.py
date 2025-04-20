@@ -154,19 +154,7 @@ def quiz_results(request, quiz_id):
 @allowed_roles(["teacher"])
 @login_required(login_url="login")
 def teacher_home(request):
-    courses = Course.objects.all()
-    units = Unit.objects.all()
-    topics = Topic.objects.all()
-
-    context = {"courses": courses, "units": units, "topics": topics}
-
-    return render(request, "base/teacher_home.html", context)
-
-
-@allowed_roles(["teacher"])
-@login_required(login_url="login")
-def create_course(request):
-    form = CourseForm()
+    courses = Course.objects.filter(teacher=request.user)
 
     if request.method == "POST":
         form = CourseForm(request.POST)
@@ -174,11 +162,14 @@ def create_course(request):
             course = form.save(commit=False)
             course.teacher = request.user
             course.save()
+            messages.success(request, "Course created successfully!")
+            return redirect("teacher-home")
     else:
         form = CourseForm()
 
-    context = {"form": form}
-    return render(request, "base/create_course.html", context)
+    context = {"courses": courses, "form": form}
+    return render(request, "base/teacher_home.html", context)
+
 
 
 @allowed_roles(["teacher"])
