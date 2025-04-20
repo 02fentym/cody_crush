@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Course
+from .models import Course, Unit
 
 class UserForm(UserCreationForm):
     ROLE_CHOICES = [
@@ -21,3 +21,9 @@ class CourseForm(ModelForm):
     class Meta:
         model = Course
         fields = ["title", "description"]
+
+
+class UnitForm(ModelForm):
+    class Meta:
+        model = Unit
+        fields = ["title"]

@@ -4,7 +4,7 @@ from django.contrib import messages
 from .models import Unit, Topic, Question, Quiz, Answer, Profile, Course
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .forms import UserForm, CourseForm
+from .forms import UserForm, CourseForm, UnitForm
 from .decorators import allowed_roles
 
 import csv, io
@@ -156,18 +156,34 @@ def quiz_results(request, quiz_id):
 def teacher_home(request):
     courses = Course.objects.filter(teacher=request.user)
 
-    if request.method == "POST":
-        form = CourseForm(request.POST)
-        if form.is_valid():
-            course = form.save(commit=False)
-            course.teacher = request.user
-            course.save()
-            messages.success(request, "Course created successfully!")
-            return redirect("teacher-home")
-    else:
-        form = CourseForm()
+    course_form = CourseForm()
+    unit_form = UnitForm()
 
-    context = {"courses": courses, "form": form}
+    if request.method == "POST":
+        form_type = request.POST.get("form_type")
+
+        if form_type == "course":
+            course_form = CourseForm(request.POST)
+            if course_form.is_valid():
+                course = course_form.save(commit=False)
+                course.teacher = request.user
+                course.save()
+                messages.success(request, "Course created successfully!")
+                return redirect("teacher-home")
+        elif form_type == "unit":
+            unit_form = UnitForm(request.POST)
+            if unit_form.is_valid():
+                unit = unit_form.save(commit=False)
+                course_id = int(request.POST.get("course_id"))
+                course = Course.objects.get(id=course_id)
+                unit.course = course
+                unit.save()
+                messages.success(request, "Unit created successfully!")
+                return redirect("teacher-home")
+
+        # fill in details for unit form
+
+    context = {"courses": courses, "course_form": course_form, "unit_form": unit_form}
     return render(request, "base/teacher_home.html", context)
 
 
