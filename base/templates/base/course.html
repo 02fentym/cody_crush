@@ -1,0 +1,44 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<h2><a href="{% url 'teacher-home' %}">Dashboard</a> > {{ course.title }}</h2>
+
+<div style="margin-top: 12px; padding-left: 16px;">
+    {% if course.unit_set.exists %}
+
+    <!-- Units dropdown-->
+    {% for unit in course.unit_set.all %}
+    <div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; background-color: #fefefe;">
+        <a href="{% url 'unit' course.id unit.id %}"  style="text-decoration: none; color: inherit; font-weight: 1000;">{{ unit.title }}</a>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p style="color: #888;">No units yet.</p>
+    {% endif %}
+    <!-- Create New Unit -->
+    <details style="margin-bottom: 20px;">
+        <summary title="Create New Unit"
+            style="display: inline-block; font-size: 12px; font-weight: bold; text-decoration: none; padding: 3px 6px; border: 1px solid #ccc; border-radius: 50%; background-color: #f0f0f0; color: #333; text-align: center; cursor: pointer;">
+            +
+        </summary>
+        <form method="POST" action=""
+            style="margin-top: 12px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            {% csrf_token %}
+            
+            <label for="title" style="margin-bottom: 0;">Title:</label>
+            <input type="text" name="title" required
+                style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;">
+
+            <input type="hidden" name="course_id" value="{{ course.id }}"> <!-- Hidden field to pass course ID -->
+
+            <button type="submit"
+                style="padding: 6px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Create
+            </button>
+            <button type="button" onclick="this.closest('details').removeAttribute('open')">Cancel</button>
+        </form>
+    </details>
+</div>
+
+{% endblock %}

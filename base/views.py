@@ -156,21 +156,18 @@ def quiz_results(request, quiz_id):
 def teacher_home(request):
     courses = Course.objects.filter(teacher=request.user)
 
-    course_form = CourseForm()
-    unit_form = UnitForm()
-
     if request.method == "POST":
-        form_type = request.POST.get("form_type")
-
-        if form_type == "course":
-            course_form = CourseForm(request.POST)
-            if course_form.is_valid():
-                course = course_form.save(commit=False)
-                course.teacher = request.user
-                course.save()
-                messages.success(request, "Course created successfully!")
-                return redirect("teacher-home")
-        elif form_type == "unit":
+        form = CourseForm(request.POST)
+        if form.is_valid():
+            course = form.save(commit=False)
+            course.teacher = request.user
+            course.save()
+            messages.success(request, "Course created successfully!")
+            return redirect("teacher-home")
+    else:
+        form = CourseForm()
+        
+        '''elif form_type == "unit":
             unit_form = UnitForm(request.POST)
             if unit_form.is_valid():
                 unit = unit_form.save(commit=False)
@@ -179,13 +176,34 @@ def teacher_home(request):
                 unit.course = course
                 unit.save()
                 messages.success(request, "Unit created successfully!")
-                return redirect("teacher-home")
+                return redirect("teacher-home")'''
 
-        # fill in details for unit form
-
-    context = {"courses": courses, "course_form": course_form, "unit_form": unit_form}
+    context = {"courses": courses, "form": form}
     return render(request, "base/teacher_home.html", context)
 
+
+def course(request, course_id):
+    course = get_object_or_404(Course, id=course_id, teacher=request.user)
+    units = course.unit_set.all()
+
+    context = {"course": course, "units": units}
+    return render(request, "base/course.html", context)
+
+
+def unit(request, course_id, unit_id):
+    unit = get_object_or_404(Unit, id=unit_id, course__id=course_id)
+    topics = unit.topic_set.all()
+
+    context = {"unit": unit, "topics": topics}
+    return render(request, "base/unit.html", context)
+
+
+def topic(request, course_id, unit_id, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id, unit__id=unit_id, unit__course__id=course_id)
+    questions = topic.question_set.all()
+
+    context = {"topic": topic, "questions": questions}
+    return render(request, "base/topic.html", context)
 
 
 @allowed_roles(["teacher"])

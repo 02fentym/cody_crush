@@ -17,5 +17,10 @@ urlpatterns = [
     path("quiz/results/<int:quiz_id>/", views.quiz_results, name="quiz-results"),
 
     # teacher
+    
+    path("course/<int:course_id>/", views.course, name="course"),
+    path("course/<int:course_id>/unit/<int:unit_id>/", views.unit, name="unit"),
+
+    path("course/<int:course_id>/unit/<int:unit_id>/topic/<int:topic_id>/", views.topic, name="topic"),
     path("upload-questions/", views.upload_questions, name="upload-questions"),
 ]

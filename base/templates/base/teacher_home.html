@@ -7,66 +7,7 @@
 <!-- Courses dropdown-->
 {% for course in courses %}
 <div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; background-color: #fefefe;">
-    <details>
-        <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer;">
-            {{ course.title }} ({{ course.language|title }})
-        </summary>
-
-        <div style="margin-top: 12px; padding-left: 16px;">
-            {% if course.unit_set.exists %}
-
-            <!-- Units dropdown-->
-            {% for unit in course.unit_set.all %}
-            <div style="margin-bottom: 8px; padding-left: 8px;">
-                <details>
-                    <summary style="font-weight: 600;">{{ unit.title }}</summary>
-                    {% if unit.topic_set.exists %}
-
-                    <!-- Topics dropdown-->
-                    {% for topic in unit.topic_set.all %}
-                    <div style="margin-bottom: 8px; padding-left: 8px;">
-                        <details>
-                            <summary style="font-weight: normal;">{{ topic.title }}</summary>
-                        </details>
-                    </div>
-                    {% endfor %}
-
-                    {% else %}
-                    <p style="color: #888;">No topics yet.</p>
-                    {% endif %}
-                </details>
-            </div>
-            {% endfor %}
-            {% else %}
-            <p style="color: #888;">No units yet.</p>
-            {% endif %}
-            <!-- Create New Unit -->
-            <details style="margin-bottom: 20px;">
-                <summary title="Create New Unit"
-                    style="display: inline-block; font-size: 12px; font-weight: bold; text-decoration: none; padding: 3px 6px; border: 1px solid #ccc; border-radius: 50%; background-color: #f0f0f0; color: #333; text-align: center; cursor: pointer;">
-                    +
-                </summary>
-                <form method="POST" action=""
-                    style="margin-top: 12px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                    {% csrf_token %}
-
-                    <input type="hidden" name="form_type" value="unit"> <!-- Hidden field to indicate form type -->
-
-                    <label for="title" style="margin-bottom: 0;">Title:</label>
-                    <input type="text" name="title" required
-                        style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;">
-
-                    <input type="hidden" name="course_id" value="{{ course.id }}"> <!-- Hidden field to pass course ID -->
-
-                    <button type="submit"
-                        style="padding: 6px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Create
-                    </button>
-                    <button type="button" onclick="this.closest('details').removeAttribute('open')">Cancel</button>
-                </form>
-            </details>
-        </div>
-    </details>
+    <a href="{% url 'course' course.id %}"  style="text-decoration: none; color: inherit; font-weight: 1000;">{{ course.title }} ({{ course.language|title }})</a>
 </div>
 {% endfor %}
 
@@ -80,8 +21,6 @@
     <form method="POST" action=""
         style="margin-top: 12px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
         {% csrf_token %}
-
-        <input type="hidden" name="form_type" value="course"> <!-- Hidden field to indicate form type -->
 
         <label for="title" style="margin-bottom: 0;">Title:</label>
         <input type="text" name="title" required style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;">

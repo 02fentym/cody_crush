@@ -1,0 +1,7 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<h2><a href="{% url 'teacher-home' %}">Dashboard</a> > <a href="{% url 'course' topic.unit.course.id %}">{{ topic.unit.course.title }}</a> > <a href="{% url 'unit' topic.unit.course.id topic.unit.id %}">{{ topic.unit.title }}</a> > {{ topic.title }}</h2>
+
+{% endblock %}
