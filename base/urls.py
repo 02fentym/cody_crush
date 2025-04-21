@@ -20,7 +20,10 @@ urlpatterns = [
     
     path("course/<int:course_id>/", views.course, name="course"),
     path("course/<int:course_id>/unit/<int:unit_id>/", views.unit, name="unit"),
-
     path("course/<int:course_id>/unit/<int:unit_id>/topic/<int:topic_id>/", views.topic, name="topic"),
     path("upload-questions/", views.upload_questions, name="upload-questions"),
+
+    path("activity/delete/<int:activity_id>/", views.delete_activity, name="delete-activity"),
+
+    path("topic/<int:topic_id>/create-quiz/", views.create_quiz, name="create-quiz"),
 ]

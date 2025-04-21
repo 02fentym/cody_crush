@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import Unit, Topic, Question, Quiz, Answer, Profile, Course
+from .models import Unit, Topic, Question, Quiz, Answer, Profile, Course, QuizTemplate, Activity
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .forms import UserForm, CourseForm, UnitForm
@@ -200,10 +200,49 @@ def unit(request, course_id, unit_id):
 
 def topic(request, course_id, unit_id, topic_id):
     topic = get_object_or_404(Topic, id=topic_id, unit__id=unit_id, unit__course__id=course_id)
-    questions = topic.question_set.all()
+    activities = topic.activity_set.order_by("order")
 
-    context = {"topic": topic, "questions": questions}
+    context = {"topic": topic, "activities": activities}
     return render(request, "base/topic.html", context)
+
+
+def create_quiz(request, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id)
+    unit = topic.unit
+    course = unit.course
+    
+    question_count = int(request.POST.get("question_count", 5))
+    if question_count is None:
+        question_count = 5
+    
+    quiz_template = QuizTemplate.objects.create(
+        topic=topic,
+        question_count=question_count
+    )
+    Activity.objects.create(
+        topic=topic,
+        type="quiz",
+        order=topic.activity_set.count() + 1,
+        quiz_template=quiz_template,
+        lesson=None
+    )
+
+    messages.success(request, "Quiz created successfully!")
+
+    return redirect("topic", course_id=course.id, unit_id=unit.id, topic_id=topic_id)
+
+
+def delete_activity(request, activity_id):
+    activity = get_object_or_404(Activity, id=activity_id)
+    if activity.type == "quiz":
+        quiz_template = activity.quiz_template
+        quiz_template.delete()
+    elif activity.type == "lesson":
+        lesson = activity.lesson
+        lesson.delete()
+        
+    messages.success(request, "Activity deleted successfully!")
+    return redirect("topic", course_id=activity.topic.unit.course.id, unit_id=activity.topic.unit.id, topic_id=activity.topic.id)
 
 
 @allowed_roles(["teacher"])

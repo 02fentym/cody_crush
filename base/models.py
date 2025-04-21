@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 
 class Profile(models.Model):
@@ -103,3 +104,56 @@ class Answer(models.Model):
 
     def __str__(self):
         return f"Answer to '{self.question.prompt[:30]}...' by {self.quiz.student.username}"
+
+
+class Lesson(models.Model):
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.title}"
+
+
+class QuizTemplate(models.Model):
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    question_count = models.PositiveIntegerField(default=5)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Quiz Template: {self.topic.title} ({self.question_count} questions)"
+
+
+class Activity(models.Model):
+    ACTIVITY_TYPES = [
+        ("lesson", "Lesson"),
+        ("quiz", "Quiz"),
+    ]
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    type = models.CharField(max_length=10, choices=ACTIVITY_TYPES)
+    order = models.PositiveIntegerField(default=0)
+    created = models.DateTimeField(auto_now_add=True)
+
+    quiz_template = models.ForeignKey('QuizTemplate', on_delete=models.CASCADE, null=True, blank=True)
+    lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE, null=True, blank=True)
+    #exercise = models.ForeignKey('Exercise', on_delete=models.SET_NULL, null=True, blank=True)
+
+    def clean(self):
+        count = 0
+
+        if self.lesson is not None:
+            count += 1
+        if self.quiz_template is not None:
+            count += 1
+
+        if count != 1:
+            raise ValidationError("Exactly one of lesson, quiz_template must be set.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # ensures clean() runs before save
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.topic.title} - {self.type}"
