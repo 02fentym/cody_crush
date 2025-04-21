@@ -2,19 +2,26 @@
 
 {% block content %}
 
-<h1>Your Courses</h1>
+<h2>Courses</h2>
 
 <!-- Courses dropdown-->
 {% for course in courses %}
-<div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; background-color: #fefefe;">
+<div style="display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; max-width: 600px; background-color: #fefefe;">
     <a href="{% url 'course' course.id %}"  style="text-decoration: none; color: inherit; font-weight: 1000;">{{ course.title }} ({{ course.language|title }})</a>
+    
+    <form method="POST" action="{% url 'delete-course' course.id %}" style="margin-top: 8px;">
+        {% csrf_token %}
+        <button type="submit" style="border: none; background: none; color: #c00; cursor: pointer; font-size: 0.9em;">
+            🗑
+        </button>
+    </form>
 </div>
 {% endfor %}
 
 <!-- Create New Course -->
 <details style="margin-bottom: 20px;">
     <summary title="Create New Course"
-        style="display: inline-block; font-size: 24px; font-weight: bold; text-decoration: none; padding: 6px 12px; border: 1px solid #ccc; border-radius: 50%; background-color: #f0f0f0; color: #333; text-align: center; cursor: pointer;">
+        style="display: inline-block; font-size: 20px; font-weight: bold; text-decoration: none; padding: 6px 12px; border: 1px solid #ccc; border-radius: 50%; background-color: #f0f0f0; color: #333; text-align: center; cursor: pointer;">
         +
     </summary>
 

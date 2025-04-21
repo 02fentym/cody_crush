@@ -2,15 +2,29 @@
 
 {% block content %}
 
-<h2><a href="{% url 'teacher-home' %}">Dashboard</a> > <a href="{% url 'course' unit.course.id %}">{{ unit.course.title }}</a> > {{ unit.title }}</h2>
+<h5><a href="{% url 'teacher-home' %}">Dashboard</a> > <a href="{% url 'course' unit.course.id %}">
+    {{ unit.course.title }}</a> > {{ unit.title }}</h5>
+
+<h2>Unit: {{unit.title}}</h2>
+
 
 <div style="margin-top: 12px; padding-left: 16px;">
-    {% if unit.topic_set.exists %}
+    {% if topics %}
 
     <!-- Topics dropdown-->
-    {% for topic in unit.topic_set.all %}
-    <div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; background-color: #fefefe;">
-        <a href="{% url 'topic' unit.course.id unit.id topic.id %}"  style="text-decoration: none; color: inherit; font-weight: 1000;">{{ topic.title }}</a>
+    {% for topic in topics %}
+    <div
+        style="display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; max-width: 600px; background-color: #fefefe;">
+        <a href="{% url 'topic' unit.course.id unit.id topic.id %}"
+            style="text-decoration: none; color: inherit; font-weight: 1000;">{{ topic.title }}</a>
+        <form method="POST" action="{% url 'delete-topic' topic.unit.course.id topic.unit.id topic.id %}"
+            style="margin-top: 8px;">
+            {% csrf_token %}
+            <button type="submit"
+                style="border: none; background: none; color: #c00; cursor: pointer; font-size: 0.9em;">
+                🗑
+            </button>
+        </form>
     </div>
     {% endfor %}
     {% else %}
@@ -28,6 +42,10 @@
 
             <label for="title" style="margin-bottom: 0;">Title:</label>
             <input type="text" name="title" required
+                style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;">
+
+            <label for="description" style="margin-bottom: 0;">Description:</label>
+            <input type="text" name="description"
                 style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;">
 
             <input type="hidden" name="course_id" value="{{ course.id }}"> <!-- Hidden field to pass course ID -->

@@ -4,7 +4,7 @@ from django.contrib import messages
 from .models import Unit, Topic, Question, Quiz, Answer, Profile, Course, QuizTemplate, Activity
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .forms import UserForm, CourseForm, UnitForm
+from .forms import UserForm, CourseForm, UnitForm, TopicForm
 from .decorators import allowed_roles
 
 import csv, io
@@ -161,6 +161,7 @@ def teacher_home(request):
         if form.is_valid():
             course = form.save(commit=False)
             course.teacher = request.user
+            course.language = request.POST.get("language")
             course.save()
             messages.success(request, "Course created successfully!")
             return redirect("teacher-home")
@@ -186,24 +187,62 @@ def course(request, course_id):
     course = get_object_or_404(Course, id=course_id, teacher=request.user)
     units = course.unit_set.all()
 
+    if request.method == "POST":
+        form = UnitForm(request.POST)
+        if form.is_valid():
+            unit = form.save(commit=False)
+            unit.course = course
+            unit.save()
+            messages.success(request, "Unit created successfully!")
+            return redirect("course", course_id=course_id)
+    
     context = {"course": course, "units": units}
     return render(request, "base/course.html", context)
+
+
+def delete_course(request, course_id):
+    course = get_object_or_404(Course, id=course_id, teacher=request.user)
+    course.delete()
+    messages.success(request, "Course deleted successfully!")
+    return redirect("teacher-home")
 
 
 def unit(request, course_id, unit_id):
     unit = get_object_or_404(Unit, id=unit_id, course__id=course_id)
     topics = unit.topic_set.all()
 
+    if request.method == "POST":
+        form = TopicForm(request.POST)
+        if form.is_valid():
+            topic = form.save(commit=False)
+            topic.unit = unit
+            topic.save()
+            messages.success(request, "Topic created successfully!")
+            return redirect("unit", course_id=course_id, unit_id=unit_id)
+        
     context = {"unit": unit, "topics": topics}
     return render(request, "base/unit.html", context)
+
+
+def delete_unit(request, course_id, unit_id):
+    unit = get_object_or_404(Unit, id=unit_id, course__id=course_id)
+    unit.delete()
+    messages.success(request, "Unit deleted successfully!")
+    return redirect("course", course_id=course_id)
 
 
 def topic(request, course_id, unit_id, topic_id):
     topic = get_object_or_404(Topic, id=topic_id, unit__id=unit_id, unit__course__id=course_id)
     activities = topic.activity_set.order_by("order")
-
     context = {"topic": topic, "activities": activities}
     return render(request, "base/topic.html", context)
+
+
+def delete_topic(request, course_id, unit_id, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id, unit__id=unit_id, unit__course__id=course_id)
+    topic.delete()
+    messages.success(request, "Topic deleted successfully!")
+    return redirect("unit", course_id=course_id, unit_id=unit_id)
 
 
 def create_quiz(request, topic_id):
@@ -240,7 +279,7 @@ def delete_activity(request, activity_id):
     elif activity.type == "lesson":
         lesson = activity.lesson
         lesson.delete()
-        
+
     messages.success(request, "Activity deleted successfully!")
     return redirect("topic", course_id=activity.topic.unit.course.id, unit_id=activity.topic.unit.id, topic_id=activity.topic.id)
 

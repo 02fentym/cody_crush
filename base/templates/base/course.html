@@ -2,24 +2,34 @@
 
 {% block content %}
 
-<h2><a href="{% url 'teacher-home' %}">Dashboard</a> > {{ course.title }}</h2>
+<h5><a href="{% url 'teacher-home' %}">Dashboard</a> > {{ course.title }}</h5>
+
+<h2>Course: {{course.title}}</h2>
 
 <div style="margin-top: 12px; padding-left: 16px;">
-    {% if course.unit_set.exists %}
+    {% if units %}
 
     <!-- Units dropdown-->
-    {% for unit in course.unit_set.all %}
-    <div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; background-color: #fefefe;">
+    {% for unit in units %}
+    <div style="display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; max-width: 600px; background-color: #fefefe;">
         <a href="{% url 'unit' course.id unit.id %}"  style="text-decoration: none; color: inherit; font-weight: 1000;">{{ unit.title }}</a>
+        <form method="POST" action="{% url 'delete-unit' unit.course.id unit.id %}" style="margin-top: 8px;">
+            {% csrf_token %}
+            <button type="submit" style="border: none; background: none; color: #c00; cursor: pointer; font-size: 0.9em;">
+                🗑
+            </button>
+        </form>
     </div>
     {% endfor %}
+    
     {% else %}
     <p style="color: #888;">No units yet.</p>
     {% endif %}
+
     <!-- Create New Unit -->
     <details style="margin-bottom: 20px;">
         <summary title="Create New Unit"
-            style="display: inline-block; font-size: 12px; font-weight: bold; text-decoration: none; padding: 3px 6px; border: 1px solid #ccc; border-radius: 50%; background-color: #f0f0f0; color: #333; text-align: center; cursor: pointer;">
+            style="display: inline-block; font-size: 20px; font-weight: bold; text-decoration: none; padding: 6px 12px; border: 1px solid #ccc; border-radius: 50%; background-color: #f0f0f0; color: #333; text-align: center; cursor: pointer;">
             +
         </summary>
         <form method="POST" action=""
