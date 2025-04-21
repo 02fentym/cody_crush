@@ -5,48 +5,55 @@
 <h2>Courses</h2>
 
 <!-- Courses dropdown-->
+ {% if courses %}
 {% for course in courses %}
 <div style="display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; max-width: 600px; background-color: #fefefe;">
     <a href="{% url 'course' course.id %}"  style="text-decoration: none; color: inherit; font-weight: 1000;">{{ course.title }} ({{ course.language|title }})</a>
     
+    {% if user.profile.role == "teacher" %}
     <form method="POST" action="{% url 'delete-course' course.id %}" style="margin-top: 8px;">
         {% csrf_token %}
         <button type="submit" style="border: none; background: none; color: #c00; cursor: pointer; font-size: 0.9em;">
             🗑
         </button>
     </form>
+    {% endif %}
 </div>
 {% endfor %}
+{% else %}
+<p style="color: #888;">No courses yet.</p>
+{% endif %}
+
+<!-- Join a Course -->
+
 
 <!-- Create New Course -->
+{% if user.profile.role == "teacher" %}
 <details style="margin-bottom: 20px;">
     <summary title="Create New Course"
         style="display: inline-block; font-size: 20px; font-weight: bold; text-decoration: none; padding: 6px 12px; border: 1px solid #ccc; border-radius: 50%; background-color: #f0f0f0; color: #333; text-align: center; cursor: pointer;">
         +
     </summary>
 
-    <form method="POST" action=""
-        style="margin-top: 12px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+    <form method="POST" style="margin-top:12px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
         {% csrf_token %}
+        <label for="{{ form.title.id_for_label }}" style="margin-bottom:0;">Title:</label>
+        {{ form.title }}
+    
+        <label for="{{ form.language.id_for_label }}" style="margin-bottom:0;">Language:</label>
+        {{ form.language }}
 
-        <label for="title" style="margin-bottom: 0;">Title:</label>
-        <input type="text" name="title" required style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;">
+        <label for="{{ form.enrollment_password.id_for_label }}" style="margin-bottom:0;">Enrollment Password:</label>
+        {{ form.enrollment_password }}
 
-        <label for="language" style="margin-bottom: 0;">Language:</label>
-        <select name="language" required style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;">
-            <option value="python">Python</option>
-            <option value="java">Java</option>
-            <option value="cpp">C++</option>
-        </select>
-
-        <button type="submit"
-            style="padding: 6px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
-            Create
-        </button>
+        <label for="{{ form.description.id_for_label }}" style="margin-bottom:0;">Description:</label>
+        {{ form.description }}
+    
+        <button type="submit" style="padding: 6px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Create</button>
         <button type="button" onclick="this.closest('details').removeAttribute('open')">Cancel</button>
-    </form>
-
+      </form>
 </details>
+{% endif %}
 
 
 {% endblock %}

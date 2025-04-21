@@ -70,12 +70,34 @@ def home_selector(request):
     role = request.user.profile.role
 
     if role == "teacher":
-        return redirect("teacher-home")
+        return redirect("home")
     elif role == "student":
         return redirect("student-home")
     else:
         return redirect("login")  # or raise an error
 
+
+@login_required
+def home(request):
+    if request.user.profile.role == "student":
+        courses = request.user.enrolled_courses.all()
+    else:
+        courses = Course.objects.filter(teacher=request.user)
+    
+    if request.method == "POST":
+        form = CourseForm(request.POST)
+        if form.is_valid():
+            course = form.save(commit=False)
+            course.teacher = request.user
+            course.language = request.POST.get("language")
+            course.save()
+            messages.success(request, "Course created successfully!")
+            return redirect("home")
+    else:
+        form = CourseForm()
+
+    context = {"courses": courses, "form": form}
+    return render(request, "base/home.html", context)
 
 
 ###################### STUDENT VIEWS
@@ -164,7 +186,7 @@ def teacher_home(request):
             course.language = request.POST.get("language")
             course.save()
             messages.success(request, "Course created successfully!")
-            return redirect("teacher-home")
+            return redirect("home")
     else:
         form = CourseForm()
         
@@ -177,7 +199,7 @@ def teacher_home(request):
                 unit.course = course
                 unit.save()
                 messages.success(request, "Unit created successfully!")
-                return redirect("teacher-home")'''
+                return redirect("home")'''
 
     context = {"courses": courses, "form": form}
     return render(request, "base/teacher_home.html", context)
@@ -204,7 +226,7 @@ def delete_course(request, course_id):
     course = get_object_or_404(Course, id=course_id, teacher=request.user)
     course.delete()
     messages.success(request, "Course deleted successfully!")
-    return redirect("teacher-home")
+    return redirect("home")
 
 
 def unit(request, course_id, unit_id):

@@ -23,6 +23,8 @@ class Course(models.Model):
     description = models.TextField(blank=True)
     language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES, default='python')  # ← Add this
     teacher = models.ForeignKey(User, on_delete=models.CASCADE)
+    students = models.ManyToManyField(User, blank=True, related_name="enrolled_courses")
+    enrollment_password = models.CharField(max_length=20, null=True, blank=True, help_text="Set a password students must enter to join.")
     created = models.DateTimeField(auto_now_add=True, null=True)
     updated = models.DateTimeField(auto_now=True, null=True)
 

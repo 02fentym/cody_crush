@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<h5><a href="{% url 'teacher-home' %}">Dashboard</a> > <a href="{% url 'course' unit.course.id %}">
+<h5><a href="{% url 'home' %}">Dashboard</a> > <a href="{% url 'course' unit.course.id %}">
     {{ unit.course.title }}</a> > {{ unit.title }}</h5>
 
 <h2>Unit: {{unit.title}}</h2>

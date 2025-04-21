@@ -20,7 +20,14 @@ class UserForm(UserCreationForm):
 class CourseForm(ModelForm):
     class Meta:
         model = Course
-        fields = ["title", "description"]
+        fields = ["title", "description", "language", "enrollment_password"]
+        widgets = {
+            "description": forms.Textarea(attrs={
+                "rows": 1,
+                "style": "padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;"
+            }),
+            # you can also set rows/style on title or password if you like
+        }
 
 
 class UnitForm(ModelForm):
