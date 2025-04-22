@@ -4,7 +4,7 @@ from django.contrib import messages
 from .models import Unit, Topic, Question, Quiz, Answer, Profile, Course, QuizTemplate, Activity
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .forms import UserForm, CourseForm, UnitForm, TopicForm
+from .forms import UserForm, CourseForm, UnitForm, TopicForm, EnrollmentPasswordForm
 from .decorators import allowed_roles
 
 import csv, io
@@ -189,17 +189,6 @@ def teacher_home(request):
             return redirect("home")
     else:
         form = CourseForm()
-        
-        '''elif form_type == "unit":
-            unit_form = UnitForm(request.POST)
-            if unit_form.is_valid():
-                unit = unit_form.save(commit=False)
-                course_id = int(request.POST.get("course_id"))
-                course = Course.objects.get(id=course_id)
-                unit.course = course
-                unit.save()
-                messages.success(request, "Unit created successfully!")
-                return redirect("home")'''
 
     context = {"courses": courses, "form": form}
     return render(request, "base/teacher_home.html", context)
@@ -209,16 +198,26 @@ def course(request, course_id):
     course = get_object_or_404(Course, id=course_id, teacher=request.user)
     units = course.unit_set.all()
 
+    unit_form = UnitForm()
+    password_form = CourseForm(instance=course)
+
     if request.method == "POST":
-        form = UnitForm(request.POST)
-        if form.is_valid():
-            unit = form.save(commit=False)
-            unit.course = course
-            unit.save()
-            messages.success(request, "Unit created successfully!")
-            return redirect("course", course_id=course_id)
+        if request.POST.get("form_type") == "unit":
+            unit_form = UnitForm(request.POST)
+            if unit_form.is_valid():
+                unit = unit_form.save(commit=False)
+                unit.course = course
+                unit.save()
+                messages.success(request, "Unit created successfully!")
+                return redirect("course", course_id=course_id)
+        elif request.POST.get("form_type") == "password":
+            password_form = EnrollmentPasswordForm(request.POST, instance=course)
+            if password_form.is_valid():
+                password_form.save()
+                messages.success(request, "Enrollment password updated!")
+                return redirect("course", course_id=course_id)
     
-    context = {"course": course, "units": units}
+    context = {"course": course, "units": units, "unit_form": unit_form, "password_form": password_form}
     return render(request, "base/course.html", context)
 
 

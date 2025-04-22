@@ -40,3 +40,16 @@ class TopicForm(ModelForm):
     class Meta:
         model = Topic
         fields = ["title", "description"]
+
+
+# This is a form to update the enrollment password
+class EnrollmentPasswordForm(forms.ModelForm):
+    class Meta:
+        model = Course
+        fields = ["enrollment_password"]
+        widgets = {
+            "enrollment_password": forms.TextInput(attrs={
+                "placeholder": "New password (leave blank to disable)",
+                "style": "padding:4px 8px; border:1px solid #ccc; border-radius:4px;"
+            }),
+        }

@@ -35,6 +35,8 @@
         <form method="POST" action=""
             style="margin-top: 12px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
             {% csrf_token %}
+
+            <input type="hidden" name="form_type" value="unit"> <!-- Hidden field to indicate form type -->
             
             <label for="title" style="margin-bottom: 0;">Title:</label>
             <input type="text" name="title" required
@@ -50,5 +52,58 @@
         </form>
     </details>
 </div>
+
+<!-- Student Enrollment -->
+<section style="margin-top: 2em; padding: 1em; border: 1px solid #ddd; border-radius: 8px;">
+    <h3>Enrollment</h3>
+  
+    <!-- Display the current password (or a note if enrollment is closed) -->
+    {% if course.enrollment_password %}
+      <p>
+        <strong>Enrollment Password:</strong>
+        <code style="background:#f1f1f1; padding:2px 4px; border-radius:4px;">
+          {{ course.enrollment_password }}
+        </code>
+        <small style="color:#666;">(Share this with students.)</small>
+      </p>
+    {% else %}
+      <p style="color:#a00;"><em>Enrollment is currently closed.</em></p>
+    {% endif %}
+  
+    <!-- Form to update/clear the password -->
+    <form method="POST" action="" style="display:flex; gap:12px; align-items:center;">
+      {% csrf_token %}
+
+      <input type="hidden" name="form_type" value="password"> <!-- Hidden field to indicate form type -->
+
+      <label for="id_enrollment_password" style="margin:0;">Set Password:</label>
+      {{ password_form.enrollment_password }}
+      <button type="submit" style="padding:6px 12px; background:#4CAF50; color:white; border:none; border-radius:4px;">
+        Save
+      </button>
+    </form>
+  </section>
+  
+  <section style="margin-top: 2em;">
+    <h3>Enrolled Students ({{ course.students.count }})</h3>
+  
+    <ul style="list-style:none; padding:0;">
+      {% for student in course.students.all %}
+        <li style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #eee;">
+          <span>{{ student.get_full_name|default:student.username }}</span>
+  
+          <form method="POST" action="">
+            {% csrf_token %}
+            <button type="submit" style="background:none; border:none; color:#c00; cursor:pointer;" title="Remove">
+              🗑
+            </button>
+          </form>
+        </li>
+      {% empty %}
+        <li style="color:#777;">No students enrolled yet.</li>
+      {% endfor %}
+    </ul>
+  </section>
+
 
 {% endblock %}
