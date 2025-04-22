@@ -111,7 +111,7 @@ def start_quiz(request, activity_id):
     quiz_template = activity.quiz_template
     question_count = quiz_template.question_count
     questions = topic.question_set.all().order_by("?")[:question_count] #randomizes the order of the questions
-    
+
     quiz = Quiz.objects.create(
         student=request.user,
         topic=topic,
@@ -327,11 +327,12 @@ def upload_questions(request):
     
     context = {"errors": errors}
 
-    return render(request, "base/upload_questions.html", context)
+    return redirect("home")
 
 
 def question_data_validation(i, row):
     topic_id = row["topic_id"]
+    print(topic_id)
     try:
         topic = Topic.objects.get(id=topic_id)
     except Topic.DoesNotExist:

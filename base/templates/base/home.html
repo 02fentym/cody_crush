@@ -55,5 +55,15 @@
 </details>
 {% endif %}
 
+<!-- Upload Questions -->
+{% if user.profile.role == "teacher" %}
+
+<h2>Upload Questions</h2>
+<div style="display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; max-width: 600px; background-color: #fefefe;">
+    {% include "base/upload_questions.html" %}
+</div>
+
+{% endif %}
+
 
 {% endblock %}
