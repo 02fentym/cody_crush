@@ -104,13 +104,6 @@ def home(request):
 
 @allowed_roles(["student"])
 @login_required(login_url="login")
-def student_home(request):
-    context = {}
-    return render(request, "base/student_home.html", context)
-
-
-@allowed_roles(["student"])
-@login_required(login_url="login")
 def start_quiz(request, topic_id):
     topic = Topic.objects.get(id=topic_id)
     questions = topic.question_set.all().order_by("?")[:5] #randomizes the order of the questions
@@ -173,29 +166,14 @@ def quiz_results(request, quiz_id):
 
 ###################### TEACHER VIEWS
 
-@allowed_roles(["teacher"])
-@login_required(login_url="login")
-def teacher_home(request):
-    courses = Course.objects.filter(teacher=request.user)
-
-    if request.method == "POST":
-        form = CourseForm(request.POST)
-        if form.is_valid():
-            course = form.save(commit=False)
-            course.teacher = request.user
-            course.language = request.POST.get("language")
-            course.save()
-            messages.success(request, "Course created successfully!")
-            return redirect("home")
-    else:
-        form = CourseForm()
-
-    context = {"courses": courses, "form": form}
-    return render(request, "base/teacher_home.html", context)
-
-
 def course(request, course_id):
-    course = get_object_or_404(Course, id=course_id, teacher=request.user)
+    user = request.user
+    if user.profile.role == "teacher":
+        qs = Course.objects.filter(id=course_id, teacher=user)
+    else:
+        qs = Course.objects.filter(id=course_id, students=user)
+
+    course = get_object_or_404(qs)
     units = course.unit_set.all()
 
     unit_form = UnitForm()

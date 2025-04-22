@@ -17,6 +17,8 @@
         style="display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; max-width: 600px; background-color: #fefefe;">
         <a href="{% url 'topic' unit.course.id unit.id topic.id %}"
             style="text-decoration: none; color: inherit; font-weight: 1000;">{{ topic.title }}</a>
+        
+        {% if request.user.profile.role == "teacher" %}
         <form method="POST" action="{% url 'delete-topic' topic.unit.course.id topic.unit.id topic.id %}"
             style="margin-top: 8px;">
             {% csrf_token %}
@@ -25,15 +27,18 @@
                 🗑
             </button>
         </form>
+        {% endif %}
+        
     </div>
     {% endfor %}
     {% else %}
     <p style="color: #888;">No units yet.</p>
     {% endif %}
     <!-- Create New Topic -->
+    {% if request.user.profile.role == "teacher" %}
     <details style="margin-bottom: 20px;">
         <summary title="Create New Topic"
-            style="display: inline-block; font-size: 12px; font-weight: bold; text-decoration: none; padding: 3px 6px; border: 1px solid #ccc; border-radius: 50%; background-color: #f0f0f0; color: #333; text-align: center; cursor: pointer;">
+            style="display: inline-block; font-size: 20px; font-weight: bold; text-decoration: none; padding: 6px 12px; border: 1px solid #ccc; border-radius: 50%; background-color: #f0f0f0; color: #333; text-align: center; cursor: pointer;">
             +
         </summary>
         <form method="POST" action=""
@@ -57,5 +62,6 @@
             <button type="button" onclick="this.closest('details').removeAttribute('open')">Cancel</button>
         </form>
     </details>
+    {% endif %}
 </div>
 {% endblock %}
