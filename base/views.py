@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import UserForm, CourseForm, UnitForm, TopicForm, EnrollmentPasswordForm
 from .decorators import allowed_roles
 
-import csv, io
+import csv, io, random
 
 ###################### GENERIC VIEWS
 
@@ -85,18 +85,34 @@ def home(request):
         courses = Course.objects.filter(teacher=request.user)
     
     if request.method == "POST":
-        form = CourseForm(request.POST)
-        if form.is_valid():
-            course = form.save(commit=False)
-            course.teacher = request.user
-            course.language = request.POST.get("language")
-            course.save()
-            messages.success(request, "Course created successfully!")
+        form_type = request.POST.get("form_type")
+
+        if form_type == "course":
+            course_form = CourseForm(request.POST)
+            if course_form.is_valid():
+                course = course_form.save(commit=False)
+                course.teacher = request.user
+                course.language = request.POST.get("language")
+                course.save()
+                messages.success(request, "Course created successfully!")
+                return redirect("home")
+        elif form_type == "password":
+            password_form = EnrollmentPasswordForm(request.POST)
+            enrollment_password = request.POST.get("enrollment_password")
+
+            try:
+                course = Course.objects.get(enrollment_password=enrollment_password)
+                course.students.add(request.user)
+                messages.success(request, f"You have been enrolled in {course.title}!")
+            except Course.DoesNotExist:
+                messages.error(request, "Invalid enrollment password. Please try again.")
+                
             return redirect("home")
     else:
-        form = CourseForm()
+        course_form = CourseForm()
+        password_form = EnrollmentPasswordForm()
 
-    context = {"courses": courses, "form": form}
+    context = {"courses": courses, "course_form": course_form, "password_form": password_form}
     return render(request, "base/home.html", context)
 
 
@@ -110,21 +126,24 @@ def start_quiz(request, activity_id):
     topic = Topic.objects.get(id=topic_id)
     quiz_template = activity.quiz_template
     question_count = quiz_template.question_count
-    questions = topic.question_set.all().order_by("?")[:question_count] #randomizes the order of the questions
+
+    all_questions = list(topic.question_set.all())
+    sampled = random.sample(all_questions, k=min(question_count, len(all_questions)))
 
     quiz = Quiz.objects.create(
         student=request.user,
         topic=topic,
         grade=None
     )
-    quiz.questions.set(questions) # can only set many-to-many fields after the quiz is created in the DB
+    quiz.questions.set(sampled) # can only set many-to-many fields after the quiz is created in the DB
+
     return redirect("take-quiz", quiz_id=quiz.id)
 
 
 @allowed_roles(["student"])
 @login_required(login_url="login")
 def take_quiz(request, quiz_id):
-    quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
+    quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)    # THE ERROR WITH THE QUESTION SET MIGHT BE HERE!!!
     questions = quiz.questions.all()
 
     if request.method == "POST":
@@ -323,9 +342,6 @@ def upload_questions(request):
             )
         if not errors:
             messages.success(request, "Questions uploaded successfully.")
-
-    
-    context = {"errors": errors}
 
     return redirect("home")
 

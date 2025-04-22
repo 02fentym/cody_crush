@@ -49,7 +49,7 @@ class EnrollmentPasswordForm(forms.ModelForm):
         fields = ["enrollment_password"]
         widgets = {
             "enrollment_password": forms.TextInput(attrs={
-                "placeholder": "New password (leave blank to disable)",
+                "placeholder": "Enter password",
                 "style": "padding:4px 8px; border:1px solid #ccc; border-radius:4px;"
             }),
         }

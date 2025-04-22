@@ -28,6 +28,7 @@
 
             <!-- Quiz Card -->
             {% elif activity.type == "quiz" and activity.quiz_template %}
+            
             {% if request.user.profile.role == "student" %}
             <a href="{% url 'start-quiz' activity.id %}">
                 <div style="font-size:1.1em; font-weight:bold;">Quiz</div>
