@@ -138,6 +138,7 @@ class Activity(models.Model):
     order = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
 
+    # Either one of these will be set
     quiz_template = models.ForeignKey('QuizTemplate', on_delete=models.CASCADE, null=True, blank=True)
     lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE, null=True, blank=True)
     #exercise = models.ForeignKey('Exercise', on_delete=models.SET_NULL, null=True, blank=True)

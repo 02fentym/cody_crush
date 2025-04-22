@@ -17,7 +17,7 @@
         {% for activity in activities %}
         <div
             style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; min-width: 200px; background-color: #fefefe; text-align: center;">
-            
+
             <!-- Lesson Card -->
             {% if activity.type == "lesson" and activity.lesson %}
             <div style="font-size: 1.1em; font-weight: bold;">
@@ -28,11 +28,11 @@
 
             <!-- Quiz Card -->
             {% elif activity.type == "quiz" and activity.quiz_template %}
-            <div style="font-size: 1.1em; font-weight: bold;">
-                Quiz
-            </div>
-            <div style="color: #666; margin-top: 8px;">{{ activity.quiz_template.question_count }} Questions</div>
-            
+            <a href="{% url 'start-quiz' activity.id %}">
+                <div style="font-size: 1.1em; font-weight: bold;">Quiz</div>
+                <div style="color: #666; margin-top: 8px;">{{ activity.quiz_template.question_count }} Questions</div>
+            </a>
+
             <!-- Unknown Card -->
             {% else %}
             <div style="color: #888;">⚠️ Unknown activity type.</div>
@@ -41,12 +41,13 @@
             {% if request.user.profile.role == "teacher" %}
             <form method="POST" action="{% url 'delete-activity' activity.id %}" style="margin-top: 8px;">
                 {% csrf_token %}
-                <button type="submit" style="border: none; background: none; color: #c00; cursor: pointer; font-size: 0.9em;">
+                <button type="submit"
+                    style="border: none; background: none; color: #c00; cursor: pointer; font-size: 0.9em;">
                     🗑
                 </button>
             </form>
             {% endif %}
-            
+
         </div>
         {% endfor %}
     </div>

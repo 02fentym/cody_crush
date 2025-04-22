@@ -104,9 +104,14 @@ def home(request):
 
 @allowed_roles(["student"])
 @login_required(login_url="login")
-def start_quiz(request, topic_id):
+def start_quiz(request, activity_id):
+    activity = get_object_or_404(Activity, id=activity_id)
+    topic_id = activity.topic.id
     topic = Topic.objects.get(id=topic_id)
-    questions = topic.question_set.all().order_by("?")[:5] #randomizes the order of the questions
+    quiz_template = activity.quiz_template
+    question_count = quiz_template.question_count
+    questions = topic.question_set.all().order_by("?")[:question_count] #randomizes the order of the questions
+    
     quiz = Quiz.objects.create(
         student=request.user,
         topic=topic,
