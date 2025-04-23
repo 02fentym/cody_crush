@@ -21,27 +21,28 @@
             <!-- Lesson Card -->
             {% if activity.type == "lesson" and activity.lesson %}
             <div style="font-size: 1.1em; font-weight: bold;">
-                {{ activity.lesson.title }}
+                Lesson
             </div>
-            <div style="color: #666; margin-top: 8px;">📘 Lesson</div>
-            <a href="#" style="margin-top: 12px; display: inline-block;">View</a>
+            <div style="color: #666; margin-top: 8px;">{{ activity.lesson.title }}</div>
+            <a href="{% url 'edit-lesson' activity.lesson.id %}"
+                style="margin-top: 12px; display: inline-block;">Edit</a>
 
             <!-- Quiz Card -->
             {% elif activity.type == "quiz" and activity.quiz_template %}
-            
+
             {% if request.user.profile.role == "student" %}
             <a href="{% url 'start-quiz' activity.id %}">
-                <div style="font-size:1.1em; font-weight:bold;">Quiz</div>
+                <div style="font-size:1.1em; font-weight:bold;">Multiple Choice Quiz</div>
                 <div style="color:#666; margin-top:8px;">
-                    {{ activity.quiz_template.question_count }} Questions
+                    Questions: {{ activity.quiz_template.question_count }}
                 </div>
             </a>
             {% else %}
             <div style="font-size:1.1em; font-weight:bold; cursor: default;">
-                Quiz
+                Multiple Choice Quiz
             </div>
             <div style="color:#666; margin-top:8px;">
-                {{ activity.quiz_template.question_count }} Questions
+                Questions: {{ activity.quiz_template.question_count }}
             </div>
             {% endif %}
 

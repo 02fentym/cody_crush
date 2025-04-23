@@ -372,11 +372,34 @@ def create_lesson(request, topic_id):
             lesson = form.save(commit=False)
             lesson.topic = topic
             lesson.save()
+
+            Activity.objects.create(
+                topic=topic,
+                type="lesson",
+                order=topic.activity_set.count() + 1,
+                quiz_template=None,
+                lesson=lesson
+            )
+
             return redirect("topic", topic.unit.course.id, topic.unit.id, topic.id)
         else:
             messages.error(request, "Please fix the errors below.")
 
         
-    context = {"topic": topic, "form": form}
-    return render(request, "base/create_lesson.html", context)
-    
+    context = {"topic": topic, "form": form, "is_edit": False}
+    return render(request, "base/create_edit_lesson.html", context)
+
+
+def edit_lesson(request, lesson_id):
+    lesson = Lesson.objects.get(id=lesson_id)
+    topic = lesson.topic
+    form = LessonForm(instance=lesson)
+
+    if request.method == "POST":
+        form = LessonForm(request.POST, instance=lesson)
+        if form.is_valid():
+            form.save()
+            return redirect("topic", topic.unit.course.id, topic.unit.id, topic.id)
+
+    context = {"form": form, "is_edit": True}
+    return render(request, "base/create_edit_lesson.html", context)
