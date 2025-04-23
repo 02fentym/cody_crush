@@ -30,6 +30,6 @@ urlpatterns = [
 
     path("topic/<int:topic_id>/create-quiz/", views.create_quiz, name="create-quiz"),
 
-    path("/topics/<topic_id>/lesson/create/", views.create_lesson, name="create-lesson"),
+    path("topics/<topic_id>/lesson/create/", views.create_lesson, name="create-lesson"),
     path("lesson/<int:lesson_id>/edit/", views.edit_lesson, name="edit-lesson"),
 ]
