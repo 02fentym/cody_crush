@@ -29,4 +29,6 @@ urlpatterns = [
     path("upload-questions/", views.upload_questions, name="upload-questions"),
 
     path("topic/<int:topic_id>/create-quiz/", views.create_quiz, name="create-quiz"),
+
+    path("/topics/<topic_id>/lesson/create/", views.create_lesson, name="create-lesson"),
 ]

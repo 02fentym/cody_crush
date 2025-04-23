@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Course, Unit, Topic
+from .models import Course, Unit, Topic, Lesson
 
 class UserForm(UserCreationForm):
     ROLE_CHOICES = [
@@ -52,4 +52,15 @@ class EnrollmentPasswordForm(forms.ModelForm):
                 "placeholder": "Enter password",
                 "style": "padding:4px 8px; border:1px solid #ccc; border-radius:4px;"
             }),
+        }
+
+class LessonForm(forms.ModelForm):
+    class Meta:
+        model = Lesson
+        fields = ["title", "content"]
+        widgets = {
+            "content": forms.Textarea(attrs={
+                "id": "id_content",     # This is what Toast UI JS expects
+                "style": "display:none;"  # Hide it from the user
+            })
         }

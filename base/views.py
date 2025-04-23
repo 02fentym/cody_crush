@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import Unit, Topic, Question, Quiz, Answer, Profile, Course, QuizTemplate, Activity
+from .models import Unit, Topic, Question, Quiz, Answer, Profile, Course, QuizTemplate, Activity, Lesson
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .forms import UserForm, CourseForm, UnitForm, TopicForm, EnrollmentPasswordForm
+from .forms import UserForm, CourseForm, UnitForm, TopicForm, EnrollmentPasswordForm, LessonForm
 from .decorators import allowed_roles
 
 import csv, io, random
@@ -106,7 +106,7 @@ def home(request):
                 messages.success(request, f"You have been enrolled in {course.title}!")
             except Course.DoesNotExist:
                 messages.error(request, "Invalid enrollment password. Please try again.")
-                
+
             return redirect("home")
     else:
         course_form = CourseForm()
@@ -360,3 +360,23 @@ def question_data_validation(i, row):
             return f"Row {i}: Missing value for {field}"
     
     return ""
+
+
+def create_lesson(request, topic_id):
+    topic = Topic.objects.get(id=topic_id)
+    form = LessonForm()
+
+    if request.method == "POST":
+        form = LessonForm(request.POST)
+        if form.is_valid():
+            lesson = form.save(commit=False)
+            lesson.topic = topic
+            lesson.save()
+            return redirect("topic", topic.unit.course.id, topic.unit.id, topic.id)
+        else:
+            messages.error(request, "Please fix the errors below.")
+
+        
+    context = {"topic": topic, "form": form}
+    return render(request, "base/create_lesson.html", context)
+    
