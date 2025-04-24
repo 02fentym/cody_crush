@@ -32,14 +32,28 @@
 
             {% if request.user.profile.role == "student" %}
             <a href="{% url 'start-quiz' activity.id %}">
-                <div style="font-size:1.1em; font-weight:bold;">Multiple Choice Quiz</div>
+                <div style="font-size:1.1em; font-weight:bold;">
+                    {% if activity.quiz_template.question_type == "multiple_choice" %}
+                    Multiple Choice Quiz
+                    {% elif activity.quiz_template.question_type == "tracing" %}
+                    Tracing Quiz
+                    {% else %}
+                    Unknown Quiz Type
+                    {% endif %}
+                </div>
                 <div style="color:#666; margin-top:8px;">
                     Questions: {{ activity.quiz_template.question_count }}
                 </div>
             </a>
             {% else %}
             <div style="font-size:1.1em; font-weight:bold; cursor: default;">
+                {% if activity.quiz_template.question_type == "multiple_choice" %}
                 Multiple Choice Quiz
+                {% elif activity.quiz_template.question_type == "tracing" %}
+                Tracing Quiz
+                {% else %}
+                Unknown Quiz Type
+                {% endif %}
             </div>
             <div style="color:#666; margin-top:8px;">
                 Questions: {{ activity.quiz_template.question_count }}
@@ -103,6 +117,12 @@
                 <option value="10">10</option>
                 <option value="15">15</option>
                 <option value="20">20</option>
+            </select>
+
+            <label for="question_type" style="font-size: 0.9em;">Question Type:</label>
+            <select name="question_type" id="question_type" style="padding: 6px; border-radius: 4px;">
+                <option value="multiple_choice" selected>Multiple Choice</option>
+                <option value="tracing">Tracing</option>
             </select>
 
             <button type="submit"

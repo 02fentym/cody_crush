@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import Unit, Topic, Question, Quiz, Answer, Profile, Course, QuizTemplate, Activity, Lesson
+from .models import Unit, Topic, Quiz, Answer, Profile, Course, QuizTemplate, Activity, Lesson, MultipleChoiceQuestion, TracingQuestion
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .forms import UserForm, CourseForm, UnitForm, TopicForm, EnrollmentPasswordForm, LessonForm
@@ -126,16 +126,29 @@ def start_quiz(request, activity_id):
     topic = Topic.objects.get(id=topic_id)
     quiz_template = activity.quiz_template
     question_count = quiz_template.question_count
-
-    all_questions = list(topic.question_set.all())
-    sampled = random.sample(all_questions, k=min(question_count, len(all_questions)))
+    question_type = quiz_template.question_type
+    questions = None
+    if question_type == "multiple_choice":
+        questions = MultipleChoiceQuestion.objects.filter(topic=topic).order_by("?")[:question_count]
+    elif question_type == "tracing":
+       questions = TracingQuestion.objects.filter(topic=topic).order_by("?")[:question_count]
+    else:
+        messages.error(request, "Invalid question type.")
+        return redirect("topic", course_id=topic.unit.course.id, unit_id=topic.unit.id, topic_id=topic.id)
 
     quiz = Quiz.objects.create(
         student=request.user,
         topic=topic,
-        grade=None
+        grade=None,
+        question_type=question_type
     )
-    quiz.questions.set(sampled) # can only set many-to-many fields after the quiz is created in the DB
+
+    # Can only set many-to-many fields after the quiz is created in the DB
+    if question_type == "multiple_choice":
+        quiz.mc_questions.set(questions)
+    elif question_type == "tracing":
+        quiz.tracing_questions.set(questions)
+    quiz.save()
 
     return redirect("take-quiz", quiz_id=quiz.id)
 
@@ -143,8 +156,13 @@ def start_quiz(request, activity_id):
 @allowed_roles(["student"])
 @login_required(login_url="login")
 def take_quiz(request, quiz_id):
-    quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)    # THE ERROR WITH THE QUESTION SET MIGHT BE HERE!!!
-    questions = quiz.questions.all()
+    quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
+    question_type = quiz.question_type
+
+    if question_type == "multiple_choice":
+        questions = quiz.mc_questions.all()
+    elif question_type == "tracing":
+        questions = quiz.tracing_questions.all()
 
     if request.method == "POST":
         correct_count = 0
@@ -153,16 +171,34 @@ def take_quiz(request, quiz_id):
         for question in questions:
             selected = request.POST.get(f'q{question.id}')
             if selected:
-                is_correct = (selected == question.correct_choice)
+
+                if question_type == "multiple_choice":
+                    is_correct = (selected == question.correct_choice)
+                elif question_type == "tracing":
+                    # For tracing questions, we assume the answer is correct if it matches the expected output
+                    student_output = normalize_output(request.POST.get(f'q{question.id}', ''))
+                    correct_output = normalize_output(question.expected_output)
+                    is_correct = (student_output == correct_output)
+
+
                 if is_correct:
                     correct_count += 1
 
-                Answer.objects.create(
+                answer = Answer.objects.create(
                     quiz=quiz,
-                    question=question,
                     selected_choice=selected,
                     is_correct=is_correct
                 )
+
+                if question_type == "multiple_choice":
+                    mc_question = MultipleChoiceQuestion.objects.get(id=question.id)
+                    tracing_question = None
+                elif question_type == "tracing":
+                    mc_question = None
+                    tracing_question = TracingQuestion.objects.get(id=question.id)
+                answer.mc_question = mc_question
+                answer.tracing_question = tracing_question
+                answer.save()
 
         grade = (correct_count / total) * 100
         quiz.grade = round(grade, 2)
@@ -175,14 +211,22 @@ def take_quiz(request, quiz_id):
     return render(request, "base/quiz.html", context)
 
 
+# Helper function to normalize output for tracing questions
+def normalize_output(text):
+    lines = text.strip().splitlines()
+    return "\n".join(line.strip() for line in lines)
+
+
 @allowed_roles(["student"])
 @login_required(login_url="login")
 def quiz_results(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
     answers = Answer.objects.filter(quiz=quiz)
+    question_type = quiz.question_type
 
-    context = {"quiz": quiz, "answers": answers}
+    context = {"quiz": quiz, "answers": answers, "question_type": question_type}
     return render(request, "base/quiz_results.html", context)
+
 
 
 
@@ -273,13 +317,25 @@ def create_quiz(request, topic_id):
     unit = topic.unit
     course = unit.course
     
-    question_count = int(request.POST.get("question_count", 5))
-    if question_count is None:
-        question_count = 5
+    question_count = int(request.POST.get("question_count", 5)) # Default to 5 if not provided
+    question_type = request.POST.get("question_type")
+
+    # Check if there are enough questions available for selected type
+    QUESTION_TYPE_MAP = {
+        "multiple_choice": MultipleChoiceQuestion,
+        "tracing": TracingQuestion,
+    }
+    question_model = QUESTION_TYPE_MAP.get(question_type)
+    available_count = question_model.objects.filter(topic=topic).count()
+    if available_count < question_count:
+        messages.error(request, f"Only {available_count} questions available for this topic.")
+        return redirect("topic", course_id=course.id, unit_id=unit.id, topic_id=topic.id)
+
     
     quiz_template = QuizTemplate.objects.create(
         topic=topic,
-        question_count=question_count
+        question_count=question_count,
+        question_type=question_type
     )
     Activity.objects.create(
         topic=topic,
@@ -313,53 +369,89 @@ def upload_questions(request):
     errors = []
 
     if request.method == "POST":
-        errors = []
         file = request.FILES["file"]
         data = file.read().decode("utf-8")
         csv_file = io.StringIO(data)
         reader = csv.DictReader(csv_file)
 
         for i, row in enumerate(reader, start=2):
-            # validate the data first
+            # Step 1: Validate
             result = question_data_validation(i, row)
-            if result != "":
+            if result:
                 errors.append(result)
                 continue
 
-            # add the question to the database
-            topic_id = row["topic_id"]
-            topic = Topic.objects.get(id=topic_id)
-            Question.objects.create(
-                topic=topic,
-                prompt=row["prompt"],
-                choice_a=row["choice_a"],
-                choice_b=row["choice_b"],
-                choice_c=row["choice_c"],
-                choice_d=row["choice_d"],
-                correct_choice=row["correct_choice"].lower(),
-                explanation=row["explanation"],
-                language=row["language"]
-            )
+            # Step 2: Get topic and question type
+            topic = Topic.objects.get(id=row["topic_id"])
+            question_type = row["question_type"].strip().lower()
+
+            try:
+                # Step 3: Create appropriate question subclass
+                if question_type == "multiple_choice":
+                    MultipleChoiceQuestion.objects.create(
+                        topic=topic,
+                        prompt=row["prompt"],
+                        choice_a=row["choice_a"],
+                        choice_b=row["choice_b"],
+                        choice_c=row["choice_c"],
+                        choice_d=row["choice_d"],
+                        correct_choice=row["correct_choice"].lower(),
+                        explanation=row["explanation"],
+                        language=row.get("language", "")
+                    )
+                elif question_type == "tracing":
+                    print(f"Row {i} expected_output:", repr(row["expected_output"]))
+                    TracingQuestion.objects.create(
+                        topic=topic,
+                        prompt=row["prompt"],
+                        expected_output=row["expected_output"],
+                        explanation=row["explanation"],
+                        language=row.get("language", "")
+                    )
+
+            except Exception as e:
+                errors.append(f"Row {i}: Failed to create question. Error: {str(e)}")
+
+        # Final message
         if not errors:
             messages.success(request, "Questions uploaded successfully.")
+        else:
+            messages.error(request, f"{len(errors)} errors occurred during upload.")
+            for err in errors:
+                messages.error(request, err)
 
     return redirect("home")
 
 
+# Helper function to validate question data
 def question_data_validation(i, row):
-    topic_id = row["topic_id"]
-    print(topic_id)
+    topic_id = row.get("topic_id")
+    question_type = row.get("question_type", "").strip().lower()
+
+    # Validate topic exists
     try:
-        topic = Topic.objects.get(id=topic_id)
+        Topic.objects.get(id=topic_id)
     except Topic.DoesNotExist:
-        return f"Row {i}: topic ID {row['topic_id']} does not exist."
-    
-    required_fields = ["prompt", "choice_a", "choice_b", "choice_c", "choice_d", "correct_choice", "explanation"]
+        return f"Row {i}: topic ID {topic_id} does not exist."
+
+    # Validate question_type exists
+    if not question_type:
+        return f"Row {i}: Missing question_type."
+
+    if question_type == "multiple_choice":
+        required_fields = ["prompt", "choice_a", "choice_b", "choice_c", "choice_d", "correct_choice", "explanation"]
+    elif question_type == "tracing":
+        required_fields = ["prompt", "expected_output", "explanation"]
+    else:
+        return f"Row {i}: Unknown question_type '{question_type}'."
+
+    # Validate required fields for the given type
     for field in required_fields:
         if not row.get(field):
-            return f"Row {i}: Missing value for {field}"
-    
-    return ""
+            return f"Row {i}: Missing value for '{field}' ({question_type} question)."
+
+    return ""  # If all is well
+
 
 
 def create_lesson(request, topic_id):

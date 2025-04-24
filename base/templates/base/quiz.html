@@ -2,40 +2,45 @@
 
 {% block content %}
 
-<h1>{{quiz.topic.title}} Quiz</h1>
-
+<h1>{{ quiz.topic.title }} Quiz</h1>
 
 <form method="POST" action="">
     {% csrf_token %}
 
     <div>
         {% for question in questions %}
+        <div style="margin-bottom: 24px;">
+            <p><strong>{{ forloop.counter }}.</strong> {{ question.prompt|safe }}</p>
 
-        <div>
-            <p>{{forloop.counter}}) {{question.prompt|safe}}</p>
-
-            <div>
-                <input type="radio" name="q{{question.id}}" value="a">
-                a) {{question.choice_a|safe}}
-            </div>
-            <div>
-                <input type="radio" name="q{{question.id}}" value="b">
-                b) {{question.choice_b|safe}}
-            </div>
-            <div>
-                <input type="radio" name="q{{question.id}}" value="c">
-                c) {{question.choice_c|safe}}
-            </div>
-            <div>
-                <input type="radio" name="q{{question.id}}" value="d">
-                d) {{question.choice_d|safe}}
-            </div>
-            <hr>
+            {% if quiz.question_type == "multiple_choice" %}
+                <div>
+                    <input type="radio" name="q{{ question.id }}" value="a" required>
+                    a) {{ question.choice_a|safe }}
+                </div>
+                <div>
+                    <input type="radio" name="q{{ question.id }}" value="b">
+                    b) {{ question.choice_b|safe }}
+                </div>
+                <div>
+                    <input type="radio" name="q{{ question.id }}" value="c">
+                    c) {{ question.choice_c|safe }}
+                </div>
+                <div>
+                    <input type="radio" name="q{{ question.id }}" value="d">
+                    d) {{ question.choice_d|safe }}
+                </div>
+                <hr>
+            {% elif quiz.question_type == "tracing" %}
+                <label for="q{{ question.id }}">What's the output?</label>
+                <textarea name="q{{ question.id }}" rows="4" style="width: 100%; padding: 6px; margin-top: 6px;" required></textarea>
+            {% else %}
+                <p style="color: red;">Unsupported question type.</p>
+            {% endif %}
         </div>
-
         {% endfor %}
     </div>
-    <button type="submit">Submit Quiz</button>
+
+    <button type="submit" style="margin-top: 20px;">Submit Quiz</button>
 </form>
 
 {% endblock %}
