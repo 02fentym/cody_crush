@@ -59,17 +59,17 @@
         <input type="hidden" name="form_type" value="course"> <!-- Hidden field to indicate form type -->
 
         <label for="{{ course_form.title.id_for_label }}" style="margin-bottom:0;">Title:</label>
-        {{ form.title }}
+        {{ course_form.title }}
 
         <label for="{{ course_form.language.id_for_label }}" style="margin-bottom:0;">Language:</label>
-        {{ form.language }}
+        {{ course_form.language }}
 
         <label for="{{ course_form.enrollment_password.id_for_label }}" style="margin-bottom:0;">Enrollment
             Password:</label>
-        {{ form.enrollment_password }}
+        {{ course_form.enrollment_password }}
 
         <label for="{{ course_form.description.id_for_label }}" style="margin-bottom:0;">Description:</label>
-        {{ form.description }}
+        {{ course_form.description }}
 
         <button type="submit"
             style="padding: 6px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Create</button>

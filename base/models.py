@@ -35,8 +35,13 @@ class Course(models.Model):
 class Unit(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
+    description = models.TextField()
+    order = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True, null=True)
     updated = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        ordering = ['order']
 
     def __str__(self):
         return self.title
@@ -46,8 +51,12 @@ class Topic(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     description = models.TextField()
+    order = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True, null=True)
     updated = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        ordering = ['order']
 
     def __str__(self):
         return f"{self.unit.title} - {self.title}"
