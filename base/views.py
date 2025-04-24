@@ -5,6 +5,7 @@ from .models import Unit, Topic, Quiz, Answer, Profile, Course, QuizTemplate, Ac
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .forms import UserForm, CourseForm, UnitForm, TopicForm, EnrollmentPasswordForm, LessonForm
+from django.contrib.contenttypes.models import ContentType
 from .decorators import allowed_roles
 
 import csv, io, random
@@ -122,33 +123,39 @@ def home(request):
 @login_required(login_url="login")
 def start_quiz(request, activity_id):
     activity = get_object_or_404(Activity, id=activity_id)
-    topic_id = activity.topic.id
-    topic = Topic.objects.get(id=topic_id)
-    quiz_template = activity.quiz_template
-    question_count = quiz_template.question_count
-    question_type = quiz_template.question_type
-    questions = None
-    if question_type == "multiple_choice":
-        questions = MultipleChoiceQuestion.objects.filter(topic=topic).order_by("?")[:question_count]
-    elif question_type == "tracing":
-       questions = TracingQuestion.objects.filter(topic=topic).order_by("?")[:question_count]
-    else:
-        messages.error(request, "Invalid question type.")
-        return redirect("topic", course_id=topic.unit.course.id, unit_id=topic.unit.id, topic_id=topic.id)
+    topic = activity.topic
+    template = activity.quiz_template
 
+    # Determine the question model
+    if template.question_type == "multiple_choice":
+        model = MultipleChoiceQuestion
+    elif template.question_type == "tracing":
+        model = TracingQuestion
+    else:
+        messages.error(request, "Unsupported question type.")
+        return redirect("topic", topic.unit.course.id, topic.unit.id, topic.id)
+
+    # Get content type for the selected question model
+    content_type = ContentType.objects.get_for_model(model)
+
+    # Random questions
+    questions = model.objects.filter(topic=topic).order_by("?")[:template.question_count]
+
+    # Create Quiz
     quiz = Quiz.objects.create(
         student=request.user,
         topic=topic,
-        grade=None,
-        question_type=question_type
+        question_type=template.question_type
     )
 
-    # Can only set many-to-many fields after the quiz is created in the DB
-    if question_type == "multiple_choice":
-        quiz.mc_questions.set(questions)
-    elif question_type == "tracing":
-        quiz.tracing_questions.set(questions)
-    quiz.save()
+    # Link questions using the bridge table
+    from .models import QuizQuestion
+    for question in questions:
+        QuizQuestion.objects.create(
+            quiz=quiz,
+            content_type=content_type,
+            object_id=question.id
+        )
 
     return redirect("take-quiz", quiz_id=quiz.id)
 
@@ -159,14 +166,12 @@ def take_quiz(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
     question_type = quiz.question_type
 
-    if question_type == "multiple_choice":
-        questions = quiz.mc_questions.all()
-    elif question_type == "tracing":
-        questions = quiz.tracing_questions.all()
+    # Get the questions using the bridge table
+    questions = quiz.get_questions()
 
     if request.method == "POST":
         correct_count = 0
-        total = questions.count()
+        total = len(questions)
 
         for question in questions:
             selected = request.POST.get(f'q{question.id}')
@@ -369,19 +374,21 @@ def upload_questions(request):
     errors = []
 
     if request.method == "POST":
+
+        # Step 1: Open csv file
         file = request.FILES["file"]
         data = file.read().decode("utf-8")
         csv_file = io.StringIO(data)
         reader = csv.DictReader(csv_file)
 
         for i, row in enumerate(reader, start=2):
-            # Step 1: Validate
+            # Step 2: Validate row data
             result = question_data_validation(i, row)
             if result:
                 errors.append(result)
                 continue
 
-            # Step 2: Get topic and question type
+            # Step 3: Get topic and question type
             topic = Topic.objects.get(id=row["topic_id"])
             question_type = row["question_type"].strip().lower()
 
@@ -408,7 +415,6 @@ def upload_questions(request):
                         explanation=row["explanation"],
                         language=row.get("language", "")
                     )
-
             except Exception as e:
                 errors.append(f"Row {i}: Failed to create question. Error: {str(e)}")
 
@@ -425,25 +431,23 @@ def upload_questions(request):
 
 # Helper function to validate question data
 def question_data_validation(i, row):
+    # Validate that the topic exists
     topic_id = row.get("topic_id")
-    question_type = row.get("question_type", "").strip().lower()
-
-    # Validate topic exists
     try:
         Topic.objects.get(id=topic_id)
     except Topic.DoesNotExist:
         return f"Row {i}: topic ID {topic_id} does not exist."
 
-    # Validate question_type exists
-    if not question_type:
-        return f"Row {i}: Missing question_type."
+    # Validate question type
+    question_type = row.get("question_type", "").strip().lower()
+    if question_type not in ["multiple_choice", "tracing"]:
+        return f"Row {i}: Invalid or missing question_type."
 
+    # Validate required fields based on question type
     if question_type == "multiple_choice":
-        required_fields = ["prompt", "choice_a", "choice_b", "choice_c", "choice_d", "correct_choice", "explanation"]
+        required_fields = ["prompt", "choice_a", "choice_b", "choice_c", "choice_d", "correct_choice", "explanation", "language", "topic_id"]
     elif question_type == "tracing":
-        required_fields = ["prompt", "expected_output", "explanation"]
-    else:
-        return f"Row {i}: Unknown question_type '{question_type}'."
+        required_fields = ["prompt", "expected_output", "explanation", "language", "topic_id"]
 
     # Validate required fields for the given type
     for field in required_fields:

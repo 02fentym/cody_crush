@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 
 class Profile(models.Model):
@@ -62,26 +64,22 @@ class Topic(models.Model):
         return f"{self.unit.title} - {self.title}"
 
 
-class BaseQuestion(models.Model):
-    topic = models.ForeignKey("Topic", on_delete=models.CASCADE)
-    prompt = models.TextField()
-    explanation = models.TextField()
-    language = models.CharField(
-        max_length=20,
-        choices=Course.LANGUAGE_CHOICES,
-        default='python'
-    )
-    created = models.DateTimeField(auto_now_add=True, null=True)
-    updated = models.DateTimeField(auto_now=True, null=True)
+class QuizQuestion(models.Model):
+    quiz = models.ForeignKey("Quiz", on_delete=models.CASCADE, related_name="quiz_questions")
 
-    class Meta:
-        abstract = True  # Prevents this model from being created in the database
+    # ContentType framework fields
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    question = GenericForeignKey("content_type", "object_id")
 
     def __str__(self):
-        return f"{self.topic.title}: {self.prompt[:40]}"
+        return f"{self.quiz} → {self.question}"
+
     
 
-class MultipleChoiceQuestion(BaseQuestion):
+class MultipleChoiceQuestion(models.Model):
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    prompt = models.TextField()
     choice_a = models.TextField()
     choice_b = models.TextField()
     choice_c = models.TextField()
@@ -90,11 +88,36 @@ class MultipleChoiceQuestion(BaseQuestion):
         max_length=1,
         choices=[('a', 'A'), ('b', 'B'), ('c', 'C'), ('d', 'D')]
     )
+    explanation = models.TextField()
+    language = models.CharField(
+        max_length=20,
+        choices=Course.LANGUAGE_CHOICES,
+        default='python'
+    )
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.topic.title}: {self.prompt[:40]}"
 
 
-class TracingQuestion(BaseQuestion):
+class TracingQuestion(models.Model):
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    prompt = models.TextField()
     expected_output = models.TextField()
 
+    explanation = models.TextField()
+    language = models.CharField(
+        max_length=20,
+        choices=Course.LANGUAGE_CHOICES,
+        default='python'
+    )
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.topic.title}: {self.prompt[:40]}"
+    
 
 class Quiz(models.Model):
     QUESTION_TYPE_CHOICES = [
@@ -109,21 +132,12 @@ class Quiz(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    # Per-type question sets
-    mc_questions = models.ManyToManyField(MultipleChoiceQuestion, blank=True)
-    tracing_questions = models.ManyToManyField(TracingQuestion, blank=True)
+    def get_questions(self):
+        return [qq.question for qq in self.quiz_questions.all()]
 
     def __str__(self):
         return f"{self.topic.title} Quiz for {self.student.username}"
 
-    def get_questions(self): # This method returns the questions based on the type of quiz
-        if self.question_type == "multiple_choice":
-            return self.mc_questions.all()
-        elif self.question_type == "tracing":
-            return self.tracing_questions.all()
-        return []
-
-    
 
 class Answer(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
@@ -155,7 +169,10 @@ class Lesson(models.Model):
     def __str__(self):
         return f"{self.title}"
 
-
+'''
+Used by the teacher to create a quiz template. This template can be used to generate quizzes for students.
+The template will have a set number of questions and a type (multiple choice or tracing).
+'''
 class QuizTemplate(models.Model):
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
     question_count = models.PositiveIntegerField(default=5)
