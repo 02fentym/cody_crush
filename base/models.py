@@ -141,15 +141,15 @@ class Quiz(models.Model):
 
 class Answer(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    mc_question = models.ForeignKey(MultipleChoiceQuestion, on_delete=models.CASCADE, null=True, blank=True)
-    tracing_question = models.ForeignKey(TracingQuestion, on_delete=models.CASCADE, null=True, blank=True)
+    quiz_question = models.ForeignKey("QuizQuestion", on_delete=models.CASCADE)
 
-    selected_choice = models.CharField(
+    selected_choice = models.CharField(  # used for multiple choice questions
         max_length=1,
         choices=[('a', 'A'), ('b', 'B'), ('c', 'C'), ('d', 'D')],
-        null=True,
-        blank=True
+        null=True, blank=True
     )
+    text_answer = models.TextField(null=True, blank=True)  # used for all other questions
+
     is_correct = models.BooleanField(null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

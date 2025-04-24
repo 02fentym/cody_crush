@@ -56,7 +56,7 @@
         {% elif question_type == "tracing" %}
             {% with question=answer.tracing_question %}
             <p><strong>{{ forloop.counter }})</strong> {{ question.prompt|safe }}</p>
-            <p><strong>Your Output:</strong> {{ answer.selected_choice }}</p>
+            <p><strong>Your Output:</strong> {{ answer.text_answer }}</p>
             <p><strong>Expected Output:</strong> {{ question.expected_output }}</p>
             {% if answer.is_correct %}
                 ✅ Correct
@@ -68,6 +68,11 @@
         {% endif %}
     </div>
     {% endfor %}
+
+    <div>
+        <a href="{% url 'topic' quiz.topic.unit.course.id quiz.topic.unit.id quiz.topic.id %}">Back to {{quiz.topic.title}}</a>
+    </div>
 </div>
+
 
 {% endblock %}
