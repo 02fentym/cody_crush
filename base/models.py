@@ -52,18 +52,10 @@ class Topic(models.Model):
     def __str__(self):
         return f"{self.unit.title} - {self.title}"
 
-    
-class Question(models.Model):
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
-    prompt = models.TextField(null=True, blank=True)
-    choice_a = models.TextField()
-    choice_b = models.TextField()
-    choice_c = models.TextField()
-    choice_d = models.TextField()
-    correct_choice = models.CharField(
-        max_length=1,
-        choices=[('a', 'A'), ('b', 'B'), ('c', 'C'), ('d', 'D')]
-    )
+
+class BaseQuestion(models.Model):
+    topic = models.ForeignKey("Topic", on_delete=models.CASCADE)
+    prompt = models.TextField()
     explanation = models.TextField()
     language = models.CharField(
         max_length=20,
@@ -74,38 +66,74 @@ class Question(models.Model):
     updated = models.DateTimeField(auto_now=True, null=True)
 
     class Meta:
-        ordering = ['-created']
+        abstract = True  # Prevents this model from being created in the database
 
     def __str__(self):
         return f"{self.topic.title}: {self.prompt[:40]}"
+    
 
+class MultipleChoiceQuestion(BaseQuestion):
+    choice_a = models.TextField()
+    choice_b = models.TextField()
+    choice_c = models.TextField()
+    choice_d = models.TextField()
+    correct_choice = models.CharField(
+        max_length=1,
+        choices=[('a', 'A'), ('b', 'B'), ('c', 'C'), ('d', 'D')]
+    )
+
+
+class TracingQuestion(BaseQuestion):
+    expected_output = models.TextField()
 
 
 class Quiz(models.Model):
+    QUESTION_TYPE_CHOICES = [
+        ("multiple_choice", "Multiple Choice"),
+        ("tracing", "Tracing"),
+    ]
+
     student = models.ForeignKey(User, on_delete=models.CASCADE)
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
     grade = models.FloatField(null=True, blank=True)
-    questions = models.ManyToManyField(Question)
-    created = models.DateTimeField(auto_now_add=True, null=True)
-    updated = models.DateTimeField(auto_now=True, null=True)
+    question_type = models.CharField(max_length=30, choices=QUESTION_TYPE_CHOICES)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    # Per-type question sets
+    mc_questions = models.ManyToManyField(MultipleChoiceQuestion, blank=True)
+    tracing_questions = models.ManyToManyField(TracingQuestion, blank=True)
 
     def __str__(self):
         return f"{self.topic.title} Quiz for {self.student.username}"
+
+    def get_questions(self): # This method returns the questions based on the type of quiz
+        if self.question_type == "multiple_choice":
+            return self.mc_questions.all()
+        elif self.question_type == "tracing":
+            return self.tracing_questions.all()
+        return []
+
     
 
 class Answer(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    mc_question = models.ForeignKey(MultipleChoiceQuestion, on_delete=models.CASCADE, null=True, blank=True)
+    tracing_question = models.ForeignKey(TracingQuestion, on_delete=models.CASCADE, null=True, blank=True)
+
     selected_choice = models.CharField(
         max_length=1,
-        choices=[('a', 'A'), ('b', 'B'), ('c', 'C'), ('d', 'D')]
+        choices=[('a', 'A'), ('b', 'B'), ('c', 'C'), ('d', 'D')],
+        null=True,
+        blank=True
     )
     is_correct = models.BooleanField(null=True, blank=True)
-    created = models.DateTimeField(auto_now_add=True, null=True)
-    updated = models.DateTimeField(auto_now=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Answer to '{self.question.prompt[:30]}...' by {self.quiz.student.username}"
+        return f"Answer by {self.quiz.student.username}"
+
 
 
 class Lesson(models.Model):
@@ -122,6 +150,7 @@ class Lesson(models.Model):
 class QuizTemplate(models.Model):
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
     question_count = models.PositiveIntegerField(default=5)
+    question_type = models.CharField(max_length=30, choices=Quiz.QUESTION_TYPE_CHOICES)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

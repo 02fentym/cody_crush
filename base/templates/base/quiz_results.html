@@ -2,50 +2,71 @@
 
 {% block content %}
 
+<h2>Quiz Results</h2>
+<p><strong>Grade:</strong> {{ quiz.grade }}%</p>
+
 <div>
     {% for answer in answers %}
+    <div style="margin-bottom: 20px;">
+        {% if question_type == "multiple_choice" %}
+            {% with question=answer.mc_question %}
+            <p><strong>{{ forloop.counter }})</strong> {{ question.prompt|safe }}</p>
 
-    <div>
-        <p>{{forloop.counter}}) {{answer.question.prompt|safe}}</p>
+            {% if question %}
+                {% if answer.selected_choice == "a" and question.correct_choice == "a" %}
+                    ✅
+                {% elif answer.selected_choice == "a" and question.correct_choice != "a" %}
+                    ❌
+                {% elif question.correct_choice == "a" %}
+                    →
+                {% endif %}
+                a) {{ question.choice_a|safe }}<br>
 
-        {% if answer.selected_choice == "a" and answer.question.correct_choice == "a" %}
-        ✅
-        {% elif answer.selected_choice == "a" and answer.question.correct_choice != "a" %}
-        ❌
-        {% elif answer.question.correct_choice == "a" %}
-        →
+                {% if answer.selected_choice == "b" and question.correct_choice == "b" %}
+                    ✅
+                {% elif answer.selected_choice == "b" and question.correct_choice != "b" %}
+                    ❌
+                {% elif question.correct_choice == "b" %}
+                    →
+                {% endif %}
+                b) {{ question.choice_b|safe }}<br>
+
+                {% if answer.selected_choice == "c" and question.correct_choice == "c" %}
+                    ✅
+                {% elif answer.selected_choice == "c" and question.correct_choice != "c" %}
+                    ❌
+                {% elif question.correct_choice == "c" %}
+                    →
+                {% endif %}
+                c) {{ question.choice_c|safe }}<br>
+
+                {% if answer.selected_choice == "d" and question.correct_choice == "d" %}
+                    ✅
+                {% elif answer.selected_choice == "d" and question.correct_choice != "d" %}
+                    ❌
+                {% elif question.correct_choice == "d" %}
+                    →
+                {% endif %}
+                d) {{ question.choice_d|safe }}<br>
+
+                <p><em>{{ question.explanation }}</em></p>
+            {% endif %}
+            {% endwith %}
+
+        {% elif question_type == "tracing" %}
+            {% with question=answer.tracing_question %}
+            <p><strong>{{ forloop.counter }})</strong> {{ question.prompt|safe }}</p>
+            <p><strong>Your Output:</strong> {{ answer.selected_choice }}</p>
+            <p><strong>Expected Output:</strong> {{ question.expected_output }}</p>
+            {% if answer.is_correct %}
+                ✅ Correct
+            {% else %}
+                ❌ Incorrect
+            {% endif %}
+            <p><em>{{ question.explanation }}</em></p>
+            {% endwith %}
         {% endif %}
-        a) {{answer.question.choice_a|safe}}<br>
-
-        {% if answer.selected_choice == "b" and answer.question.correct_choice == "b" %}
-        ✅
-        {% elif answer.selected_choice == "b" and answer.question.correct_choice != "b" %}
-        ❌
-        {% elif answer.question.correct_choice == "b" %}
-        →
-        {% endif %}
-        b) {{answer.question.choice_b|safe}}<br>
-
-        {% if answer.selected_choice == "c" and answer.question.correct_choice == "c" %}
-        ✅
-        {% elif answer.selected_choice == "c" and answer.question.correct_choice != "c" %}
-        ❌
-        {% elif answer.question.correct_choice == "c" %}
-        →
-        {% endif %}
-        c) {{answer.question.choice_c|safe}}<br>
-
-        {% if answer.selected_choice == "d" and answer.question.correct_choice == "d" %}
-        ✅
-        {% elif answer.selected_choice == "d" and answer.question.correct_choice != "d" %}
-        ❌
-        {% elif answer.question.correct_choice == "d" %}
-        →
-        {% endif %}
-        d) {{answer.question.choice_d|safe}}<br>
-
     </div>
-
     {% endfor %}
 </div>
 
