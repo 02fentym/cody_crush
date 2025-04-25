@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Unit, Topic, Quiz, Answer, Profile, Course, Activity, QuizTemplate, Lesson, MultipleChoiceQuestion, TracingQuestion
+from .models import Unit, Topic, Quiz, Answer, Profile, Course, Activity, QuizTemplate, Lesson, MultipleChoiceQuestion, TracingQuestion, DmojExercise
 
 # Register your models here.
 admin.site.register(Unit)
@@ -13,3 +13,4 @@ admin.site.register(QuizTemplate)
 admin.site.register(Lesson)
 admin.site.register(MultipleChoiceQuestion)
 admin.site.register(TracingQuestion)
+admin.site.register(DmojExercise)

@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import Unit, Topic, Quiz, Answer, Profile, Course, QuizTemplate, Activity, Lesson, MultipleChoiceQuestion, TracingQuestion
+from .models import Unit, Topic, Quiz, Answer, Profile, Course, QuizTemplate, Activity, Lesson, MultipleChoiceQuestion, TracingQuestion, DmojExercise
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .forms import UserForm, CourseForm, UnitForm, TopicForm, EnrollmentPasswordForm, LessonForm
+from .forms import UserForm, CourseForm, UnitForm, TopicForm, EnrollmentPasswordForm, LessonForm, DmojForm
 from django.contrib.contenttypes.models import ContentType
 from .decorators import allowed_roles
+from .utils import fetch_dmoj_metadata_from_url
 
 import csv, io, random
 
@@ -49,8 +50,11 @@ def register_user(request):
             user.username = user.username.lower()
             user.save()
 
-            role = form.cleaned_data.get("role")
-            Profile.objects.create(user=user, role=role)
+            Profile.objects.create(
+                user=user,
+                role=form.cleaned_data.get("role"),
+                dmoj_username=form.cleaned_data['dmoj_username'] if form.cleaned_data['role'] == 'student' else None
+            )
 
             login(request, user)
             return redirect("home")
@@ -469,6 +473,7 @@ def question_data_validation(i, row):
 
 
 def create_lesson(request, topic_id):
+    print(f"Creating lesson for topic ID: {topic_id}")
     topic = get_object_or_404(Topic, id=topic_id)
     form = LessonForm()
 
@@ -476,7 +481,6 @@ def create_lesson(request, topic_id):
         form = LessonForm(request.POST)
         if form.is_valid():
             lesson = form.save(commit=False)
-            lesson.topic = topic
             lesson.save()
 
             Activity.objects.create(
@@ -495,9 +499,9 @@ def create_lesson(request, topic_id):
     return render(request, "base/create_edit_lesson.html", context)
 
 
-def edit_lesson(request, lesson_id):
+def edit_lesson(request, topic_id, lesson_id):
     lesson = Lesson.objects.get(id=lesson_id)
-    topic = lesson.topic
+    topic = Topic.objects.get(id=topic_id)
     form = LessonForm(instance=lesson)
 
     if request.method == "POST":
@@ -508,3 +512,33 @@ def edit_lesson(request, lesson_id):
 
     context = {"form": form, "is_edit": True}
     return render(request, "base/create_edit_lesson.html", context)
+
+
+def create_dmoj_exercise(request, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id)
+    
+    if request.method == "POST":
+        url = request.POST.get("url")
+        metadata = fetch_dmoj_metadata_from_url(url)
+        
+        if metadata:
+            dmoj_exercise = DmojExercise.objects.create(
+                title=metadata['title'],
+                url=url,
+                problem_code=metadata['problem_code'],
+                points=metadata['points']
+            )
+
+            Activity.objects.create(
+                topic=topic,
+                order=topic.activity_set.count() + 1,
+                content_type=ContentType.objects.get_for_model(dmoj_exercise),
+                object_id=dmoj_exercise.id
+            )
+
+            messages.success(request, "DMOJ exercise created successfully!")
+        else:
+            messages.error(request, "Failed to fetch DMOJ metadata. Please check the URL.")
+
+    
+    return redirect("topic", course_id=topic.unit.course.id, unit_id=topic.unit.id, topic_id=topic_id)

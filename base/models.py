@@ -8,6 +8,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=10, choices=[('student', 'Student'), ('teacher', 'Teacher')])
+    dmoj_username = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.username} ({self.role.title()})"
@@ -160,7 +161,6 @@ class Answer(models.Model):
 
 
 class Lesson(models.Model):
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     content = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
@@ -194,9 +194,19 @@ class Activity(models.Model):
     content_object = GenericForeignKey("content_type", "object_id")
 
     def clean(self):
-        allowed_models = ['lesson', 'quiztemplate']
+        allowed_models = ["lesson", "quiztemplate", "dmojexercise"]
         if self.content_type.model not in allowed_models:
-            raise ValidationError("Activity can only be linked to a Lesson or a QuizTemplate.")
+            raise ValidationError("Unknown activity type.")
 
     def __str__(self):
         return f"{self.topic.title} - {self.content_object.__class__.__name__}"
+    
+
+class DmojExercise(models.Model):
+    title = models.CharField(max_length=255)
+    url = models.URLField()
+    problem_code = models.CharField(max_length=100, unique=True)
+    points = models.FloatField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.title} ({self.problem_code})"

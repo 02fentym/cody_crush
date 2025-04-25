@@ -26,10 +26,16 @@ urlpatterns = [
     path("course/<int:course_id>/unit/<int:unit_id>/topic/<int:topic_id>/delete/", views.delete_topic, name="delete-topic"),
     path("activity/delete/<int:activity_id>/", views.delete_activity, name="delete-activity"),
 
+    # question uploading
     path("upload-questions/", views.upload_questions, name="upload-questions"),
 
+    # quiz views
     path("topic/<int:topic_id>/create-quiz/", views.create_quiz, name="create-quiz"),
 
+    # lesson views
     path("topics/<topic_id>/lesson/create/", views.create_lesson, name="create-lesson"),
-    path("lesson/<int:lesson_id>/edit/", views.edit_lesson, name="edit-lesson"),
+    path("topics/<topic_id>/lesson/<int:lesson_id>/edit/", views.edit_lesson, name="edit-lesson"),
+
+    # dmoj exercise views
+    path("topic/<topic_id>/create_dmoj_exercise/", views.create_dmoj_exercise, name="create-dmoj-exercise"),
 ]

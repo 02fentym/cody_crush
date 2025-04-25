@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Course, Unit, Topic, Lesson
+from .models import Course, Unit, Topic, Lesson, DmojExercise
 
 class UserForm(UserCreationForm):
     ROLE_CHOICES = [
@@ -11,10 +11,25 @@ class UserForm(UserCreationForm):
     ]
 
     role = forms.ChoiceField(choices=ROLE_CHOICES)
+    dmoj_username = forms.CharField(required=False, help_text="Required for students only")
 
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2', 'role']
+        fields = ['username', 'password1', 'password2', 'role', 'dmoj_username']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        role = cleaned_data.get('role')
+        dmoj_username = cleaned_data.get('dmoj_username')
+
+        if role == 'student' and not dmoj_username:
+            self.add_error('dmoj_username', "DMOJ username is required for students.")
+
+        if role != 'student':
+            # Prevent teachers from setting a DMOJ username
+            cleaned_data['dmoj_username'] = None
+
+        return cleaned_data
 
 
 class CourseForm(ModelForm):
@@ -62,5 +77,16 @@ class LessonForm(forms.ModelForm):
             "content": forms.Textarea(attrs={
                 "id": "id_content",     # This is what Toast UI JS expects
                 "style": "display:none;"  # Hide it from the user
+            })
+        }
+
+class DmojForm(forms.ModelForm):
+    class Meta:
+        model = DmojExercise
+        fields = ["url"]
+        widgets = {
+            'url': forms.URLInput(attrs={
+                'placeholder': 'https://dmoj.ca/problem/ccc07j3',
+                'style': 'width:100%; padding:8px;'
             })
         }
