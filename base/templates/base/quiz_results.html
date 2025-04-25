@@ -1,78 +1,42 @@
 {% extends "main.html" %}
 
 {% block content %}
+<h2>{{ quiz.topic.title }} - Results</h2>
 
-<h2>Quiz Results</h2>
-<p><strong>Grade:</strong> {{ quiz.grade }}%</p>
+{% for item in results %}
+    <div>
+        <p><strong>{{ forloop.counter }}. {{ item.question.prompt }}</strong></p>
 
-<div>
-    {% for answer in answers %}
-    <div style="margin-bottom: 20px;">
         {% if question_type == "multiple_choice" %}
-            {% with question=answer.mc_question %}
-            <p><strong>{{ forloop.counter }})</strong> {{ question.prompt|safe }}</p>
+            <div>a) {{ item.question.choice_a }}</div>
+            <div>b) {{ item.question.choice_b }}</div>
+            <div>c) {{ item.question.choice_c }}</div>
+            <div>d) {{ item.question.choice_d }}</div>
 
-            {% if question %}
-                {% if answer.selected_choice == "a" and question.correct_choice == "a" %}
-                    ✅
-                {% elif answer.selected_choice == "a" and question.correct_choice != "a" %}
-                    ❌
-                {% elif question.correct_choice == "a" %}
-                    →
-                {% endif %}
-                a) {{ question.choice_a|safe }}<br>
+            <p>Your answer: {{ item.answer.selected_choice }}</p>
+            <p>Correct answer: {{ item.question.correct_choice }}</p>
 
-                {% if answer.selected_choice == "b" and question.correct_choice == "b" %}
-                    ✅
-                {% elif answer.selected_choice == "b" and question.correct_choice != "b" %}
-                    ❌
-                {% elif question.correct_choice == "b" %}
-                    →
-                {% endif %}
-                b) {{ question.choice_b|safe }}<br>
-
-                {% if answer.selected_choice == "c" and question.correct_choice == "c" %}
-                    ✅
-                {% elif answer.selected_choice == "c" and question.correct_choice != "c" %}
-                    ❌
-                {% elif question.correct_choice == "c" %}
-                    →
-                {% endif %}
-                c) {{ question.choice_c|safe }}<br>
-
-                {% if answer.selected_choice == "d" and question.correct_choice == "d" %}
-                    ✅
-                {% elif answer.selected_choice == "d" and question.correct_choice != "d" %}
-                    ❌
-                {% elif question.correct_choice == "d" %}
-                    →
-                {% endif %}
-                d) {{ question.choice_d|safe }}<br>
-
-                <p><em>Explanation: {{ question.explanation }}</em></p>
+            {% if item.answer.selected_choice == item.question.correct_choice %}
+                <span style="color: green;">✅ Correct</span>
+            {% else %}
+                <span style="color: red;">❌ Incorrect</span>
             {% endif %}
-            {% endwith %}
 
         {% elif question_type == "tracing" %}
-            {% with question=answer.tracing_question %}
-            <p><strong>{{ forloop.counter }})</strong> {{ question.prompt|safe }}</p>
-            <p><strong>Your Output:</strong> {{ answer.text_answer }}</p>
-            <p><strong>Expected Output:</strong> {{ question.expected_output }}</p>
-            {% if answer.is_correct %}
-                ✅ Correct
+            <p>Your answer:</p>
+            <pre>{{ item.answer.selected_choice }}</pre>
+
+            <p>Expected output:</p>
+            <pre>{{ item.question.expected_output }}</pre>
+
+            {% if item.answer.is_correct %}
+                <span style="color: green;">✅ Correct</span>
             {% else %}
-                ❌ Incorrect
+                <span style="color: red;">❌ Incorrect</span>
             {% endif %}
-            <p><em>{{ question.explanation }}</em></p>
-            {% endwith %}
         {% endif %}
+
+        <hr>
     </div>
-    {% endfor %}
-
-    <div>
-        <a href="{% url 'topic' quiz.topic.unit.course.id quiz.topic.unit.id quiz.topic.id %}">Back to {{quiz.topic.title}}</a>
-    </div>
-</div>
-
-
+{% endfor %}
 {% endblock %}

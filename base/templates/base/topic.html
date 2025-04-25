@@ -18,45 +18,46 @@
         <div
             style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; min-width: 200px; background-color: #fefefe; text-align: center;">
 
+            {% with activity.content_object as content_object %}
+
             <!-- Lesson Card -->
-            {% if activity.type == "lesson" and activity.lesson %}
-            <div style="font-size: 1.1em; font-weight: bold;">
-                Lesson
-            </div>
-            <div style="color: #666; margin-top: 8px;">{{ activity.lesson.title }}</div>
-            <a href="{% url 'edit-lesson' activity.lesson.id %}"
+            {% if activity.content_type.model == "lesson" and content_object %}
+            <div style="font-size: 1.1em; font-weight: bold;">Lesson</div>
+            <div style="color: #666; margin-top: 8px;">{{ content_object.title }}</div>
+            <a href="{% url 'edit-lesson' content_object.id %}"
                 style="margin-top: 12px; display: inline-block;">Edit</a>
 
             <!-- Quiz Card -->
-            {% elif activity.type == "quiz" and activity.quiz_template %}
+            {% elif activity.content_type.model == "quiztemplate" and content_object %}
 
             {% if request.user.profile.role == "student" %}
             <a href="{% url 'start-quiz' activity.id %}">
-                <div style="font-size:1.1em; font-weight:bold;">
-                    {% if activity.quiz_template.question_type == "multiple_choice" %}
+                <div style="font-size: 1.1em; font-weight: bold;">
+                    {% if content_object.question_type == "multiple_choice" %}
                     Multiple Choice Quiz
-                    {% elif activity.quiz_template.question_type == "tracing" %}
+                    {% elif content_object.question_type == "tracing" %}
                     Tracing Quiz
                     {% else %}
                     Unknown Quiz Type
                     {% endif %}
                 </div>
-                <div style="color:#666; margin-top:8px;">
-                    Questions: {{ activity.quiz_template.question_count }}
+                <div style="color: #666; margin-top: 8px;">
+                    Questions: {{ content_object.question_count }}
                 </div>
             </a>
             {% else %}
-            <div style="font-size:1.1em; font-weight:bold; cursor: default;">
-                {% if activity.quiz_template.question_type == "multiple_choice" %}
+            <div style="font-size: 1.1em; font-weight: bold; cursor: default;">
+                {% if content_object.question_type == "multiple_choice" %}
                 Multiple Choice Quiz
-                {% elif activity.quiz_template.question_type == "tracing" %}
+                {% elif content_object.question_type == "tracing" %}
                 Tracing Quiz
                 {% else %}
                 Unknown Quiz Type
                 {% endif %}
             </div>
-            <div style="color:#666; margin-top:8px;">
-                Questions: {{ activity.quiz_template.question_count }}
+
+            <div style="color: #666; margin-top: 8px;">
+                Questions: {{ content_object.question_count }}
             </div>
             {% endif %}
 
@@ -64,6 +65,8 @@
             {% else %}
             <div style="color: #888;">⚠️ Unknown activity type.</div>
             {% endif %}
+
+            {% endwith %}
 
             {% if request.user.profile.role == "teacher" %}
             <form method="POST" action="{% url 'delete-activity' activity.id %}" style="margin-top: 8px;">

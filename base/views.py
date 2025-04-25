@@ -124,7 +124,7 @@ def home(request):
 def start_quiz(request, activity_id):
     activity = get_object_or_404(Activity, id=activity_id)
     topic = activity.topic
-    template = activity.quiz_template
+    template = activity.content_object
 
     # Determine the question model
     if template.question_type == "multiple_choice":
@@ -165,55 +165,50 @@ def start_quiz(request, activity_id):
 def take_quiz(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
     question_type = quiz.question_type
-
-    # Get the questions using the bridge table
-    questions = quiz.get_questions()
+    quiz_questions = quiz.quiz_questions.all()  # this gives access to both question and bridge
 
     if request.method == "POST":
         correct_count = 0
-        total = len(questions)
+        total = quiz_questions.count()
 
-        for question in questions:
-            selected = request.POST.get(f'q{question.id}')
-            if selected:
+        for qq in quiz_questions:
+            question = qq.question
+            user_input = request.POST.get(f'q{question.id}')
+
+            if user_input:
+                # Default to False in case we can't validate
+                is_correct = False
 
                 if question_type == "multiple_choice":
-                    is_correct = (selected == question.correct_choice)
+                    is_correct = user_input == question.correct_choice
                 elif question_type == "tracing":
-                    # For tracing questions, we assume the answer is correct if it matches the expected output
-                    student_output = normalize_output(request.POST.get(f'q{question.id}', ''))
+                    student_output = normalize_output(user_input)
                     correct_output = normalize_output(question.expected_output)
-                    is_correct = (student_output == correct_output)
+                    is_correct = student_output == correct_output
 
+                # Save the answer
+                Answer.objects.create(
+                    quiz=quiz,
+                    quiz_question=qq,
+                    selected_choice=user_input if question_type == "multiple_choice" else None,
+                    text_answer=user_input if question_type == "tracing" else None,
+                    is_correct=is_correct
+                )
 
                 if is_correct:
                     correct_count += 1
 
-                answer = Answer.objects.create(
-                    quiz=quiz,
-                    selected_choice=selected,
-                    is_correct=is_correct
-                )
-
-                if question_type == "multiple_choice":
-                    mc_question = MultipleChoiceQuestion.objects.get(id=question.id)
-                    tracing_question = None
-                elif question_type == "tracing":
-                    mc_question = None
-                    tracing_question = TracingQuestion.objects.get(id=question.id)
-                answer.mc_question = mc_question
-                answer.tracing_question = tracing_question
-                answer.save()
-
+        # Save grade
         grade = (correct_count / total) * 100
         quiz.grade = round(grade, 2)
         quiz.save()
 
         return redirect("quiz-results", quiz.id)
 
-
-    context = {"quiz": quiz, "questions": questions}
+    # GET request → show the quiz
+    context = {"quiz": quiz, "questions": [qq.question for qq in quiz_questions]}
     return render(request, "base/quiz.html", context)
+
 
 
 # Helper function to normalize output for tracing questions
@@ -225,12 +220,29 @@ def normalize_output(text):
 @allowed_roles(["student"])
 @login_required(login_url="login")
 def quiz_results(request, quiz_id):
+    # Step 1: Get the quiz
     quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
-    answers = Answer.objects.filter(quiz=quiz)
-    question_type = quiz.question_type
 
-    context = {"quiz": quiz, "answers": answers, "question_type": question_type}
+    # Step 2: Get all answers the student gave
+    answers = Answer.objects.filter(quiz=quiz)
+
+    # Step 3: Create a list of each question + answer
+    results = []
+    for answer in answers:
+        question = answer.quiz_question.question  # <-- this gets the actual question object
+        results.append({
+            "answer": answer,
+            "question": question,
+        })
+
+    # Step 4: Send to the template
+    context = {
+        "quiz": quiz,
+        "results": results,
+        "question_type": quiz.question_type,  # so you can tell if it's MC or tracing
+    }
     return render(request, "base/quiz_results.html", context)
+
 
 
 
@@ -342,12 +354,12 @@ def create_quiz(request, topic_id):
         question_count=question_count,
         question_type=question_type
     )
+
     Activity.objects.create(
         topic=topic,
-        type="quiz",
         order=topic.activity_set.count() + 1,
-        quiz_template=quiz_template,
-        lesson=None
+        content_type=ContentType.objects.get_for_model(quiz_template),
+        object_id=quiz_template.id
     )
 
     messages.success(request, "Quiz created successfully!")
@@ -357,12 +369,12 @@ def create_quiz(request, topic_id):
 
 def delete_activity(request, activity_id):
     activity = get_object_or_404(Activity, id=activity_id)
-    if activity.type == "quiz":
-        quiz_template = activity.quiz_template
-        quiz_template.delete()
-    elif activity.type == "lesson":
-        lesson = activity.lesson
-        lesson.delete()
+
+     # Delete the associated object, whether it's a lesson or quiz_template
+    activity.content_object.delete()
+
+    # Delete the Activity itself too
+    activity.delete()
 
     messages.success(request, "Activity deleted successfully!")
     return redirect("topic", course_id=activity.topic.unit.course.id, unit_id=activity.topic.unit.id, topic_id=activity.topic.id)
@@ -459,7 +471,7 @@ def question_data_validation(i, row):
 
 
 def create_lesson(request, topic_id):
-    topic = Topic.objects.get(id=topic_id)
+    topic = get_object_or_404(Topic, id=topic_id)
     form = LessonForm()
 
     if request.method == "POST":
@@ -471,10 +483,9 @@ def create_lesson(request, topic_id):
 
             Activity.objects.create(
                 topic=topic,
-                type="lesson",
                 order=topic.activity_set.count() + 1,
-                quiz_template=None,
-                lesson=lesson
+                content_type=ContentType.objects.get_for_model(lesson),
+                object_id=lesson.id
             )
 
             return redirect("topic", topic.unit.course.id, topic.unit.id, topic.id)

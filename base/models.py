@@ -184,34 +184,19 @@ class QuizTemplate(models.Model):
 
 
 class Activity(models.Model):
-    ACTIVITY_TYPES = [
-        ("lesson", "Lesson"),
-        ("quiz", "Quiz"),
-    ]
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
-    type = models.CharField(max_length=10, choices=ACTIVITY_TYPES)
     order = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
 
-    # Either one of these will be set
-    quiz_template = models.ForeignKey('QuizTemplate', on_delete=models.CASCADE, null=True, blank=True)
-    lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE, null=True, blank=True)
-    #exercise = models.ForeignKey('Exercise', on_delete=models.SET_NULL, null=True, blank=True)
+    # Generic relation
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
 
     def clean(self):
-        count = 0
-
-        if self.lesson is not None:
-            count += 1
-        if self.quiz_template is not None:
-            count += 1
-
-        if count != 1:
-            raise ValidationError("Exactly one of lesson, quiz_template must be set.")
-
-    def save(self, *args, **kwargs):
-        self.full_clean()  # ensures clean() runs before save
-        super().save(*args, **kwargs)
+        allowed_models = ['lesson', 'quiztemplate']
+        if self.content_type.model not in allowed_models:
+            raise ValidationError("Activity can only be linked to a Lesson or a QuizTemplate.")
 
     def __str__(self):
-        return f"{self.topic.title} - {self.type}"
+        return f"{self.topic.title} - {self.content_object.__class__.__name__}"
