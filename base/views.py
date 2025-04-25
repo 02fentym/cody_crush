@@ -247,8 +247,6 @@ def quiz_results(request, quiz_id):
 
 
 
-
-
 ###################### TEACHER VIEWS
 
 def course(request, course_id):

@@ -3,15 +3,19 @@
 {% block content %}
 <h2>{{ quiz.topic.title }} - Results</h2>
 
+<div>
+    <p><strong>Score:</strong> {{ quiz.grade }}%</p>
+</div>
+
 {% for item in results %}
     <div>
-        <p><strong>{{ forloop.counter }}. {{ item.question.prompt }}</strong></p>
+        <p><strong>{{ forloop.counter }}. {{ item.question.prompt|safe }}</strong></p>
 
         {% if question_type == "multiple_choice" %}
-            <div>a) {{ item.question.choice_a }}</div>
-            <div>b) {{ item.question.choice_b }}</div>
-            <div>c) {{ item.question.choice_c }}</div>
-            <div>d) {{ item.question.choice_d }}</div>
+            <div>a) {{ item.question.choice_a|safe }}</div>
+            <div>b) {{ item.question.choice_b|safe }}</div>
+            <div>c) {{ item.question.choice_c|safe }}</div>
+            <div>d) {{ item.question.choice_d|safe }}</div>
 
             <p>Your answer: {{ item.answer.selected_choice }}</p>
             <p>Correct answer: {{ item.question.correct_choice }}</p>
@@ -24,10 +28,10 @@
 
         {% elif question_type == "tracing" %}
             <p>Your answer:</p>
-            <pre>{{ item.answer.selected_choice }}</pre>
+            <pre>{{ item.answer.text_answer|safe }}</pre>
 
             <p>Expected output:</p>
-            <pre>{{ item.question.expected_output }}</pre>
+            <pre>{{ item.question.expected_output|safe }}</pre>
 
             {% if item.answer.is_correct %}
                 <span style="color: green;">✅ Correct</span>
@@ -39,4 +43,6 @@
         <hr>
     </div>
 {% endfor %}
+
+
 {% endblock %}
