@@ -202,6 +202,20 @@ class Activity(models.Model):
         return f"{self.topic.title} - {self.content_object.__class__.__name__}"
     
 
+class ActivityCompletion(models.Model):
+    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
+    completed = models.BooleanField(default=False)
+    score = models.FloatField(blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("student", "activity")
+
+    def __str__(self):
+        return f"{self.student.username} completed {self.activity}"
+    
+
 class DmojExercise(models.Model):
     title = models.CharField(max_length=255)
     url = models.URLField()
