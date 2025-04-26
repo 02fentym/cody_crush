@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import Unit, Topic, Quiz, Answer, Profile, Course, QuizTemplate, Activity, Lesson, MultipleChoiceQuestion, TracingQuestion, DmojExercise
+from .models import (Unit, Topic, Quiz, Answer, Profile, Course, QuizTemplate, Activity, Lesson, 
+    MultipleChoiceQuestion, TracingQuestion, DmojExercise, ActivityCompletion
+)
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .forms import UserForm, CourseForm, UnitForm, TopicForm, EnrollmentPasswordForm, LessonForm, DmojForm
@@ -9,7 +11,9 @@ from django.contrib.contenttypes.models import ContentType
 from .decorators import allowed_roles
 from .utils import fetch_dmoj_metadata_from_url
 
-import csv, io, random
+import csv, io, markdown, re
+from markdown.extensions.fenced_code import FencedCodeExtension
+
 
 ###################### GENERIC VIEWS
 
@@ -512,6 +516,46 @@ def edit_lesson(request, topic_id, lesson_id):
 
     context = {"form": form, "is_edit": True}
     return render(request, "base/create_edit_lesson.html", context)
+
+
+@allowed_roles(["student"])
+@login_required(login_url="login")
+def view_lesson(request, lesson_id):
+    lesson = get_object_or_404(Lesson, id=lesson_id)
+    activity = Activity.objects.get(content_type__model="lesson", object_id=lesson.id)
+    course_language = activity.topic.unit.course.language.lower()  # like "python", "java"
+
+    '''
+    if request.method == "POST":
+        if 'mark_as_read' in request.POST:
+            ActivityCompletion.objects.get_or_create(
+                student=request.user,
+                activity=activity,
+                defaults={'is_complete': True}
+            )
+            return redirect('topic', course_id=activity.topic.unit.course.id, unit_id=activity.topic.unit.id, topic_id=activity.topic.id)
+    '''
+    
+    completed = ActivityCompletion.objects.filter(student=request.user, activity=activity).exists()
+
+    # Step 1: Parse the Markdown (handle fenced code blocks)
+    lesson_html = markdown.markdown(
+        lesson.content,
+        extensions=[FencedCodeExtension()]
+    )
+
+    # Step 2: Post-process to add language class
+
+    # Handle <pre><code> blocks first
+    lesson_html = re.sub(r'<pre><code>', f'<pre><code class="language-{course_language}">', lesson_html)
+
+    # Then handle inline <code> blocks that are NOT inside <pre>
+    # (lookbehind ensures we're not replacing inside <pre>)
+    lesson_html = re.sub(r'(?<!<pre>)<code>', f'<code class="language-{course_language}">', lesson_html)
+
+    context = {"lesson": lesson, "lesson_html": lesson_html, "activity": activity, "completed": completed}
+    return render(request, "base/view_lesson.html", context)
+
 
 
 def create_dmoj_exercise(request, topic_id):

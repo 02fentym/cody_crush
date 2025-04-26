@@ -18,6 +18,8 @@ urlpatterns = [
     path("quiz/<int:quiz_id>/take-quiz/", views.take_quiz, name="take-quiz"),
     path("quiz/results/<int:quiz_id>/", views.quiz_results, name="quiz-results"),
 
+    path("lessons/<lesson_id>/view/", views.view_lesson, name="view-lesson"),
+
     # TEACHER
     
     # deletion views

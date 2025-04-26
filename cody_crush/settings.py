@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    'markdownify', # For markdown support
+
     "base.apps.BaseConfig",
 ]
 

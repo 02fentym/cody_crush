@@ -1,0 +1,14 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+{% if lesson %}
+<div class="lesson">
+    <h1>{{ lesson.title|safe }}</h1>
+    <p>{{ lesson_html|safe }}</p>
+</div>
+{% else %}
+<p>No lesson found.</p>
+{% endif %}
+
+{% endblock %}

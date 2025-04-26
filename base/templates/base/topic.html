@@ -22,16 +22,24 @@
 
             <!-- Lesson Card -->
             {% if activity.content_type.model == "lesson" and content_object %}
+
+            {% if request.user.profile.role == "student" %}
+            <a href="{% url 'view-lesson' content_object.id %}" style="margin-top: 12px; display: inline-block;">
+                <div style="font-size: 1.1em; font-weight: bold;">Lesson</div>
+                <div style="color: #666; margin-top: 8px;">{{ content_object.title|striptags }}</div>
+            </a>
+            {% else %}
             <div style="font-size: 1.1em; font-weight: bold;">Lesson</div>
-            <div style="color: #666; margin-top: 8px;">{{ content_object.title }}</div>
+            <div style="color: #666; margin-top: 8px;">{{ content_object.title|striptags }}</div>
             <a href="{% url 'edit-lesson' activity.topic.id content_object.id %}"
                 style="margin-top: 12px; display: inline-block;">Edit</a>
+            {% endif %}
 
             <!-- Dmoj Exerdcise Card -->
             {% elif activity.content_type.model == "dmojexercise" and content_object %}
             <div style="font-size: 1.1em; font-weight: bold;">DMOJ Exercise</div>
             <div style="color: #666; margin-top: 8px;">{{ content_object.title }}</div>
-    
+
 
             <!-- Quiz Card -->
             {% elif activity.content_type.model == "quiztemplate" and content_object %}
@@ -117,16 +125,16 @@
         <form method="POST" action="{% url 'create-dmoj-exercise' topic.id %}">
             {% csrf_token %}
             <input type="hidden" name="form-type" value="dmoj">
-        
+
             <label for="url" style="font-size: 0.9em;">DMOJ URL:</label><br>
             <input type="text" name="url" id="url" placeholder="https://dmoj.ca/problem/abc123"
-                   style="width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #ccc; margin-top: 4px;"><br><br>
-        
+                style="width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #ccc; margin-top: 4px;"><br><br>
+
             <button type="submit"
-                    style="padding: 8px 14px; background-color: #2196F3; color: white; border: none; border-radius: 6px; font-weight: bold;">
+                style="padding: 8px 14px; background-color: #2196F3; color: white; border: none; border-radius: 6px; font-weight: bold;">
                 Submit
             </button>
-        </form>        
+        </form>
     </div>
 
     <!-- Create Quiz Card -->
