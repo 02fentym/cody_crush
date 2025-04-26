@@ -525,18 +525,20 @@ def view_lesson(request, lesson_id):
     activity = Activity.objects.get(content_type__model="lesson", object_id=lesson.id)
     course_language = activity.topic.unit.course.language.lower()  # like "python", "java"
 
-    '''
     if request.method == "POST":
-        if 'mark_as_read' in request.POST:
-            ActivityCompletion.objects.get_or_create(
+        if 'mark_as_complete' in request.POST:
+            ActivityCompletion.objects.update_or_create(
                 student=request.user,
                 activity=activity,
-                defaults={'is_complete': True}
+                defaults={'completed': True}
             )
-            return redirect('topic', course_id=activity.topic.unit.course.id, unit_id=activity.topic.unit.id, topic_id=activity.topic.id)
-    '''
-    
-    completed = ActivityCompletion.objects.filter(student=request.user, activity=activity).exists()
+        else:
+            completion = ActivityCompletion.objects.filter(student=request.user, activity=activity).first()
+            if completion:
+                completion.completed = False
+                completion.save()
+
+        return redirect('view-lesson', lesson_id=lesson.id)
 
     # Step 1: Parse the Markdown (handle fenced code blocks)
     lesson_html = markdown.markdown(
@@ -545,17 +547,20 @@ def view_lesson(request, lesson_id):
     )
 
     # Step 2: Post-process to add language class
-
-    # Handle <pre><code> blocks first
     lesson_html = re.sub(r'<pre><code>', f'<pre><code class="language-{course_language}">', lesson_html)
-
-    # Then handle inline <code> blocks that are NOT inside <pre>
-    # (lookbehind ensures we're not replacing inside <pre>)
     lesson_html = re.sub(r'(?<!<pre>)<code>', f'<code class="language-{course_language}">', lesson_html)
 
-    context = {"lesson": lesson, "lesson_html": lesson_html, "activity": activity, "completed": completed}
-    return render(request, "base/view_lesson.html", context)
+    # Step 3: Get completion status
+    completion = ActivityCompletion.objects.filter(student=request.user, activity=activity).first()
+    completed = completion.completed if completion else False
 
+    context = {
+        "lesson": lesson,
+        "lesson_html": lesson_html,
+        "activity": activity,
+        "completed": completed,
+    }
+    return render(request, "base/view_lesson.html", context)
 
 
 def create_dmoj_exercise(request, topic_id):

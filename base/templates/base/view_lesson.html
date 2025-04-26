@@ -5,8 +5,21 @@
 {% if lesson %}
 <div class="lesson">
     <h1>{{ lesson.title|safe }}</h1>
-    <p>{{ lesson_html|safe }}</p>
-</div>
+
+    <div style="margin: 20px 0;">
+        <form method="POST">
+            {% csrf_token %}
+            <label>
+                <input type="checkbox" name="mark_as_complete" onchange="this.form.submit()"
+                    {% if completed %}checked{% endif %}>
+                Mark as completed
+            </label>
+        </form>
+    </div>
+
+    <div>
+        {{ lesson_html|safe }}
+    </div>
 {% else %}
 <p>No lesson found.</p>
 {% endif %}
