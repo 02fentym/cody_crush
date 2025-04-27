@@ -207,7 +207,7 @@ class ActivityCompletion(models.Model):
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
     score = models.FloatField(blank=True, null=True)
-    created = models.DateTimeField(auto_now_add=True)
+    date_completed = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = ("student", "activity")

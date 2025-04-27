@@ -10,6 +10,7 @@ from .forms import UserForm, CourseForm, UnitForm, TopicForm, EnrollmentPassword
 from django.contrib.contenttypes.models import ContentType
 from .decorators import allowed_roles
 from .utils import fetch_dmoj_metadata_from_url
+from django.utils import timezone
 
 import csv, io, markdown, re
 from markdown.extensions.fenced_code import FencedCodeExtension
@@ -165,13 +166,14 @@ def start_quiz(request, activity_id):
             object_id=question.id
         )
 
-    return redirect("take-quiz", quiz_id=quiz.id)
+    return redirect("take-quiz", quiz_id=quiz.id, activity_id=activity.id)
 
 
 @allowed_roles(["student"])
 @login_required(login_url="login")
-def take_quiz(request, quiz_id):
+def take_quiz(request, quiz_id, activity_id):
     quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
+    activity = get_object_or_404(Activity, id=activity_id)
     question_type = quiz.question_type
     quiz_questions = quiz.quiz_questions.all()  # this gives access to both question and bridge
 
@@ -210,6 +212,16 @@ def take_quiz(request, quiz_id):
         grade = (correct_count / total) * 100
         quiz.grade = round(grade, 2)
         quiz.save()
+
+        ActivityCompletion.objects.update_or_create(
+            student=request.user,
+            activity=activity, 
+            defaults={
+                'completed': True,
+                'date_completed': timezone.now()
+            },
+            score=quiz.grade
+        )
 
         return redirect("quiz-results", quiz.id)
 
@@ -530,12 +542,13 @@ def view_lesson(request, lesson_id):
             ActivityCompletion.objects.update_or_create(
                 student=request.user,
                 activity=activity,
-                defaults={'completed': True}
+                defaults={'completed': True, 'date_completed': timezone.now()}
             )
         else:
             completion = ActivityCompletion.objects.filter(student=request.user, activity=activity).first()
             if completion:
                 completion.completed = False
+                date_completed = None
                 completion.save()
 
         return redirect('view-lesson', lesson_id=lesson.id)
