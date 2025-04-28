@@ -35,10 +35,12 @@
                 style="margin-top: 12px; display: inline-block;">Edit</a>
             {% endif %}
 
-            <!-- Dmoj Exerdcise Card -->
             {% elif activity.content_type.model == "dmojexercise" and content_object %}
-            <div style="font-size: 1.1em; font-weight: bold;">DMOJ Exercise</div>
-            <div style="color: #666; margin-top: 8px;">{{ content_object.title }}</div>
+            <!-- Dmoj Exercise Card -->
+            <a href="{{ content_object.url }}" target="_blank">
+                <div style="font-size: 1.1em; font-weight: bold;">DMOJ Exercise</div>
+                <div style="color: #666; margin-top: 8px;">{{ content_object.title }}</div>
+            </a>
 
 
             <!-- Quiz Card -->
@@ -100,6 +102,14 @@
     {% endif %}
 </div>
 
+{% if request.user.profile.role == "student" %}
+<div>
+    <form method="POST" action="{% url 'update-dmoj-exercises' topic.id %}">
+        {% csrf_token %}
+        <button type="submit">Update My DMOJ Progress</button>
+    </form>
+</div>
+{% endif %}
 
 
 {% if request.user.profile.role == "teacher" %}

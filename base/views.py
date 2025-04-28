@@ -9,10 +9,12 @@ from django.contrib.auth.decorators import login_required
 from .forms import UserForm, CourseForm, UnitForm, TopicForm, EnrollmentPasswordForm, LessonForm, DmojForm
 from django.contrib.contenttypes.models import ContentType
 from .decorators import allowed_roles
-from .utils import fetch_dmoj_metadata_from_url
+from .utils import fetch_dmoj_metadata_from_url, fetch_dmoj_user_data
 from django.utils import timezone
+from datetime import timedelta
 
 import csv, io, markdown, re
+
 from markdown.extensions.fenced_code import FencedCodeExtension
 
 
@@ -58,7 +60,7 @@ def register_user(request):
             Profile.objects.create(
                 user=user,
                 role=form.cleaned_data.get("role"),
-                dmoj_username=form.cleaned_data['dmoj_username'] if form.cleaned_data['role'] == 'student' else None
+                dmoj_username=form.cleaned_data['dmoj_username'] if form.cleaned_data['role'] == 'student' else None,
             )
 
             login(request, user)
@@ -603,4 +605,44 @@ def create_dmoj_exercise(request, topic_id):
             messages.error(request, "Failed to fetch DMOJ metadata. Please check the URL.")
 
     
+    return redirect("topic", course_id=topic.unit.course.id, unit_id=topic.unit.id, topic_id=topic_id)
+
+
+def update_dmoj_exercises(request, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id)
+    profile = request.user.profile
+    now = timezone.now()
+    cooldown_minutes = 2
+
+    # Check if cooldown period has passed
+    if now - profile.last_dmoj_update < timedelta(minutes=cooldown_minutes):
+        wait_time = cooldown_minutes - (now - profile.last_dmoj_update).seconds // 60
+        messages.error(request, f"Please wait {wait_time} more minutes before refreshing again.")
+        return redirect("topic", course_id=topic.unit.course.id, unit_id=topic.unit.id, topic_id=topic_id)
+    
+
+    # Fetch DMOJ user solved problems (list of problem codes)
+    solved_problems = fetch_dmoj_user_data(request.user.profile.dmoj_username)
+
+    # Fetch ALL DMOJ exercise activities across the system
+    dmojexercise_type = ContentType.objects.get_for_model(DmojExercise)
+    activities = Activity.objects.filter(content_type=dmojexercise_type)
+
+    for activity in activities:
+        dmoj_exercise = activity.content_object
+        if dmoj_exercise.problem_code in solved_problems:
+
+            completion = ActivityCompletion.objects.filter(student=request.user, activity=activity, completed=True).first()
+
+            if not completion:
+                ActivityCompletion.objects.update_or_create(
+                    student=request.user,
+                    activity=activity,
+                    defaults={'completed': True, 'date_completed': now}
+                )
+
+    profile.last_dmoj_update = now
+    profile.save()
+
+    messages.success(request, "DMOJ exercises successfully refreshed!")
     return redirect("topic", course_id=topic.unit.course.id, unit_id=topic.unit.id, topic_id=topic_id)

@@ -40,4 +40,5 @@ urlpatterns = [
 
     # dmoj exercise views
     path("topic/<topic_id>/create_dmoj_exercise/", views.create_dmoj_exercise, name="create-dmoj-exercise"),
+    path("topic/<topic_id>/update_dmoj/", views.update_dmoj_exercises, name="update-dmoj-exercises"),
 ]

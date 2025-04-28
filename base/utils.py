@@ -27,3 +27,20 @@ def fetch_dmoj_metadata_from_url(url):
     except Exception as e:
         print(f"Error fetching DMOJ metadata: {e}")
         return None
+
+
+def fetch_dmoj_user_data(username):
+    try:
+        api_url = f"https://dmoj.ca/api/v2/user/{username}"
+        response = requests.get(api_url)
+        if response.status_code == 200:
+            data = response.json()
+            obj = data.get("data", {}).get("object", {})
+            return obj.get("solved_problems", [])
+        elif response.status_code == 404:
+            raise ValueError(f"User '{username}' not found on DMOJ.")
+        else:
+            raise ValueError(f"Unexpected response from DMOJ API: {response.status_code}")
+    except Exception as e:
+        print(f"Error fetching DMOJ user data: {e}")
+        return None
