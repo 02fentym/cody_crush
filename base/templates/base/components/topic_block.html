@@ -1,0 +1,11 @@
+<details style="margin-bottom: 12px;">
+    <summary>
+        <strong>{{ topic.title }}</strong> - Progress: {{ topic.progress }}%
+    </summary>
+
+    <ul style="margin-left: 20px; margin-top: 8px;">
+        {% for activity in topic.activity_set.all %}
+        {% include "base/components/activity_block.html" with activity=activity %}
+        {% endfor %}
+    </ul>
+</details>

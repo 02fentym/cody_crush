@@ -1,0 +1,24 @@
+<details style="margin-bottom: 16px;">
+    <summary>
+        <strong>Unit {{ unit.order }}: {{ unit.title }}</strong> - Progress: {{ unit.progress }}%
+
+        {% if user.profile.role == "teacher" %}
+        <form method="POST" action="" style="margin: 0; display: inline;">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="delete_unit">
+            <input type="hidden" name="unit_id" value="{{ unit.id }}">
+            <button type="submit" style="background: none; border: none; color: red; cursor: pointer; font-size: 1.2em;"
+                title="Delete Unit">
+                🗑️
+            </button>
+        </form>
+        {% endif %}
+
+    </summary>
+
+    <div style="margin-left: 20px; margin-top: 10px;">
+        {% for topic in unit.topic_set.all %}
+        {% include "base/components/topic_block.html" with topic=topic %}
+        {% endfor %}
+    </div>
+</details>

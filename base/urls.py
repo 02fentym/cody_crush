@@ -10,8 +10,6 @@ urlpatterns = [
     path("logout/", views.logout_user, name = "logout"),
 
     path("course/<int:course_id>/", views.course, name="course"),
-    path("course/<int:course_id>/unit/<int:unit_id>/", views.unit, name="unit"),
-    path("course/<int:course_id>/unit/<int:unit_id>/topic/<int:topic_id>/", views.topic, name="topic"),
 
     # STUDENT
     path("activity/<int:activity_id>/start-quiz/", views.start_quiz, name="start-quiz"),

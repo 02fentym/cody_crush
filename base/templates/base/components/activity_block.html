@@ -1,0 +1,16 @@
+<li>
+    {% if activity.content_type.model == "lesson" %}
+    📚 Lesson: <a href="{% url 'view-lesson' activity.object_id %}">{{ activity.title }}</a>
+    {% elif activity.content_type.model == "quiztemplate" %}
+    📝 Quiz: <a href="{% url 'start-quiz' activity.object_id %}">{{ activity.title }}</a>
+    {% elif activity.content_type.model == "dmojexercise" %}
+    💻 DMOJ Problem: <a href="{{ activity.url }}" target="_blank">{{ activity.title }}</a>
+    {% else %}
+    ❓ Unknown activity type
+    {% endif %}
+    {% if activity.completed %}
+    ✅
+    {% else %}
+    ❌
+    {% endif %}
+</li>

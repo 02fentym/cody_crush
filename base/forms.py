@@ -48,7 +48,11 @@ class CourseForm(ModelForm):
 class UnitForm(ModelForm):
     class Meta:
         model = Unit
-        fields = ["title"]
+        fields = ["title", "description"]
+        widgets = {
+            'title': forms.TextInput(attrs={'placeholder': 'Enter unit title'}),
+            'description': forms.TextInput(attrs={'placeholder': 'Enter description'}),
+        }
 
 
 class TopicForm(ModelForm):

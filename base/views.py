@@ -12,6 +12,7 @@ from .decorators import allowed_roles
 from .utils import fetch_dmoj_metadata_from_url, fetch_dmoj_user_data
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models import Max
 
 import csv, io, markdown, re
 
@@ -273,34 +274,54 @@ def quiz_results(request, quiz_id):
 
 def course(request, course_id):
     user = request.user
+
     if user.profile.role == "teacher":
         qs = Course.objects.filter(id=course_id, teacher=user)
     else:
         qs = Course.objects.filter(id=course_id, students=user)
 
     course = get_object_or_404(qs)
-    units = course.unit_set.all()
 
     unit_form = UnitForm()
-    password_form = CourseForm(instance=course)
+    password_form = EnrollmentPasswordForm(instance=course)
 
+    # Handle unit creation, course password update and unit deletion
     if request.method == "POST":
-        if request.POST.get("form_type") == "unit":
+        form_type = request.POST.get("form_type")
+
+        # Unit creation
+        if form_type == "unit":
             unit_form = UnitForm(request.POST)
             if unit_form.is_valid():
                 unit = unit_form.save(commit=False)
                 unit.course = course
+                last_order = course.unit_set.aggregate(Max('order'))['order__max'] or 0
+                unit.order = last_order + 1
                 unit.save()
                 messages.success(request, "Unit created successfully!")
                 return redirect("course", course_id=course_id)
-        elif request.POST.get("form_type") == "password":
+
+        # Course password update
+        elif form_type == "password":
             password_form = EnrollmentPasswordForm(request.POST, instance=course)
             if password_form.is_valid():
                 password_form.save()
                 messages.success(request, "Enrollment password updated!")
                 return redirect("course", course_id=course_id)
-    
-    context = {"course": course, "units": units, "unit_form": unit_form, "password_form": password_form}
+
+        # Unit deletion
+        elif form_type == "delete_unit":
+            unit_id = request.POST.get("unit_id")
+            unit_to_delete = get_object_or_404(Unit, id=unit_id, course=course)
+            unit_to_delete.delete()
+            messages.success(request, "Unit deleted successfully!")
+            return redirect("course", course_id=course_id)
+        
+
+    # Prefetch Topics and Activities inside Topics
+    units = course.unit_set.prefetch_related('topic_set__activity_set').all()
+
+    context = {"course": course, "units": units, "unit_form": unit_form, "password_form": password_form,}
     return render(request, "base/course.html", context)
 
 
@@ -311,35 +332,11 @@ def delete_course(request, course_id):
     return redirect("home")
 
 
-def unit(request, course_id, unit_id):
-    unit = get_object_or_404(Unit, id=unit_id, course__id=course_id)
-    topics = unit.topic_set.all()
-
-    if request.method == "POST":
-        form = TopicForm(request.POST)
-        if form.is_valid():
-            topic = form.save(commit=False)
-            topic.unit = unit
-            topic.save()
-            messages.success(request, "Topic created successfully!")
-            return redirect("unit", course_id=course_id, unit_id=unit_id)
-        
-    context = {"unit": unit, "topics": topics}
-    return render(request, "base/unit.html", context)
-
-
 def delete_unit(request, course_id, unit_id):
     unit = get_object_or_404(Unit, id=unit_id, course__id=course_id)
     unit.delete()
     messages.success(request, "Unit deleted successfully!")
     return redirect("course", course_id=course_id)
-
-
-def topic(request, course_id, unit_id, topic_id):
-    topic = get_object_or_404(Topic, id=topic_id, unit__id=unit_id, unit__course__id=course_id)
-    activities = topic.activity_set.order_by("order")
-    context = {"topic": topic, "activities": activities}
-    return render(request, "base/topic.html", context)
 
 
 def delete_topic(request, course_id, unit_id, topic_id):

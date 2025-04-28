@@ -2,118 +2,54 @@
 
 {% block content %}
 
-<h5><a href="{% url 'home' %}">Dashboard</a> > {{ course.title }}</h5>
+<h1>{{ course.title }}</h1>
 
-<h2>Course: {{course.title}}</h2>
+{% for unit in units %}
+{% include "base/components/unit_block.html" with unit=unit %}
+{% endfor %}
 
-<div style="margin-top: 12px; padding-left: 16px;">
-  {% if units %}
+{% if user.profile.role == "teacher" %}
+<!-- Add New Unit Button -->
+<button onclick="toggleForm('add-unit-form')" style="cursor: pointer; font-size: 16px; background: none; border: none;">
+    ➕ Add New Unit
+</button>
 
-  <!-- Units dropdown-->
-  {% for unit in units %}
-  <div
-    style="display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; max-width: 600px; background-color: #fefefe;">
-    <a href="{% url 'unit' course.id unit.id %}" style="text-decoration: none; color: inherit; font-weight: 1000;">Unit
-      {{forloop.counter}} | {{ unit.title }}</a>
+<!-- Hidden Unit Form -->
+<div id="add-unit-form" style="display: none; margin-top: 10px;">
+    <form method="POST" style="display: flex; align-items: center; gap: 10px;">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="unit">
 
-    {% if request.user.profile.role == "teacher" %}
-    <form method="POST" action="{% url 'delete-unit' unit.course.id unit.id %}" style="margin-top: 8px;">
-      {% csrf_token %}
-      <button type="submit" style="border: none; background: none; color: #c00; cursor: pointer; font-size: 0.9em;">
-        🗑
-      </button>
+        {{ unit_form.title }}
+        {{ unit_form.description }}
+
+        <button type="submit">Create</button>
+
+        <!-- Cancel Button -->
+        <button type="button" onclick="toggleForm('add-unit-form')"
+            style="background: none; border: 1px solid #ccc; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+            Cancel
+        </button>
     </form>
-    {% endif %}
-  </div>
-  {% endfor %}
-
-  {% else %}
-  <p style="color: #888;">No units yet.</p>
-  {% endif %}
-
-  <!-- Create New Unit -->
-  {% if request.user.profile.role == "teacher" %}
-  <details style="margin-bottom: 20px;">
-    <summary title="Create New Unit"
-      style="display: inline-block; font-size: 20px; font-weight: bold; text-decoration: none; padding: 6px 12px; border: 1px solid #ccc; border-radius: 50%; background-color: #f0f0f0; color: #333; text-align: center; cursor: pointer;">
-      +
-    </summary>
-    <form method="POST" action=""
-      style="margin-top: 12px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-      {% csrf_token %}
-
-      <input type="hidden" name="form_type" value="unit"> <!-- Hidden field to indicate form type -->
-
-      <label for="title" style="margin-bottom: 0;">Title:</label>
-      <input type="text" name="title" required style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;">
-
-      <input type="hidden" name="course_id" value="{{ course.id }}"> <!-- Hidden field to pass course ID -->
-
-      <button type="submit"
-        style="padding: 6px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
-        Create
-      </button>
-      <button type="button" onclick="this.closest('details').removeAttribute('open')">Cancel</button>
-    </form>
-  </details>
-  {% endif %}
 </div>
 
-<!-- Student Enrollment -->
-{% if request.user.profile.role == "teacher" %}
-<section style="margin-top: 2em; padding: 1em; border: 1px solid #ddd; border-radius: 8px;">
-  <h3>Enrollment</h3>
 
-  <!-- Display the current password (or a note if enrollment is closed) -->
-  {% if course.enrollment_password %}
-  <p>
-    <strong>Enrollment Password:</strong>
-    <code style="background:#f1f1f1; padding:2px 4px; border-radius:4px;">
-          {{ course.enrollment_password }}
-        </code>
-    <small style="color:#666;">(Share this with students.)</small>
-  </p>
-  {% else %}
-  <p style="color:#a00;"><em>Enrollment is currently closed.</em></p>
-  {% endif %}
-
-  <!-- Form to update/clear the password -->
-  <form method="POST" action="" style="display:flex; gap:12px; align-items:center;">
-    {% csrf_token %}
-
-    <input type="hidden" name="form_type" value="password"> <!-- Hidden field to indicate form type -->
-
-    <label for="id_enrollment_password" style="margin:0;">Set Password:</label>
-    {{ password_form.enrollment_password }}
-    <button type="submit" style="padding:6px 12px; background:#4CAF50; color:white; border:none; border-radius:4px;">
-      Save
-    </button>
-  </form>
-</section>
-
-
-<section style="margin-top: 2em;">
-  <h3>Enrolled Students ({{ course.students.count }})</h3>
-
-  <ul style="list-style:none; padding:0;">
-    {% for student in course.students.all %}
-    <li
-      style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #eee;">
-      <span>{{ student.get_full_name|default:student.username }}</span>
-
-      <form method="POST" action="">
-        {% csrf_token %}
-        <button type="submit" style="background:none; border:none; color:#c00; cursor:pointer;" title="Remove">
-          🗑
-        </button>
-      </form>
-    </li>
-    {% empty %}
-    <li style="color:#777;">No students enrolled yet.</li>
-    {% endfor %}
-  </ul>
-</section>
 {% endif %}
+
+<script>
+    function toggleForm(id) {
+        const formDiv = document.getElementById(id);
+        if (formDiv.style.display === "none") {
+            formDiv.style.display = "block";
+        } else {
+            formDiv.style.display = "none";
+            // Clear all inputs inside the form when hiding
+            const inputs = formDiv.querySelectorAll('input[type="text"], textarea');
+            inputs.forEach(input => input.value = "");
+        }
+    }
+    </script>
+    
 
 
 {% endblock %}
