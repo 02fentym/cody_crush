@@ -55,10 +55,14 @@ class UnitForm(ModelForm):
         }
 
 
-class TopicForm(ModelForm):
+class TopicForm(forms.ModelForm):
     class Meta:
         model = Topic
-        fields = ["title", "description"]
+        fields = ['title', 'description']
+        widgets = {
+            'title': forms.TextInput(attrs={'placeholder': 'Enter topic title'}),
+            'description': forms.TextInput(attrs={'placeholder': 'Enter description'}),
+        }
 
 
 # This is a form to update the enrollment password

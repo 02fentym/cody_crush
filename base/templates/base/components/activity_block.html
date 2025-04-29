@@ -1,13 +1,36 @@
 <li>
     {% if activity.content_type.model == "lesson" %}
-    📚 Lesson: <a href="{% url 'view-lesson' activity.object_id %}">{{ activity.title }}</a>
+
+        <!-- Lesson Card -->
+        {% if user.profile.role == "teacher" %}
+        📚 Lesson: <a href="{% url 'edit-lesson' activity.topic.id activity.object_id %}">{{ activity.content_object.title|striptags }}</a>
+        {% else %}
+        📚 Lesson: <a href="{% url 'view-lesson' activity.object_id %}">{{ activity.content_object.title|striptags }}</a>
+        {% endif %}
+
+    <!-- Quiz Card -->
     {% elif activity.content_type.model == "quiztemplate" %}
-    📝 Quiz: <a href="{% url 'start-quiz' activity.object_id %}">{{ activity.title }}</a>
+        {% if user.profile.role == "teacher" %}
+        📝 {{ activity.content_object.quiz_type }}
+        {% else %}
+        📝 Quiz: <a href="{% url 'start-quiz' activity.object_id %}">{{ activity.content_object.title|striptags }}</a>
+        {% endif %}
+
+    <!-- Dmoj Exercise Card -->
     {% elif activity.content_type.model == "dmojexercise" %}
-    💻 DMOJ Problem: <a href="{{ activity.url }}" target="_blank">{{ activity.title }}</a>
+    💻 DMOJ Problem: <a href="{{ activity.content_object.url }}" target="_blank">{{ activity.content_object.title|striptags }}</a>
+
+    <!-- Unknown Activity Type-->
     {% else %}
     ❓ Unknown activity type
     {% endif %}
+
+    <!-- Delete activity -->
+    {% if user.profile.role == "teacher" %}
+        {% include "base/components/delete_activity_form.html" with activity=activity %}
+    {% endif %}
+
+    <!-- Activity completion status -->
     {% if activity.completed %}
     ✅
     {% else %}

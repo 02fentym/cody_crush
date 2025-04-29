@@ -1,0 +1,6 @@
+<form method="POST" action="{% url 'delete-activity' activity.id %}" style="display: inline;">
+    {% csrf_token %}
+    <button type="submit" style="background: none; border: none; color: red; cursor: pointer;">
+        🗑️
+    </button>
+</form>

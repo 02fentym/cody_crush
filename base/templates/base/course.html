@@ -8,48 +8,13 @@
 {% include "base/components/unit_block.html" with unit=unit %}
 {% endfor %}
 
-{% if user.profile.role == "teacher" %}
 <!-- Add New Unit Button -->
+{% if user.profile.role == "teacher" %}
 <button onclick="toggleForm('add-unit-form')" style="cursor: pointer; font-size: 16px; background: none; border: none;">
     ➕ Add New Unit
 </button>
-
-<!-- Hidden Unit Form -->
-<div id="add-unit-form" style="display: none; margin-top: 10px;">
-    <form method="POST" style="display: flex; align-items: center; gap: 10px;">
-        {% csrf_token %}
-        <input type="hidden" name="form_type" value="unit">
-
-        {{ unit_form.title }}
-        {{ unit_form.description }}
-
-        <button type="submit">Create</button>
-
-        <!-- Cancel Button -->
-        <button type="button" onclick="toggleForm('add-unit-form')"
-            style="background: none; border: 1px solid #ccc; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-            Cancel
-        </button>
-    </form>
-</div>
-
-
+{% include "base/components/add_unit_form.html" %}
 {% endif %}
-
-<script>
-    function toggleForm(id) {
-        const formDiv = document.getElementById(id);
-        if (formDiv.style.display === "none") {
-            formDiv.style.display = "block";
-        } else {
-            formDiv.style.display = "none";
-            // Clear all inputs inside the form when hiding
-            const inputs = formDiv.querySelectorAll('input[type="text"], textarea');
-            inputs.forEach(input => input.value = "");
-        }
-    }
-    </script>
-    
 
 
 {% endblock %}

@@ -1,0 +1,10 @@
+<!-- Deletes a unit -->
+<form method="POST" action="" style="margin: 0; display: inline;">
+    {% csrf_token %}
+    <input type="hidden" name="form_type" value="delete_unit">
+    <input type="hidden" name="unit_id" value="{{ unit.id }}">
+    <button type="submit" style="background: none; border: none; color: red; cursor: pointer; font-size: 1.2em;"
+        title="Delete Unit">
+        🗑️
+    </button>
+</form>

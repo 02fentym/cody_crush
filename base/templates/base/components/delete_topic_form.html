@@ -1,0 +1,10 @@
+<!-- Deletes a topic -->
+<form method="POST" action="" style="margin: 0; display: inline;">
+    {% csrf_token %}
+    <input type="hidden" name="form_type" value="delete_topic">
+    <input type="hidden" name="topic_id" value="{{ topic.id }}">
+    <button type="submit" style="background: none; border: none; color: red; cursor: pointer; font-size: 1.2em;"
+        title="Delete Topic">
+        🗑️
+    </button>
+</form>

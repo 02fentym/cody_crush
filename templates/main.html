@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cody Crush</title>
-    
+
     <!-- Highlight.js CSS (kept your theme) -->
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css">
@@ -16,66 +17,63 @@
     <style>
         /* Inline code (small words like `print()`) */
         code {
-          background-color: #f5f5f5;
-          color: #d6336c; /* optional - can remove if you want plain gray */
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-          font-size: 0.95em;
+            background-color: #f5f5f5;
+            color: #d6336c;
+            /* optional - can remove if you want plain gray */
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 0.95em;
         }
-        
+
         /* Block code (full fenced blocks like ```python) */
         pre code {
-          display: block;
-          background-color: #f5f5f5; /* light gray */
-          color: inherit; /* let highlight.js set syntax colors */
-          padding: 16px;
-          margin: 16px 0;
-          border-radius: 8px;
-          overflow-x: auto;
-          font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-          font-size: 0.95em;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* subtle shadow */
+            display: block;
+            background-color: #f5f5f5;
+            /* light gray */
+            color: inherit;
+            /* let highlight.js set syntax colors */
+            padding: 16px;
+            margin: 16px 0;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 0.95em;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            /* subtle shadow */
         }
-        </style>
-        
-        
-
+    </style>
 </head>
 
 <body>
     {% include "navbar.html" %}
 
     {% if messages %}
-    <ul>
+    <div class="messages">
         {% for message in messages %}
-        <li class="{{ message.tags }}">{{ message }}</li>
+        <div class="alert {{ message.tags }}">{{ message }}</div>
         {% endfor %}
-    </ul>
+    </div>
     {% endif %}
 
     {% block content %}
     {% endblock %}
 
-    <!-- Highlight.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <!-- 📚 Toast UI Scripts -->
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+    <script
+        src="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight-all.min.js"></script>
 
-    <!-- Initialize Highlight.js -->
+    <!-- 🧠 Syntax Highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             hljs.highlightAll();
         });
     </script>
 
-    <!-- Toast UI Editor JS -->
-    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
-
-    <!-- Toast UI Editor Plugin for Code Syntax Highlighting -->
-    <script
-        src="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight-all.min.js"></script>
-
-
-
+    <!-- File that runs all javascript -->
+    <script src="{% static 'js/main.js' %}"></script>
 </body>
 
 </html>

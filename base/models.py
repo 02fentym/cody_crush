@@ -181,6 +181,18 @@ class QuizTemplate(models.Model):
     question_type = models.CharField(max_length=30, choices=Quiz.QUESTION_TYPE_CHOICES)
     created = models.DateTimeField(auto_now_add=True)
 
+    '''
+    Generates text based on quiz type.
+    This is used to display the quiz type in activity_block.html
+    '''
+    @property
+    def quiz_type(self):
+        if self.question_type == "multiple_choice":
+            return "Multiple Choice Quiz"
+        elif self.question_type == "tracing":
+            return "Tracing Quiz"
+        return "Unknown Quiz Type"
+
     def __str__(self):
         return f"Quiz Template: {self.topic.title} ({self.question_count} questions)"
 

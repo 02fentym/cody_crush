@@ -1,0 +1,18 @@
+<!-- Creates a new unit -->
+<div id="add-unit-form" style="display: none; margin-top: 10px;">
+    <form method="POST" style="display: flex; align-items: center; gap: 10px;">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="unit">
+
+        {{ unit_form.title }}
+        {{ unit_form.description }}
+
+        <button type="submit">Create</button>
+
+        <!-- Cancel Button -->
+        <button type="button" onclick="toggleForm('add-unit-form')"
+            style="background: none; border: 1px solid #ccc; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+            Cancel
+        </button>
+    </form>
+</div>

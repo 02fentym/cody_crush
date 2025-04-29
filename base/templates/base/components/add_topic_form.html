@@ -1,0 +1,14 @@
+<!-- Add new topic -->
+<div id="add-topic-form-{{ unit.id }}" style="display: none; margin-top: 10px;">
+    <form method="POST" style="display: flex; align-items: center; gap: 10px;">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="topic">
+        <input type="hidden" name="unit_id" value="{{ unit.id }}">
+
+        <input type="text" name="title" placeholder="Topic title" required>
+        <input type="text" name="description" placeholder="Description" required>
+
+        <button type="submit">Create</button>
+        <button type="button" onclick="toggleForm('add-topic-form-{{ unit.id }}')">Cancel</button>
+    </form>
+</div>
