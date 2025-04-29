@@ -1,0 +1,18 @@
+<!-- Creates a new course -->
+<div id="add-course-form" class="hidden-form">
+    <form method="POST" class="flex-center-gap">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="course">
+
+        {{ course_form.title }}
+        {{ course_form.language }}
+        {{ course_form.enrollment_password }}
+        {{ course_form.description }}
+
+        <button type="submit" class="add-button">Create</button>
+
+        <button type="button" onclick="toggleForm('add-course-form')" class="cancel-button">
+            Cancel
+        </button>
+    </form>
+</div>

@@ -1,0 +1,6 @@
+<form method="POST" action="{% url 'delete-course' course.id %}" class="inline-form">
+    {% csrf_token %}
+    <button type="submit" class="delete-icon-button" title="Delete Course">
+        🗑
+    </button>
+</form>

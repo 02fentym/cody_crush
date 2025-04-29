@@ -1,0 +1,12 @@
+<form method="POST" action="" class="flex-center-gap">
+    {% csrf_token %}
+
+    <input type="hidden" name="form_type" value="password"> <!-- Hidden field to indicate form type -->
+
+    <label for="id_enrollment_password" class="form-label">Join class:</label>
+    <input type="text" name="enrollment_password" required class="input-field">
+
+    <button type="submit" class="add-button">
+        Enroll
+    </button>
+</form>

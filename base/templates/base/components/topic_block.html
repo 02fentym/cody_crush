@@ -1,4 +1,4 @@
-<details style="margin-bottom: 12px;">
+<details class="block-margin-small" id="topic-{{ topic.id }}">
     <summary>
         <strong>{{ topic.title }}</strong> - Progress: {{ topic.progress }}%
         {% if user.profile.role == "teacher" %}
@@ -6,7 +6,7 @@
         {% endif %}
     </summary>
 
-    <ul style="margin-left: 20px; margin-top: 8px;">
+    <ul class="list-indent">
         {% for activity in topic.activity_set.all %}
         {% include "base/components/activity_block.html" with activity=activity %}
         {% endfor %}

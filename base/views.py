@@ -514,7 +514,6 @@ def question_data_validation(i, row):
 
 
 def create_lesson(request, topic_id):
-    print(f"Creating lesson for topic ID: {topic_id}")
     topic = get_object_or_404(Topic, id=topic_id)
     form = LessonForm()
 

@@ -37,11 +37,10 @@ class CourseForm(ModelForm):
         model = Course
         fields = ["title", "description", "language", "enrollment_password"]
         widgets = {
-            "description": forms.Textarea(attrs={
-                "rows": 1,
-                "style": "padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;"
-            }),
-            # you can also set rows/style on title or password if you like
+            'title': forms.TextInput(attrs={'placeholder': 'Course title...', 'class': 'input-field'}),
+            'language': forms.Select(attrs={'class': 'input-field'}),
+            'enrollment_password': forms.TextInput(attrs={'placeholder': 'Enrollment password...', 'class': 'input-field'}),
+            'description': forms.Textarea(attrs={'placeholder': 'Brief description...', 'class': 'input-field', 'rows': 1}),
         }
 
 
@@ -82,9 +81,13 @@ class LessonForm(forms.ModelForm):
         model = Lesson
         fields = ["title", "content"]
         widgets = {
-            "content": forms.Textarea(attrs={
-                "id": "id_content",     # This is what Toast UI JS expects
-                "style": "display:none;"  # Hide it from the user
+            'title': forms.TextInput(attrs={
+                'placeholder': 'Lesson title...',
+                'class': 'input-field'
+            }),
+            'content': forms.Textarea(attrs={  # technically not used since replaced by JS
+                'class': 'input-field',
+                'rows': 1
             })
         }
 

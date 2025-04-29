@@ -1,4 +1,4 @@
-<details style="margin-bottom: 16px;">
+<details class="block-margin" id="unit-{{ unit.id }}">
     <summary>
         <strong>Unit {{ unit.order }}: {{ unit.title }}</strong> - Progress: {{ unit.progress }}%
 
@@ -9,20 +9,19 @@
 
     </summary>
 
-    <div style="margin-left: 20px; margin-top: 10px;">
+    <div class="details-body">
         {% for topic in unit.topic_set.all %}
         {% include "base/components/topic_block.html" with topic=topic %}
         {% endfor %}
 
         <!-- Display message if no topics exist -->
         {% if unit.topic_set.count == 0 %}
-        <p style="margin-top: 10px; font-style: italic; color: gray;">No topics available for this unit.</p>
+        <p class="empty-message">No topics available for this unit.</p>
         {% endif %}
         
         <!-- Add Topic Button -->
         {% if user.profile.role == "teacher" %}
-        <button onclick="toggleForm('add-topic-form-{{ unit.id }}')"
-            style="margin-top: 10px; font-size: 16px; cursor: pointer; background: none; border: none;">
+        <button onclick="toggleForm('add-topic-form-{{ unit.id }}')" class="link-button">
             ➕ Add Topic
         </button>
         {% include "base/components/add_topic_form.html" %}

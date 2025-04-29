@@ -3,90 +3,43 @@
 {% block content %}
 
 {% if user.profile.role == "student" %}
-<form method="POST" action="" style="display:flex; gap:12px; align-items:center;">
-    {% csrf_token %}
-
-    <input type="hidden" name="form_type" value="password"> <!-- Hidden field to indicate form type -->
-
-    <label for="id_enrollment_password" style="margin:0;">Join class:</label>
-    <input type="text" name="enrollment_password" required
-           style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;">
-
-    <button type="submit" style="padding:6px 12px; background:#4CAF50; color:white; border:none; border-radius:4px;">
-        Enroll
-    </button>
-</form>
+{% include "base/components/course_enrolment_form.html" %}
 {% endif %}
 
 <h2>Courses</h2>
 
-<!-- Courses dropdown-->
+<!-- List of courses -->
 {% if courses %}
 {% for course in courses %}
-<div
-    style="display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; max-width: 600px; background-color: #fefefe;">
-    <a href="{% url 'course' course.id %}" style="text-decoration: none; color: inherit; font-weight: 1000;">
-        {{ course.title }} ({{ course.language|title }})</a>
+<div class="course-card">
+    <a href="{% url 'course' course.id %}" class="course-link">
+        {{ course.title }} ({{ course.language|title }})
+    </a>
 
     {% if user.profile.role == "teacher" %}
-    <form method="POST" action="{% url 'delete-course' course.id %}" style="margin-top: 8px;">
-        {% csrf_token %}
-        <button type="submit" style="border: none; background: none; color: #c00; cursor: pointer; font-size: 0.9em;">
-            🗑
-        </button>
-    </form>
+    {% include "base/components/delete_course_form.html" with course=course %}
     {% endif %}
 </div>
 {% endfor %}
 {% else %}
-<p style="color: #888;">No courses yet.</p>
+<p class="empty-message">No courses yet.</p>
 {% endif %}
-
-<!-- Join a Course -->
 
 
 <!-- Create New Course -->
 {% if user.profile.role == "teacher" %}
-<details style="margin-bottom: 20px;">
-    <summary title="Create New Course"
-        style="display: inline-block; font-size: 20px; font-weight: bold; text-decoration: none; padding: 6px 12px; border: 1px solid #ccc; border-radius: 50%; background-color: #f0f0f0; color: #333; text-align: center; cursor: pointer;">
-        +
-    </summary>
-
-    <form method="POST" style="margin-top:12px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-        {% csrf_token %}
-
-        <input type="hidden" name="form_type" value="course"> <!-- Hidden field to indicate form type -->
-
-        <label for="{{ course_form.title.id_for_label }}" style="margin-bottom:0;">Title:</label>
-        {{ course_form.title }}
-
-        <label for="{{ course_form.language.id_for_label }}" style="margin-bottom:0;">Language:</label>
-        {{ course_form.language }}
-
-        <label for="{{ course_form.enrollment_password.id_for_label }}" style="margin-bottom:0;">Enrollment
-            Password:</label>
-        {{ course_form.enrollment_password }}
-
-        <label for="{{ course_form.description.id_for_label }}" style="margin-bottom:0;">Description:</label>
-        {{ course_form.description }}
-
-        <button type="submit"
-            style="padding: 6px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Create</button>
-        <button type="button" onclick="this.closest('details').removeAttribute('open')">Cancel</button>
-    </form>
-</details>
+<button onclick="toggleForm('add-course-form')" class="link-button">
+    ➕ Add New Course
+</button>
+{% include "base/components/create_course_form.html" %}
 {% endif %}
 
 <!-- Upload Questions -->
 {% if user.profile.role == "teacher" %}
-
 <h2>Upload Questions</h2>
-<div
-    style="display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; max-width: 600px; background-color: #fefefe;">
-    {% include "base/upload_questions.html" %}
+<div class="course-card">
+    {% include "base/components/upload_questions_form.html" %}
 </div>
-
 {% endif %}
 
 
