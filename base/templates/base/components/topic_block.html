@@ -11,4 +11,18 @@
         {% include "base/components/activity_block.html" with activity=activity %}
         {% endfor %}
     </ul>
+
+    {% if user.profile.role == "teacher" %}
+    <a href="{% url 'create-lesson' topic.id %}" class="link-button">
+        ➕ Add Lesson
+    </a>
+
+    <button onclick="toggleForm('add-quiz-form-{{ topic.id }}')" class="link-button mt-10 inline-block">
+        ➕ Add Quiz
+    </button>
+
+    {% include "base/components/add_quiz_form.html" with topic=topic %}
+
+    {% endif %}
+
 </details>
