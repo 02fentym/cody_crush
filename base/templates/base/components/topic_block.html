@@ -17,10 +17,14 @@
         ➕ Add Lesson
     </a>
 
-    <button onclick="toggleForm('add-quiz-form-{{ topic.id }}')" class="link-button mt-10 inline-block">
+    <button onclick="toggleForm('add-dmoj-form-{{ topic.id }}')" class="link-button inline-block">
+        ➕ Add DMOJ Exercise
+    </button>
+    {% include "base/components/add_dmoj_form.html" with topic=topic %}
+
+    <button onclick="toggleForm('add-quiz-form-{{ topic.id }}')" class="link-button inline-block">
         ➕ Add Quiz
     </button>
-
     {% include "base/components/add_quiz_form.html" with topic=topic %}
 
     {% endif %}

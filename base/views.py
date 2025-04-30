@@ -602,6 +602,7 @@ def view_lesson(request, lesson_id):
 
 def create_dmoj_exercise(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
+    course = topic.unit.course
     
     if request.method == "POST":
         url = request.POST.get("url")
@@ -627,7 +628,7 @@ def create_dmoj_exercise(request, topic_id):
             messages.error(request, "Failed to fetch DMOJ metadata. Please check the URL.")
 
     
-    return redirect("topic", course_id=topic.unit.course.id, unit_id=topic.unit.id, topic_id=topic_id)
+    return redirect("course", course_id=course.id)
 
 
 def update_dmoj_exercises(request, topic_id):

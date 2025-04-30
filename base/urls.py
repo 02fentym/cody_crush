@@ -34,7 +34,7 @@ urlpatterns = [
 
     # lesson views
     path("topic/<topic_id>/lesson/create/", views.create_lesson, name="create-lesson"),
-    path("topics/<topic_id>/lesson/<int:lesson_id>/edit/", views.edit_lesson, name="edit-lesson"),
+    path("topic/<topic_id>/lesson/<int:lesson_id>/edit/", views.edit_lesson, name="edit-lesson"),
 
     # dmoj exercise views
     path("topic/<topic_id>/create_dmoj_exercise/", views.create_dmoj_exercise, name="create-dmoj-exercise"),

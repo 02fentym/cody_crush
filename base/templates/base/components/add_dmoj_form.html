@@ -1,0 +1,23 @@
+<!-- Add DMOJ Exercise Form -->
+<div id="add-dmoj-form-{{ topic.id }}" class="hidden-form">
+    <div class="card-sm">
+        <h4 class="form-label" style="margin-top: 0;">Create a DMOJ Exercise</h4>
+        <p class="small-muted">Assign a DMOJ exercise.</p>
+
+        <form method="POST" action="{% url 'create-dmoj-exercise' topic.id %}" class="flex-column-gap">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="dmoj">
+
+            <label for="url" class="form-label">DMOJ URL:</label>
+            <input type="text" name="url" id="url" class="input-field"
+                   placeholder="https://dmoj.ca/problem/abc123" required>
+
+            <div>
+                <button type="submit" class="add-button">Create</button>
+                <button type="button" onclick="toggleForm('add-dmoj-form-{{ topic.id }}')" class="cancel-button">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
