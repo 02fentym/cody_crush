@@ -76,6 +76,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "cody_crush.wsgi.application"
 
+LOGIN_URL = '/login/'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
