@@ -14,7 +14,7 @@ urlpatterns = [
     # STUDENT
     path("activity/<int:activity_id>/start-quiz/", views.start_quiz, name="start-quiz"),
     path('quiz/<int:quiz_id>/activity/<int:activity_id>/take-quiz/', views.take_quiz, name='take-quiz'),
-    path("quiz/results/<int:quiz_id>/", views.quiz_results, name="quiz-results"),
+    path("quiz/results/<int:ac_id>/", views.quiz_results, name="quiz-results"),
 
     path("lessons/<lesson_id>/view/", views.view_lesson, name="view-lesson"),
 

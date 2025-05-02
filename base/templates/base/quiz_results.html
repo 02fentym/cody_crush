@@ -1,78 +1,59 @@
 {% extends "main.html" %}
 
 {% block content %}
-<h2>{{ quiz.topic.title }} - Results</h2>
+<h2>{{ quiz_template.topic.title }} - Attempt #{{ attempt.attempt_number }}</h2>
 
-<div>
-    <p><strong>Score:</strong> {{ quiz.grade }}%</p>
-</div>
+<p><strong>Score:</strong> {{ attempt.score }}%</p>
 
-{% for item in results %}
-<div>
-    <p><strong>{{ forloop.counter }}. {{ item.question.prompt|safe }}</strong></p>
+{% for answer in answers %}
+<div class="quiz-result">
+    <p><strong>{{ forloop.counter }}. {{ answer.quiz_question.question.prompt|safe }}</strong></p>
 
-    {% if question_type == "multiple_choice" %}
-    <div>a) {{ item.question.choice_a|safe }}</div>
-    <div>b) {{ item.question.choice_b|safe }}</div>
-    <div>c) {{ item.question.choice_c|safe }}</div>
-    <div>d) {{ item.question.choice_d|safe }}</div>
+    {% if quiz_template.question_type == "multiple_choice" %}
+    <div>a) {{ answer.quiz_question.question.choice_a|safe }}</div>
+    <div>b) {{ answer.quiz_question.question.choice_b|safe }}</div>
+    <div>c) {{ answer.quiz_question.question.choice_c|safe }}</div>
+    <div>d) {{ answer.quiz_question.question.choice_d|safe }}</div>
 
-    <p>Your answer: {{ item.answer.selected_choice }}</p>
-    <p>Correct answer: {{ item.question.correct_choice }}</p>
+    <p>Your answer: {{ answer.selected_choice }}</p>
+    <p>Correct answer: {{ answer.quiz_question.question.correct_choice }}</p>
 
-    {% if item.answer.selected_choice == item.question.correct_choice %}
-    <span style="color: green;">✅ Correct</span>
+    {% if answer.is_correct %}
+    <span class="correct-text">✅ Correct</span>
     {% else %}
-    <span style="color: red;">❌ Incorrect</span>
+    <span class="incorrect-text">❌ Incorrect</span>
     {% endif %}
 
-    {% elif question_type == "tracing" %}
+    {% elif quiz_template.question_type == "tracing" %}
     <p>Your answer:</p>
-    <pre>{{ item.answer.text_answer|safe }}</pre>
+    <pre>{{ answer.text_answer|safe }}</pre>
 
     <p>Expected output:</p>
-    <pre>{{ item.question.expected_output|safe }}</pre>
+    <pre>{{ answer.quiz_question.question.expected_output|safe }}</pre>
 
-    {% if item.answer.is_correct %}
-    <span style="color: green;">✅ Correct</span>
+    {% if answer.is_correct %}
+    <span class="correct-text">✅ Correct</span>
     {% else %}
-    <span style="color: red;">❌ Incorrect</span>
+    <span class="incorrect-text">❌ Incorrect</span>
     {% endif %}
     {% endif %}
 
-    <button type="button" onclick="toggleExplanation('{{ forloop.counter0 }}', this)"
-        style="font-size: 0.9em; color: #007bff; background: none; border: none; cursor: pointer;">
+    <button type="button" onclick="toggleExplanation('{{ forloop.counter0 }}', this)" class="link-button" style="font-size: 0.9em;">
         Show Explanation
     </button>
 
-    <div id="explanation-{{ forloop.counter0 }}"
-        style="display: none; margin-top: 6px; color: #555; background-color: #f1f1f1; padding: 8px; border-radius: 4px;">
-        {{ item.answer.quiz_question.question.explanation|linebreaksbr }}
+    <div id="explanation-{{ forloop.counter0 }}" class="explanation-box">
+        {{ answer.quiz_question.question.explanation|linebreaksbr }}
     </div>
-
 
     <hr>
 </div>
 {% endfor %}
 
 <div style="margin-top: 24px;">
-    <a href="{% url 'topic' quiz.topic.unit.course.id quiz.topic.unit.id quiz.topic.id %}" 
-       style="display: inline-block; padding: 10px 16px; background-color: #4CAF50; color: white; 
-              text-decoration: none; border-radius: 6px; font-weight: bold;">
-        ← Back to Topic
+    <a href="{% url 'course' quiz_template.topic.unit.course.id %}" class="back-button">
+        ← Back to Course
     </a>
 </div>
-
-<script>
-    function toggleExplanation(index, btn) {
-        const elem = document.getElementById(`explanation-${index}`);
-        if (elem) {
-            const isHidden = elem.style.display === "none";
-            elem.style.display = isHidden ? "block" : "none";
-            btn.textContent = isHidden ? "Hide Explanation" : "Show Explanation";
-            console.log(`Toggled index: ${index}`);
-        }
-    }
-</script>
 
 {% endblock %}

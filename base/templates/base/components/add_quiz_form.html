@@ -4,7 +4,7 @@
         <h4 class="form-label" style="margin-top: 0;">Create a Quiz</h4>
         <p class="small-muted">Generate a quiz from the topic's question pool. Students will receive randomized questions.</p>
 
-        <form method="POST" class="flex-column-gap">
+        <form method="POST" class="flex-column-gap" action="{% url 'create-quiz' topic.id %}">
             {% csrf_token %}
             <input type="hidden" name="form_type" value="quiz">
             <input type="hidden" name="topic_id" value="{{ topic.id }}">

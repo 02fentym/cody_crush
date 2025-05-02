@@ -145,6 +145,7 @@ class Quiz(models.Model):
 class Answer(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     quiz_question = models.ForeignKey("QuizQuestion", on_delete=models.CASCADE)
+    activity_completion = models.ForeignKey("ActivityCompletion", on_delete=models.CASCADE, null=True, blank=True)
 
     selected_choice = models.CharField(  # used for multiple choice questions
         max_length=1,
@@ -222,12 +223,10 @@ class ActivityCompletion(models.Model):
     completed = models.BooleanField(default=False)
     score = models.FloatField(blank=True, null=True)
     date_completed = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        unique_together = ("student", "activity")
+    attempt_number = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.student.username} completed {self.activity}"
+        return f"{self.student.username} completed {self.activity}({self.activity.id})"
     
 
 class DmojExercise(models.Model):

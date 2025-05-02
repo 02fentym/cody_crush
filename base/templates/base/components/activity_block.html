@@ -11,18 +11,18 @@
     <!-- Quiz Card -->
     {% elif activity.content_type.model == "quiztemplate" %}
         {% if user.profile.role == "teacher" %}
-        📝 {{ activity.content_object.quiz_type }}
+            📝 {{ activity.content_object.quiz_type }}
         {% else %}
-        📝 Quiz: <a href="{% url 'start-quiz' activity.object_id %}">{{ activity.content_object.title|striptags }}</a>
+            📝 {{ activity.content_object.quiz_type }}: <a href="{% url 'start-quiz' activity.id %}">{{ activity.content_object.topic.title|striptags }}</a>
         {% endif %}
 
     <!-- Dmoj Exercise Card -->
     {% elif activity.content_type.model == "dmojexercise" %}
-    💻 DMOJ Problem: <a href="{{ activity.content_object.url }}" target="_blank">{{ activity.content_object.title|striptags }}</a>
+        💻 DMOJ Problem: <a href="{{ activity.content_object.url }}" target="_blank">{{ activity.content_object.title|striptags }}</a>
 
     <!-- Unknown Activity Type-->
     {% else %}
-    ❓ Unknown activity type
+        ❓ Unknown activity type
     {% endif %}
 
     <!-- Delete activity -->
@@ -31,9 +31,11 @@
     {% endif %}
 
     <!-- Activity completion status -->
-    {% if activity.completed %}
-    <span class="activity-status">✅</span>
-    {% else %}
-    <span class="activity-status">❌</span>
+    {% if user.profile.role == "student" %}
+        {% if activity.completed %}
+        <span class="activity-status">✅</span>
+        {% else %}
+        <span class="activity-status">❌</span>
+        {% endif %}
     {% endif %}
 </li>

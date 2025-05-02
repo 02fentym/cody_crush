@@ -181,6 +181,17 @@ def take_quiz(request, quiz_id, activity_id):
     quiz_questions = quiz.quiz_questions.all()  # this gives access to both question and bridge
 
     if request.method == "POST":
+        # Create the ActivityCompletion so we can link answers to it
+        previous_attempts = ActivityCompletion.objects.filter(student=request.user, activity=activity).count()
+
+        ac = ActivityCompletion.objects.create(
+            student=request.user,
+            activity=activity,
+            completed=False,
+            attempt_number=previous_attempts + 1,
+            date_completed=timezone.now()
+        )
+
         correct_count = 0
         total = quiz_questions.count()
 
@@ -203,6 +214,7 @@ def take_quiz(request, quiz_id, activity_id):
                 Answer.objects.create(
                     quiz=quiz,
                     quiz_question=qq,
+                    activity_completion=ac,
                     selected_choice=user_input if question_type == "multiple_choice" else None,
                     text_answer=user_input if question_type == "tracing" else None,
                     is_correct=is_correct
@@ -216,17 +228,12 @@ def take_quiz(request, quiz_id, activity_id):
         quiz.grade = round(grade, 2)
         quiz.save()
 
-        ActivityCompletion.objects.update_or_create(
-            student=request.user,
-            activity=activity, 
-            defaults={
-                'completed': True,
-                'date_completed': timezone.now()
-            },
-            score=quiz.grade
-        )
+        # Update the activity_completion to mark it complete + save the score
+        ac.completed = True
+        ac.score = quiz.grade
+        ac.save()
 
-        return redirect("quiz-results", quiz.id)
+        return redirect("quiz-results", ac.id)
 
     # GET request → show the quiz
     context = {"quiz": quiz, "questions": [qq.question for qq in quiz_questions]}
@@ -242,28 +249,19 @@ def normalize_output(text):
 
 @allowed_roles(["student"])
 @login_required(login_url="login")
-def quiz_results(request, quiz_id):
-    # Step 1: Get the quiz
-    quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
+def quiz_results(request, ac_id):
+    ac = get_object_or_404(ActivityCompletion, id=ac_id, student=request.user)
+    activity = ac.activity
+    quiz_template = activity.content_object
+    answers = Answer.objects.filter(activity_completion=ac).select_related('quiz_question')
 
-    # Step 2: Get all answers the student gave
-    answers = Answer.objects.filter(quiz=quiz)
-
-    # Step 3: Create a list of each question + answer
-    results = []
-    for answer in answers:
-        question = answer.quiz_question.question  # <-- this gets the actual question object
-        results.append({
-            "answer": answer,
-            "question": question,
-        })
-
-    # Step 4: Send to the template
     context = {
-        "quiz": quiz,
-        "results": results,
-        "question_type": quiz.question_type,  # so you can tell if it's MC or tracing
+        "activity_completion": ac,
+        "activity": activity,
+        "quiz_template": quiz_template,
+        "answers": answers,
     }
+
     return render(request, "base/quiz_results.html", context)
 
 
@@ -374,8 +372,7 @@ def delete_topic(request, course_id, unit_id, topic_id):
 
 def create_quiz(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
-    unit = topic.unit
-    course = unit.course
+    course_id = topic.unit.course.id
     
     question_count = int(request.POST.get("question_count", 5)) # Default to 5 if not provided
     question_type = request.POST.get("question_type")
@@ -389,7 +386,7 @@ def create_quiz(request, topic_id):
     available_count = question_model.objects.filter(topic=topic).count()
     if available_count < question_count:
         messages.error(request, f"Only {available_count} questions available for this topic.")
-        return redirect("topic", course_id=course.id, unit_id=unit.id, topic_id=topic.id)
+        return redirect("course", course_id=course_id)
 
     
     quiz_template = QuizTemplate.objects.create(
@@ -407,7 +404,7 @@ def create_quiz(request, topic_id):
 
     messages.success(request, "Quiz created successfully!")
 
-    return redirect("topic", course_id=course.id, unit_id=unit.id, topic_id=topic_id)
+    return redirect("course", course_id=course_id)
 
 
 def delete_activity(request, activity_id):
@@ -420,7 +417,7 @@ def delete_activity(request, activity_id):
     activity.delete()
 
     messages.success(request, "Activity deleted successfully!")
-    return redirect("topic", course_id=activity.topic.unit.course.id, unit_id=activity.topic.unit.id, topic_id=activity.topic.id)
+    return redirect("course", course_id=activity.topic.unit.course.id)
 
 
 @allowed_roles(["teacher"])
@@ -530,7 +527,7 @@ def create_lesson(request, topic_id):
                 object_id=lesson.id
             )
 
-            return redirect("topic", topic.unit.course.id, topic.unit.id, topic.id)
+            return redirect("course", topic.unit.course.id)
         else:
             messages.error(request, "Please fix the errors below.")
 
@@ -548,7 +545,8 @@ def edit_lesson(request, topic_id, lesson_id):
         form = LessonForm(request.POST, instance=lesson)
         if form.is_valid():
             form.save()
-            return redirect("topic", topic.unit.course.id, topic.unit.id, topic.id)
+            messages.success(request, "Lesson updated successfully!")
+            return redirect("course", topic.unit.course.id)
 
     context = {"form": form, "is_edit": True}
     return render(request, "base/create_edit_lesson.html", context)
