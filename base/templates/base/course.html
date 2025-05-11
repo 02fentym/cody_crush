@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<h1 class="bg-red-200">{{ course.title }}</h1>
+<h1>{{ course.title }}</h1>
 
 {% for unit in units %}
 {% include "base/components/unit_block.html" with unit=unit %}
