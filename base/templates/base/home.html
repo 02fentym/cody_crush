@@ -16,6 +16,8 @@
     {% for course in courses %}
     <div class="card card-sm card-border bg-base-100 w-96 shadow-sm hover:shadow-md relative">
         {% if user.profile.role == "teacher" %}
+
+        <!-- Delete course -->
         <div class="absolute top-2 right-2">
             {% include "base/components/delete_course_form.html" with course=course %}
         </div>

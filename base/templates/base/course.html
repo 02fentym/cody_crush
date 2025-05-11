@@ -4,9 +4,13 @@
 
 <h1>{{ course.title }}</h1>
 
-{% for unit in units %}
-{% include "base/components/unit_block.html" with unit=unit %}
-{% endfor %}
+{% if units %}
+<div class="flex flex-col gap-4">
+    {% for unit in units %}
+        {% include "base/components/unit_block.html" with unit=unit %}
+    {% endfor %}
+</div>
+{% endif %}
 
 <!-- Add New Unit Button -->
 {% if user.profile.role == "teacher" %}
@@ -15,6 +19,4 @@
 </button>
 {% include "base/components/add_unit_form.html" %}
 {% endif %}
-
-
 {% endblock %}

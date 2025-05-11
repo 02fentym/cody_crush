@@ -1,25 +1,34 @@
-<details class="block-margin" id="unit-{{ unit.id }}">
-    <summary>
-        <strong>Unit {{ unit.order }}: {{ unit.title }}</strong> - Progress: {{ unit.progress }}%
+<div class="collapse collapse-arrow bg-base-200" id="unit-{{ unit.id }}">
+    <input type="checkbox" />
+    <div class="collapse-title font-medium flex justify-between items-center gap-4">
+        <div class="flex items-center gap-4">
+            <!-- Circle icon for Unit number -->
+            <div class="flex items-center justify-center bg-primary text-primary-content font-bold text-sm"
+                style="width: 2.5rem; height: 2.5rem; border-radius: 9999px;">
+                {{ unit.order }}
+            </div>
 
-        <!-- Deletes a unit -->
-        {% if user.profile.role == "teacher" %}
-        {% include "base/components/delete_unit_form.html" with unit=unit %}
-        {% endif %}
 
-    </summary>
 
-    <div class="details-body">
+
+            <!-- Unit title and description -->
+            <div class="flex flex-col">
+                <span class="text-base font-semibold">{{ unit.title }}</span>
+                <span class="text-xs text-base-content/70">Progress: {{ unit.progress }}%</span>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="collapse-content">
         {% for topic in unit.topic_set.all %}
         {% include "base/components/topic_block.html" with topic=topic %}
         {% endfor %}
 
-        <!-- Display message if no topics exist -->
         {% if unit.topic_set.count == 0 %}
         <p class="empty-message">No topics available for this unit.</p>
         {% endif %}
-        
-        <!-- Add Topic Button -->
+
         {% if user.profile.role == "teacher" %}
         <button onclick="toggleForm('add-topic-form-{{ unit.id }}')" class="link-button">
             ➕ Add Topic
@@ -27,4 +36,4 @@
         {% include "base/components/add_topic_form.html" %}
         {% endif %}
     </div>
-</details>
+</div>
