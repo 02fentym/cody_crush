@@ -1,0 +1,26 @@
+{
+  "name": "cody_crush",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch:css": "npx @tailwindcss/cli -i ./static/src/styles.css -o ./static/dist/styles.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/02fentym/cody_crush.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/02fentym/cody_crush/issues"
+  },
+  "homepage": "https://github.com/02fentym/cody_crush#readme",
+  "description": "",
+  "devDependencies": {
+    "daisyui": "^5.0.35",
+    "tailwindcss": "^4.1.5",
+    "tailwindcss-cli": "^0.1.2"
+  }
+}

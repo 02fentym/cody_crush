@@ -1,18 +1,23 @@
-<!-- Creates a new course -->
-<div id="add-course-form" class="hidden-form">
-    <form method="POST" class="flex-center-gap">
-        {% csrf_token %}
-        <input type="hidden" name="form_type" value="course">
+<input type="checkbox" id="add-course-modal" class="modal-toggle" />
 
-        {{ course_form.title }}
-        {{ course_form.language }}
-        {{ course_form.enrollment_password }}
-        {{ course_form.description }}
+<dialog class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg mb-4">Create New Course</h3>
 
-        <button type="submit" class="add-button">Create</button>
+    <form method="POST" class="space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="form_type" value="course">
 
-        <button type="button" onclick="toggleForm('add-course-form')" class="cancel-button">
-            Cancel
-        </button>
+      {{ course_form.title }}
+      {{ course_form.language }}
+      {{ course_form.enrollment_password }}
+      {{ course_form.description }}
+
+
+      <div class="modal-action">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <label for="add-course-modal" class="btn">Cancel</label>
+      </div>
     </form>
-</div>
+  </div>
+</dialog>

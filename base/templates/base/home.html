@@ -2,45 +2,66 @@
 
 {% block content %}
 
+<!--
 {% if user.profile.role == "student" %}
 {% include "base/components/course_enrolment_form.html" %}
 {% endif %}
+-->
 
-<h2>Courses</h2>
+<h1>Courses</h1>
 
 <!-- List of courses -->
 {% if courses %}
-{% for course in courses %}
-<div class="course-card">
-    <a href="{% url 'course' course.id %}" class="course-link">
-        {{ course.title }} ({{ course.language|title }})
-    </a>
+<div class="flex flex-wrap gap-4">
+    {% for course in courses %}
+    <div class="card card-sm card-border bg-base-100 w-96 shadow-sm hover:shadow-md relative">
+        {% if user.profile.role == "teacher" %}
+        <div class="absolute top-2 right-2">
+            {% include "base/components/delete_course_form.html" with course=course %}
+        </div>
+        {% endif %}
+
+        <a href="{% url 'course' course.id %}" class="block">
+            <div class="card-body">
+                <h2 class="card-title">{{ course.title }}</h2>
+                <p>{{ course.description }}</p>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="empty-message">No courses yet.</p>
+    {% endif %}
+
 
     {% if user.profile.role == "teacher" %}
-    {% include "base/components/delete_course_form.html" with course=course %}
+    <!-- Create New Course -->
+    <label for="add-course-modal" class="cursor-pointer block">
+        <div class="card card-sm card-border card-dash bg-base-100 w-96 shadow-sm hover:shadow-md">
+            <div class="card-body items-center text-center">
+                <div class="rounded-full bg-primary/20 p-1 inline-block mx-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" class="w-8 h-8 text-primary">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                </div>
+                <h2 class="card-title mt-2">Create New Course</h2>
+            </div>
+        </div>
+    </label>
+    {% include "base/components/create_course_form.html" %}
     {% endif %}
 </div>
-{% endfor %}
-{% else %}
-<p class="empty-message">No courses yet.</p>
-{% endif %}
 
-
-<!-- Create New Course -->
-{% if user.profile.role == "teacher" %}
-<button onclick="toggleForm('add-course-form')" class="link-button">
-    ➕ Add New Course
-</button>
-{% include "base/components/create_course_form.html" %}
-{% endif %}
 
 <!-- Upload Questions -->
+<!--
 {% if user.profile.role == "teacher" %}
 <h2>Upload Questions</h2>
 <div class="course-card">
     {% include "base/components/upload_questions_form.html" %}
 </div>
 {% endif %}
-
+-->
 
 {% endblock %}

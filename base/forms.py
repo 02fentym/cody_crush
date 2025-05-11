@@ -2,34 +2,68 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Course, Unit, Topic, Lesson, DmojExercise
+from .models import Course, Unit, Topic, Lesson, DmojExercise, Profile
+
 
 class UserForm(UserCreationForm):
-    ROLE_CHOICES = [
-        ('student', 'Student'),
-        ('teacher', 'Teacher'),
-    ]
-
-    role = forms.ChoiceField(choices=ROLE_CHOICES)
-    dmoj_username = forms.CharField(required=False, help_text="Required for students only")
+    dmoj_username = forms.CharField(
+        required=True,
+        widget=forms.TextInput()
+    )
 
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2', 'role', 'dmoj_username']
+        fields = ['username', 'password1', 'password2', 'dmoj_username']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Apply daisyUI/Tailwind classes
+        self.fields['username'].widget.attrs.update({
+            'class': 'input input-bordered w-full mb-4',
+            'placeholder': 'Username'
+        })
+        self.fields['password1'].widget.attrs.update({
+            'class': 'input input-bordered w-full mb-4',
+            'placeholder': 'Password'
+        })
+        self.fields['password2'].widget.attrs.update({
+            'class': 'input input-bordered w-full mb-4',
+            'placeholder': 'Confirm Password'
+        })
+        self.fields['dmoj_username'].widget.attrs.update({
+            'class': 'input input-bordered w-full mb-4',
+            'placeholder': 'DMOJ username'
+        })
+
+        # Remove verbose help text from Django's defaults
+        self.fields['username'].help_text = ''
+        self.fields['password1'].help_text = ''
+        self.fields['password2'].help_text = ''
 
     def clean(self):
         cleaned_data = super().clean()
-        role = cleaned_data.get('role')
         dmoj_username = cleaned_data.get('dmoj_username')
 
-        if role == 'student' and not dmoj_username:
-            self.add_error('dmoj_username', "DMOJ username is required for students.")
-
-        if role != 'student':
-            # Prevent teachers from setting a DMOJ username
-            cleaned_data['dmoj_username'] = None
+        if not dmoj_username:
+            self.add_error('dmoj_username', "DMOJ username is required.")
 
         return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.username = user.username.lower()
+        user.save()  # save user to get a valid user.id
+
+        # Create and attach the profile manually
+        Profile.objects.create(
+            user=user,
+            role='student',
+            dmoj_username=self.cleaned_data['dmoj_username']
+        )
+
+        return user
+
 
 
 class CourseForm(ModelForm):
@@ -37,10 +71,22 @@ class CourseForm(ModelForm):
         model = Course
         fields = ["title", "description", "language", "enrollment_password"]
         widgets = {
-            'title': forms.TextInput(attrs={'placeholder': 'Course title...', 'class': 'input-field'}),
-            'language': forms.Select(attrs={'class': 'input-field'}),
-            'enrollment_password': forms.TextInput(attrs={'placeholder': 'Enrollment password...', 'class': 'input-field'}),
-            'description': forms.Textarea(attrs={'placeholder': 'Brief description...', 'class': 'input-field', 'rows': 1}),
+            'title': forms.TextInput(attrs={
+                'placeholder': 'Course title...',
+                'class': 'input input-bordered w-full'
+            }),
+            'language': forms.Select(attrs={
+                'class': 'select select-bordered w-full'
+            }),
+            'enrollment_password': forms.TextInput(attrs={
+                'placeholder': 'Enrollment password...',
+                'class': 'input input-bordered w-full'
+            }),
+            'description': forms.Textarea(attrs={
+                'placeholder': 'Brief description...',
+                'class': 'textarea textarea-bordered w-full',
+                'rows': 1
+            }),
         }
 
 

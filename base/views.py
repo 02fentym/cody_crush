@@ -35,6 +35,7 @@ def login_user(request):
             user = User.objects.get(username=username)
         except:
             messages.error(request, "User does not exist")
+            return redirect("home")
         
         user = authenticate(request, username=username, password=password)
         if user is not None:
@@ -42,35 +43,27 @@ def login_user(request):
             return redirect("home")
         else:
             messages.error(request, "Password is incorrect")
+            return redirect("home")
 
     context = {"page": page}
-    return render(request, "base/login_register.html", context)
+    return render(request, "base/login.html", context)
 
 
 def register_user(request):
-    page = "register"
     form = UserForm()
 
     if request.method == "POST":
         form = UserForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.username = user.username.lower()
-            user.save()
-
-            Profile.objects.create(
-                user=user,
-                role=form.cleaned_data.get("role"),
-                dmoj_username=form.cleaned_data['dmoj_username'] if form.cleaned_data['role'] == 'student' else None,
-            )
-
+            user = form.save()
             login(request, user)
             return redirect("home")
         else:
             messages.error(request, "An error occurred during registration")
 
-    context = {"page": page, "form": form}
-    return render(request, "base/login_register.html", context)
+    context = {"page": "register", "form": form}
+    return render(request, "base/register.html", context)
+
 
 
 def logout_user(request):
@@ -78,6 +71,7 @@ def logout_user(request):
     return redirect("login")
 
 
+'''
 @login_required(login_url="login")
 def home_selector(request):
     role = request.user.profile.role
@@ -88,14 +82,11 @@ def home_selector(request):
         return redirect("student-home")
     else:
         return redirect("login")  # or raise an error
+'''
 
-
-@login_required
+@login_required(login_url="login")
 def home(request):
-    if request.user.profile.role == "student":
-        courses = request.user.enrolled_courses.all()
-    else:
-        courses = Course.objects.filter(teacher=request.user)
+    courses = get_all_courses(request.user.profile.role, request.user)
     
     if request.method == "POST":
         form_type = request.POST.get("form_type")
@@ -128,6 +119,15 @@ def home(request):
     context = {"courses": courses, "course_form": course_form, "password_form": password_form}
     return render(request, "base/home.html", context)
 
+
+# Helper function to get all courses
+def get_all_courses(role, user):
+    if role == "student":
+        courses = user.enrolled_courses.all()
+    else:
+        courses = Course.objects.filter(teacher=user)
+    return courses
+        
 
 ###################### STUDENT VIEWS
 
@@ -272,6 +272,7 @@ def quiz_results(request, ac_id):
 
 def course(request, course_id):
     user = request.user
+    courses = get_all_courses(user.profile.role, user)
 
     if user.profile.role == "teacher":
         qs = Course.objects.filter(id=course_id, teacher=user)
@@ -345,7 +346,7 @@ def course(request, course_id):
     # Prefetch Topics and Activities inside Topics
     units = course.unit_set.prefetch_related('topic_set__activity_set').all()
 
-    context = {"course": course, "units": units, "unit_form": unit_form, "password_form": password_form,}
+    context = {"courses": courses, "course": course, "units": units, "unit_form": unit_form, "password_form": password_form,}
     return render(request, "base/course.html", context)
 
 

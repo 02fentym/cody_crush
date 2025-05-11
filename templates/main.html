@@ -8,28 +8,37 @@
     <title>Cody Crush</title>
 
     <!-- Highlight.js CSS (kept your theme) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css">
 
     <!-- Toast UI Editor CSS -->
     <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
 
-    
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'dist/styles.css' %}">
+
 </head>
 
 <body>
-    {% include "navbar.html" %}
+    <div class="min-h-screen px-80">
+        {% include "navbar.html" %}
 
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div class="alert {{ message.tags }}">{{ message }}</div>
-        {% endfor %}
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="flex">
+            {% include "sidebar.html" %}
+
+            <main class="flex-1 p-6">
+                {% block content %}
+                {% endblock %}
+            </main>
+        </div>
     </div>
-    {% endif %}
-
-    {% block content %}
-    {% endblock %}
 
     <!-- 📚 Toast UI Scripts -->
     <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>

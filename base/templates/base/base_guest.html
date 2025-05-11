@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cody Crush - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'dist/styles.css' %}">
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-base-200">
+    <div class="bg-base-100 shadow p-8 rounded-lg w-96">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div
+                class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% block content %}
+
+        {% endblock %}
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,36 @@
+<aside class="w-56 bg-base-200 p-4 space-y-4">
+    <nav>
+        <!-- HOME -->
+        <ul class="menu border-b pb-2 mb-2 w-full px-0">
+            <li>
+                <a href="{% url 'home' %}" class="block">
+                    Home
+                </a>
+            </li>
+        </ul>
+
+
+        <!-- COURSE MANAGEMENT -->
+        <p class="menu-title">Course Management</p>
+        <ul class="menu border-b pb-2 mb-2 w-full"> <!-- ⭐️ added border-b here -->
+            {% if courses %}
+            {% for course in courses %}
+            <li>
+                <a {% if course.is_active %}class="active" {% endif %} href="{% url 'course' course.id %}">{{ course.title }}</a>
+            </li>
+            {% endfor %}
+            {% else %}
+            <li><span class="text-gray-500 italic">No courses yet</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- TEACHING TOOLS -->
+    <nav>
+        <p class="menu-title">Teaching Tools</p>
+        <ul class="menu">
+            <li><a>Question Bank</a></li>
+            <li><a>Upload Questions</a></li>
+        </ul>
+    </nav>
+</aside>

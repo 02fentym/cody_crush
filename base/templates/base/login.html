@@ -1,0 +1,23 @@
+{% extends "base/base_guest.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<h1 class="text-xl font-bold mb-4">Login</h1>
+
+<form method="POST">
+    {% csrf_token %}
+    <label class="label">Username:</label>
+    <input type="text" name="username" class="input input-bordered w-full mb-4" placeholder="Enter Username"/>
+
+    <label class="label">Password:</label>
+    <input type="password" name="password" class="input input-bordered w-full mb-4" placeholder="Enter Password"/>
+
+    <input type="submit" value="Login" class="btn btn-primary w-full"/>
+</form>
+
+<p class="mt-4 text-center text-sm">
+    Haven't signed up yet?
+    <a href="{% url 'register-user' %}" class="link link-primary">Sign up</a>
+</p>
+{% endblock %}
