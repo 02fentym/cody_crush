@@ -84,3 +84,31 @@ function toggleExplanation(index, btn) {
         btn.textContent = isHidden ? "Hide Explanation" : "Show Explanation";
     }
 }
+
+// Opens modal for adding units or topics
+function openModal(type, unitId = null) {
+    const modalTitle = document.getElementById("modal-title");
+    const formType = document.getElementById("form-type");
+    const unitInput = document.getElementById("unit-id");
+    const formFields = document.getElementById("form-fields");
+
+    if (type === "unit") {
+        modalTitle.textContent = "Add Unit";
+        formType.value = "unit";
+        unitInput.value = "";
+
+        formFields.innerHTML = `
+        <input name="title" placeholder="Unit title" class="input input-bordered w-full" required>
+        <textarea name="description" placeholder="Unit description" class="textarea textarea-bordered w-full"></textarea>
+    `;
+    } else if (type === "topic") {
+        modalTitle.textContent = "Add Topic";
+        formType.value = "topic";
+        unitInput.value = unitId;
+
+        formFields.innerHTML = `
+        <input name="title" placeholder="Topic title" class="input input-bordered w-full" required>
+        <textarea name="description" placeholder="Topic description" class="textarea textarea-bordered w-full"></textarea>
+    `;
+    }
+}

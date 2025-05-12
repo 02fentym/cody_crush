@@ -319,20 +319,21 @@ def course(request, course_id):
         # Topic creation
         elif form_type == "topic":
             unit_id = request.POST.get("unit_id")
-            unit = get_object_or_404(Unit, id=unit_id, course=course)
+            if unit_id:
+                unit = get_object_or_404(Unit, id=unit_id, course=course)
 
-            topic_form = TopicForm(request.POST)
-            if topic_form.is_valid():
-                topic = topic_form.save(commit=False)
-                topic.unit = unit
+                topic_form = TopicForm(request.POST)
+                if topic_form.is_valid():
+                    topic = topic_form.save(commit=False)
+                    topic.unit = unit
 
-                # Set topic order nicely
-                last_order = unit.topic_set.aggregate(Max('order'))['order__max'] or 0
-                topic.order = last_order + 1
+                    last_order = unit.topic_set.aggregate(Max('order'))['order__max'] or 0
+                    topic.order = last_order + 1
+                    topic.save()
 
-                topic.save()
-                messages.success(request, "Topic created successfully!")
-                return redirect("course", course_id=course_id)
+                    messages.success(request, "Topic created successfully!")
+                    return redirect("course", course_id=course_id)
+
         
         # Topic deletion
         elif form_type == "delete_topic":
