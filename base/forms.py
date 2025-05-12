@@ -95,8 +95,15 @@ class UnitForm(ModelForm):
         model = Unit
         fields = ["title", "description"]
         widgets = {
-            'title': forms.TextInput(attrs={'placeholder': 'Enter unit title'}),
-            'description': forms.TextInput(attrs={'placeholder': 'Enter description'}),
+            'title': forms.TextInput(attrs={
+                'placeholder': 'Course title...',
+                'class': 'input input-bordered w-full'
+            }),
+            'description': forms.Textarea(attrs={
+                'placeholder': 'Brief description...',
+                'class': 'textarea textarea-bordered w-full',
+                'rows': 1
+            }),
         }
 
 
@@ -105,8 +112,15 @@ class TopicForm(forms.ModelForm):
         model = Topic
         fields = ['title', 'description']
         widgets = {
-            'title': forms.TextInput(attrs={'placeholder': 'Enter topic title'}),
-            'description': forms.TextInput(attrs={'placeholder': 'Enter description'}),
+            'title': forms.TextInput(attrs={
+                'placeholder': 'Course title...',
+                'class': 'input input-bordered w-full'
+            }),
+            'description': forms.Textarea(attrs={
+                'placeholder': 'Brief description...',
+                'class': 'textarea textarea-bordered w-full',
+                'rows': 1
+            }),
         }
 
 

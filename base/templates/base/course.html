@@ -7,12 +7,10 @@
 {% if units %}
 <div class="flex flex-col gap-4">
     {% for unit in units %}
-        {% include "base/components/unit_block.html" with unit=unit %}
+    {% include "base/components/unit_block.html" with unit=unit %}
     {% endfor %}
+    {% else %}
+    <p class="text-base-content/70">No topics available for this unit.</p>
+    {% endif %}
 </div>
-{% else %}
-    <p class="empty-message">No topics available for this unit.</p>
-{% endif %}
-
-<!-- TODO: Add New Unit Button with add_unit_form.html -->
 {% endblock %}

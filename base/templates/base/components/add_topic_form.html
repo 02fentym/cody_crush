@@ -1,14 +1,20 @@
-<!-- Add new topic -->
-<div id="add-topic-form-{{ unit.id }}" class="hidden-form">
-    <form method="POST" class="flex-center-gap">
-        {% csrf_token %}
-        <input type="hidden" name="form_type" value="topic">
-        <input type="hidden" name="unit_id" value="{{ unit.id }}">
+<input type="checkbox" id="add-topic-modal-{{ unit.id }}" class="modal-toggle" />
 
-        <input type="text" name="title" placeholder="Topic title" required>
-        <input type="text" name="description" placeholder="Description" required>
+<div class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg mb-4">Add New Topic</h3>
 
-        <button type="submit">Create</button>
-        <button type="button" onclick="toggleForm('add-topic-form-{{ unit.id }}')" class="cancel-button">Cancel</button>
+    <form method="POST" class="space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="form_type" value="{{ unit.id }}">
+
+      {{ topic_form.title }}
+      {{ topic_form.description }}
+
+      <div class="modal-action">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <label for="add-topic-modal-{{ unit.id }}" class="btn">Cancel</label>
+      </div>
     </form>
+  </div>
 </div>

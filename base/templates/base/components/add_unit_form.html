@@ -1,17 +1,20 @@
-<!-- Creates a new unit -->
-<div id="add-unit-form" class="hidden-form">
-    <form method="POST" class="flex-center-gap">
-        {% csrf_token %}
-        <input type="hidden" name="form_type" value="unit">
+<input type="checkbox" id="add-unit-modal" class="modal-toggle" />
 
-        {{ unit_form.title }}
-        {{ unit_form.description }}
+<div class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg mb-4">Add New Unit</h3>
 
-        <button type="submit">Create</button>
+    <form method="POST" class="space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="form_type" value="unit">
 
-        <!-- Cancel Button -->
-        <button type="button" onclick="toggleForm('add-unit-form')" class="cancel-button">
-            Cancel
-        </button>
+      {{ unit_form.title }}
+      {{ unit_form.description }}
+
+      <div class="modal-action">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <label for="add-unit-modal" class="btn">Cancel</label>
+      </div>
     </form>
+  </div>
 </div>
