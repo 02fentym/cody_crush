@@ -10,13 +10,9 @@
         {% include "base/components/unit_block.html" with unit=unit %}
     {% endfor %}
 </div>
+{% else %}
+    <p class="empty-message">No topics available for this unit.</p>
 {% endif %}
 
-<!-- Add New Unit Button -->
-{% if user.profile.role == "teacher" %}
-<button onclick="toggleForm('add-unit-form')" class="link-button">
-    ➕ Add New Unit
-</button>
-{% include "base/components/add_unit_form.html" %}
-{% endif %}
+<!-- TODO: Add New Unit Button with add_unit_form.html -->
 {% endblock %}

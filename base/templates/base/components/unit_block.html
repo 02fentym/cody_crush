@@ -1,39 +1,35 @@
+<!-- Unit Card -->
 <div class="collapse collapse-arrow bg-base-200" id="unit-{{ unit.id }}">
-    <input type="checkbox" />
+    <input type="checkbox" name="unit-accordion"/>
     <div class="collapse-title font-medium flex justify-between items-center gap-4">
         <div class="flex items-center gap-4">
+
             <!-- Circle icon for Unit number -->
             <div class="flex items-center justify-center bg-primary text-primary-content font-bold text-sm"
                 style="width: 2.5rem; height: 2.5rem; border-radius: 9999px;">
                 {{ unit.order }}
             </div>
 
-
-
-
             <!-- Unit title and description -->
             <div class="flex flex-col">
                 <span class="text-base font-semibold">{{ unit.title }}</span>
+
+                {% if user.profile.role == "student" %}
                 <span class="text-xs text-base-content/70">Progress: {{ unit.progress }}%</span>
+                {% endif %}
             </div>
         </div>
     </div>
 
 
+    <!-- Topic Cards within each Unit Card -->
     <div class="collapse-content">
-        {% for topic in unit.topic_set.all %}
-        {% include "base/components/topic_block.html" with topic=topic %}
-        {% endfor %}
+        <div class="flex flex-col gap-4 p-4">
+            {% for topic in unit.topic_set.all %}
+                {% include "base/components/topic_block.html" with topic=topic %}
+            {% endfor %}
 
-        {% if unit.topic_set.count == 0 %}
-        <p class="empty-message">No topics available for this unit.</p>
-        {% endif %}
-
-        {% if user.profile.role == "teacher" %}
-        <button onclick="toggleForm('add-topic-form-{{ unit.id }}')" class="link-button">
-            ➕ Add Topic
-        </button>
-        {% include "base/components/add_topic_form.html" %}
-        {% endif %}
+            <!-- TODO: Add Topic Button and Form via add_topic_form.html -->
+        </div>
     </div>
 </div>
