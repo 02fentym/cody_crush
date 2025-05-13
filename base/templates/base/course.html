@@ -4,16 +4,18 @@
 
 <h1>{{ course.title }}</h1>
 
+<!-- Course Unit Cards -->
 {% if units %}
 <div class="flex flex-col gap-4">
     {% for unit in units %}
-    {% include "base/components/unit_block.html" with unit=unit %}
+        {% include "base/components/unit_card.html" with unit=unit %}
     {% endfor %}
     {% else %}
     <p class="text-base-content/70">No topics available for this unit.</p>
     {% endif %}
 </div>
 
+<!-- Modal for creating new unit or topic -->
 <input type="checkbox" id="shared-modal" class="modal-toggle" />
 <div class="modal">
     <div class="modal-box">

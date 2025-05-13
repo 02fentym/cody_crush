@@ -1,24 +1,51 @@
-<div class="unit-card">
-    <!-- Left Side -->
-    <div class="card-side">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="{1.5}"
-            stroke="currentColor" class="icon-sm">
-            <path strokeLinecap="round" strokeLinejoin="round"
-                d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
-        </svg>
+<div class="flex flex-row gap-4 items-center justify-between">
+    <!-- Unit Card -->
+    <div class="collapse collapse-arrow bg-base-200" id="unit-{{ unit.id }}">
+        <input type="checkbox" name="unit-accordion" />
+        <div class="collapse-title font-medium flex justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
 
-        <h3>Unit 1: Input, Output, Variables</h3>
+                <!-- Circle icon for Unit number -->
+                <div class="flex items-center justify-center bg-primary text-primary-content font-bold text-sm"
+                    style="width: 2.5rem; height: 2.5rem; border-radius: 9999px;">
+                    {{ unit.order }}
+                </div>
+
+                <!-- Unit title and description -->
+                <div class="flex flex-col">
+                    <span class="text-base font-semibold">{{ unit.title }}</span>
+
+                    {% if user.profile.role == "student" %}
+                    <span class="text-xs text-base-content/70">Progress: {{ unit.progress }}%</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Topic Cards within each Unit Card -->
+        <div class="collapse-content">
+            <div class="flex flex-col gap-4 p-4">
+                {% if unit.topic_set.all.count > 0 %}
+                {% for topic in unit.topic_set.all %}
+                    {% include "base/components/topic_card.html" with topic=topic %}
+                {% endfor %}
+                {% else %}
+                <p class="text-base-content/70">No topics available for this unit.</p>
+                {% endif %}
+            </div>
+
+            <!-- Add Topic Button -->
+            <div class="flex justify-center mt-6">
+                <label for="shared-modal" class="btn btn-primary rounded-full px-6 text-base cursor-pointer"
+                    onclick="openModal('topic', {{ unit.id }})"> <!-- Ignore error, it still works -->
+                    + Topic
+                </label>
+            </div>
+        </div>
     </div>
 
-    <!-- Right Side -->
-    <div class="card-side">
-        <div class="progress-bar-small">
-            <div class="progress-fill-small" style="width: 70%;"></div>
-        </div>
-        <h4>70%</h4>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="{1.5}"
-            stroke="currentColor" class="h-4 w-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-        </svg>
+    <div>
+        {% include "base/components/delete_unit_form.html" %}
     </div>
 </div>

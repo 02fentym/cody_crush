@@ -2170,6 +2170,13 @@
     --btn-color: var(--color-primary);
     --btn-fg: var(--color-primary-content);
   }
+  .group-hover\:block {
+    &:is(:where(.group):hover *) {
+      @media (hover: hover) {
+        display: block;
+      }
+    }
+  }
   .hover\:bg-error\/10 {
     &:hover {
       @media (hover: hover) {
