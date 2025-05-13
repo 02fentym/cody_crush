@@ -112,3 +112,16 @@ function openModal(type, unitId = null) {
     `;
     }
 }
+
+// Unit Card: Only allows one to be open at a time
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".unit-toggle").forEach((checkbox) => {
+        checkbox.addEventListener("change", function () {
+            if (checkbox.checked) {
+                document.querySelectorAll(".unit-toggle").forEach((other) => {
+                    if (other !== checkbox) other.checked = false;
+                });
+            }
+        });
+    });
+});

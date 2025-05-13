@@ -2207,6 +2207,20 @@
       }
     }
   }
+  .hover\:rotate-45 {
+    &:hover {
+      @media (hover: hover) {
+        rotate: 45deg;
+      }
+    }
+  }
+  .hover\:rotate-90 {
+    &:hover {
+      @media (hover: hover) {
+        rotate: 90deg;
+      }
+    }
+  }
   .hover\:bg-error\/10 {
     &:hover {
       @media (hover: hover) {
