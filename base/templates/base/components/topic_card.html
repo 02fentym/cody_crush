@@ -12,14 +12,20 @@
 
 
     <!-- TODO: Add activities -->
-     <div class="collapse-content">
+    <div class="collapse-content">
         <div class="flex flex-col gap-4 p-4">
             {% for activity in topic.activity_set.all %}
-                {% include "base/components/activity_block.html" with activity=activity %}
+            {% include "base/components/activity_block.html" with activity=activity %}
             {% endfor %}
+            
+            <!-- TODO: Add 'create lesson', 'add dmoj' and 'add quiz' -->
+            <div class="flex justify-center gap-2 p-4">
+                <button class="btn btn-sm btn-outline" hx-get="{% url 'get_dmoj_form' topic.id %}"
+                    hx-target="#modal-body" hx-swap="innerHTML"
+                    onclick="document.getElementById('shared-modal').checked = true">
+                    + DMOJ
+                </button>
+            </div>
         </div>
     </div>
-
-    <!-- TODO: Add 'create lesson', 'add dmoj' and 'add quiz' -->
-
 </div>

@@ -1,0 +1,18 @@
+<form method="POST" hx-post="{% url 'submit_dmoj_form' topic.id %}" hx-target="#topic-list-{{ topic.unit.id }}"
+    hx-swap="outerHTML" hx-on="htmx:afterRequest: document.getElementById('shared-modal').checked = false">
+
+    {% csrf_token %}
+    <h3 class="font-bold text-lg mb-4">Add DMOJ Exercise</h3>
+
+    <div class="form-control mb-4">
+        {{ form.title }}
+    </div>
+    <div class="form-control mb-4">
+        {{ form.url }}
+    </div>
+
+    <div class="modal-action">
+        <button type="submit" class="btn btn-primary">Add</button>
+        <label for="shared-modal" class="btn">Cancel</label>
+    </div>
+</form>

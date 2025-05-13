@@ -156,8 +156,8 @@ class DmojForm(forms.ModelForm):
         model = DmojExercise
         fields = ["url"]
         widgets = {
-            'url': forms.URLInput(attrs={
-                'placeholder': 'https://dmoj.ca/problem/ccc07j3',
-                'style': 'width:100%; padding:8px;'
+            "url": forms.URLInput(attrs={
+                "placeholder": "https://dmoj.ca/problem/ccc07j3",
+                "class": "input input-bordered w-full"
             })
         }

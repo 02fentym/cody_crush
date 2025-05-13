@@ -603,37 +603,6 @@ def view_lesson(request, lesson_id):
     return render(request, "base/view_lesson.html", context)
 
 
-def create_dmoj_exercise(request, topic_id):
-    topic = get_object_or_404(Topic, id=topic_id)
-    course = topic.unit.course
-    
-    if request.method == "POST":
-        url = request.POST.get("url")
-        metadata = fetch_dmoj_metadata_from_url(url)
-        
-        if metadata:
-            dmoj_exercise = DmojExercise.objects.create(
-                title=metadata['title'],
-                url=url,
-                problem_code=metadata['problem_code'],
-                points=metadata['points']
-            )
-
-            Activity.objects.create(
-                topic=topic,
-                order=topic.activity_set.count() + 1,
-                content_type=ContentType.objects.get_for_model(dmoj_exercise),
-                object_id=dmoj_exercise.id
-            )
-
-            messages.success(request, "DMOJ exercise created successfully!")
-        else:
-            messages.error(request, "Failed to fetch DMOJ metadata. Please check the URL.")
-
-    
-    return redirect("course", course_id=course.id)
-
-
 def update_dmoj_exercises(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
     profile = request.user.profile
@@ -673,6 +642,9 @@ def update_dmoj_exercises(request, topic_id):
     messages.success(request, "DMOJ exercises successfully refreshed!")
     return redirect("topic", course_id=topic.unit.course.id, unit_id=topic.unit.id, topic_id=topic_id)
 
+
+
+################## SECTION: Forms for adding things (unites, topics, lessons, quizzes, etc)
 
 # New Unit Form: Renders the form for creating a new unit
 @login_required(login_url="login")
@@ -727,3 +699,46 @@ def submit_topic_form(request, unit_id):
         return render(request, "base/partials/topic_list.html", {"topics": topics, "unit": unit})
 
     return render(request, "base/partials/topic_form.html", {"form": form, "unit": unit})
+
+# New DMOJ Exercise Form: Renders the form for creating a DMOJ exercise
+def get_dmoj_form(request, topic_id):
+    topic = Topic.objects.get(id=topic_id)
+    form = DmojForm()
+    return render(request, "base/partials/dmoj_form.html", {"form": form, "topic": topic})
+
+def submit_dmoj_form(request, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id)
+    course = topic.unit.course
+
+    if request.method == "POST":
+        form = DmojForm(request.POST)
+        if form.is_valid():
+            url = form.cleaned_data["url"]
+            metadata = fetch_dmoj_metadata_from_url(url)
+
+            if metadata:
+                dmoj_exercise = DmojExercise.objects.create(
+                    title=metadata["title"],
+                    url=url,
+                    problem_code=metadata["problem_code"],
+                    points=metadata["points"]
+                )
+
+                Activity.objects.create(
+                    topic=topic,
+                    order=topic.activity_set.count() + 1,
+                    content_type=ContentType.objects.get_for_model(dmoj_exercise),
+                    object_id=dmoj_exercise.id
+                )
+
+                messages.success(request, "DMOJ exercise created successfully!")
+
+                # HTMX response: replace topic list
+                return render(request, "base/partials/topic_list.html", {"unit": topic.unit})
+            else:
+                messages.error(request, "Failed to fetch DMOJ metadata. Please check the URL.")
+        else:
+            messages.error(request, "Form validation failed.")
+    
+    # Return modal with form and errors if needed
+    return render(request, "base/partials/dmoj_form.html", {"form": form, "topic": topic})

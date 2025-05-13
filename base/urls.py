@@ -48,4 +48,8 @@ urlpatterns = [
 
     path("topic-form/<int:unit_id>/", views.get_topic_form, name="get_topic_form"),
     path("submit-topic-form/<int:unit_id>/", views.submit_topic_form, name="submit_topic_form"),
+
+    path("get_dmoj_form/<int:topic_id>/", views.get_dmoj_form, name="get_dmoj_form"),
+    path("submit_dmoj_form/<int:topic_id>/", views.submit_dmoj_form, name="submit_dmoj_form"),
+
 ]
