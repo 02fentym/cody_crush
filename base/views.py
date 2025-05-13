@@ -13,6 +13,9 @@ from .utils import fetch_dmoj_metadata_from_url, fetch_dmoj_user_data
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Max
+from django.views.decorators.http import require_POST
+from django.http import HttpResponse
+
 
 import csv, io, markdown, re
 
@@ -669,3 +672,32 @@ def update_dmoj_exercises(request, topic_id):
 
     messages.success(request, "DMOJ exercises successfully refreshed!")
     return redirect("topic", course_id=topic.unit.course.id, unit_id=topic.unit.id, topic_id=topic_id)
+
+
+# Renders the form for creating a new unit
+@login_required(login_url="login")
+@allowed_roles(["teacher"])
+def get_unit_form(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    form = UnitForm()
+    context = {"form": form, "course": course}
+    return render(request, "base/partials/unit_form.html", context)
+
+@require_POST
+@login_required(login_url="login")
+@allowed_roles(["teacher"])
+def submit_unit_form(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    form = UnitForm(request.POST)
+
+    if form.is_valid():
+        unit = form.save(commit=False)
+        unit.course = course
+        unit.order = (course.unit_set.aggregate(Max("order"))["order__max"] or 0) + 1
+        unit.save()
+        units = course.unit_set.prefetch_related('topic_set__activity_set').all()
+        return render(request, "base/partials/unit_list.html", {"units": units, "course": course})
+
+
+    context = {"form": form, "course": course}
+    return render(request, "base/partials/unit_form.html", context)

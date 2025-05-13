@@ -39,4 +39,9 @@ urlpatterns = [
     # dmoj exercise views
     path("topic/<topic_id>/create_dmoj_exercise/", views.create_dmoj_exercise, name="create-dmoj-exercise"),
     path("topic/<topic_id>/update_dmoj/", views.update_dmoj_exercises, name="update-dmoj-exercises"),
+
+    # 'Add' button views
+    path("unit-form/<int:course_id>/", views.get_unit_form, name="get_unit_form"),
+    path("submit-unit-form/<int:course_id>/", views.submit_unit_form, name="submit_unit_form"),
+
 ]
