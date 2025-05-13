@@ -1,45 +1,51 @@
-<!-- Unit Card -->
-<div class="collapse collapse-arrow bg-base-200" id="unit-{{ unit.id }}">
-    <input type="checkbox" name="unit-accordion" />
-    <div class="collapse-title font-medium flex justify-between items-center gap-4">
-        <div class="flex items-center gap-4">
+<div class="flex flex-row gap-4 items-center justify-between">
+    <!-- Unit Card -->
+    <div class="collapse collapse-arrow bg-base-200" id="unit-{{ unit.id }}">
+        <input type="checkbox" name="unit-accordion" />
+        <div class="collapse-title font-medium flex justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
 
-            <!-- Circle icon for Unit number -->
-            <div class="flex items-center justify-center bg-primary text-primary-content font-bold text-sm"
-                style="width: 2.5rem; height: 2.5rem; border-radius: 9999px;">
-                {{ unit.order }}
+                <!-- Circle icon for Unit number -->
+                <div class="flex items-center justify-center bg-primary text-primary-content font-bold text-sm"
+                    style="width: 2.5rem; height: 2.5rem; border-radius: 9999px;">
+                    {{ unit.order }}
+                </div>
+
+                <!-- Unit title and description -->
+                <div class="flex flex-col">
+                    <span class="text-base font-semibold">{{ unit.title }}</span>
+
+                    {% if user.profile.role == "student" %}
+                    <span class="text-xs text-base-content/70">Progress: {{ unit.progress }}%</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Topic Cards within each Unit Card -->
+        <div class="collapse-content">
+            <div class="flex flex-col gap-4 p-4">
+                {% if unit.topic_set.all.count > 0 %}
+                {% for topic in unit.topic_set.all %}
+                {% include "base/components/topic_block.html" with topic=topic %}
+                {% endfor %}
+                {% else %}
+                <p class="text-base-content/70">No topics available for this unit.</p>
+                {% endif %}
             </div>
 
-            <!-- Unit title and description -->
-            <div class="flex flex-col">
-                <span class="text-base font-semibold">{{ unit.title }}</span>
-
-                {% if user.profile.role == "student" %}
-                <span class="text-xs text-base-content/70">Progress: {{ unit.progress }}%</span>
-                {% endif %}
+            <!-- Add Topic Button -->
+            <div class="flex justify-center mt-6">
+                <label for="shared-modal" class="btn btn-primary rounded-full px-6 text-base cursor-pointer"
+                    onclick="openModal('topic', {{ unit.id }})"> <!-- Ignore error, it still works -->
+                    + Topic
+                </label>
             </div>
         </div>
     </div>
 
-
-    <!-- Topic Cards within each Unit Card -->
-    <div class="collapse-content">
-        <div class="flex flex-col gap-4 p-4">
-            {% if unit.topic_set.all.count > 0 %}
-            {% for topic in unit.topic_set.all %}
-                {% include "base/components/topic_block.html" with topic=topic %}
-            {% endfor %}
-            {% else %}
-                <p class="text-base-content/70">No topics available for this unit.</p>
-            {% endif %}
-        </div>
-
-        <!-- Add Topic Button -->
-        <div class="flex justify-center mt-6">
-            <label for="shared-modal" class="btn btn-primary rounded-full px-6 text-base cursor-pointer"
-                onclick="openModal('topic', {{ unit.id }})"> <!-- Ignore error, it still works -->
-                + Topic
-            </label>
-        </div>
+    <div>
+        {% include "base/components/delete_unit_form.html" %}
     </div>
 </div>

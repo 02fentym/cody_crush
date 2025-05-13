@@ -1,5 +1,6 @@
 <!-- Deletes a unit -->
-<form method="POST" action="" class="inline-form">
+<form method="POST" action="" class="inline-form"
+      onsubmit="return confirm('Are you sure you want to delete this unit?');">
     {% csrf_token %}
     <input type="hidden" name="form_type" value="delete_unit">
     <input type="hidden" name="unit_id" value="{{ unit.id }}">
