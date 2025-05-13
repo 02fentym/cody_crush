@@ -23,28 +23,27 @@
         </div>
 
 
-        <!-- Topic Cards within each Unit Card -->
+        <!-- Topic Cards + Add Topic Button -->
         <div class="collapse-content">
-            <div class="flex flex-col gap-4 p-4">
-                {% if unit.topic_set.all.count > 0 %}
-                {% for topic in unit.topic_set.all %}
-                    {% include "base/components/topic_card.html" with topic=topic %}
-                {% endfor %}
-                {% else %}
-                <p class="text-base-content/70">No topics available for this unit.</p>
-                {% endif %}
+
+            <!-- Topic Cards -->
+            <div id="topic-list-{{ unit.id }}">
+                {% include "base/partials/topic_list.html" with unit=unit %}
             </div>
 
             <!-- Add Topic Button -->
-            <div class="flex justify-center mt-6">
-                <label for="shared-modal" class="btn btn-primary rounded-full px-6 text-base cursor-pointer"
-                    onclick="openModal('topic', {{ unit.id }})"> <!-- Ignore error, it still works -->
+            <div class="flex justify-center">
+                <button hx-get="{% url 'get_topic_form' unit.id %}" hx-target="#modal-body" hx-swap="innerHTML"
+                    class="btn btn-primary rounded-full px-6 text-base"
+                    onclick="document.getElementById('shared-modal').checked = true">
                     + Topic
-                </label>
+                </button>
             </div>
+            
         </div>
     </div>
 
+    <!-- Delete Unit -->
     <div>
         {% include "base/components/delete_unit_form.html" %}
     </div>

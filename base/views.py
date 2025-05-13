@@ -674,7 +674,7 @@ def update_dmoj_exercises(request, topic_id):
     return redirect("topic", course_id=topic.unit.course.id, unit_id=topic.unit.id, topic_id=topic_id)
 
 
-# Renders the form for creating a new unit
+# New Unit Form: Renders the form for creating a new unit
 @login_required(login_url="login")
 @allowed_roles(["teacher"])
 def get_unit_form(request, course_id):
@@ -701,3 +701,29 @@ def submit_unit_form(request, course_id):
 
     context = {"form": form, "course": course}
     return render(request, "base/partials/unit_form.html", context)
+
+# New Topic Form: Renders the form for creating a new topic
+@login_required(login_url="login")
+@allowed_roles(["teacher"])
+def get_topic_form(request, unit_id):
+    unit = get_object_or_404(Unit, id=unit_id)
+    form = TopicForm()
+    context = {"form": form, "unit": unit}
+    return render(request, "base/partials/topic_form.html", context)
+
+@require_POST
+@login_required(login_url="login")
+@allowed_roles(["teacher"])
+def submit_topic_form(request, unit_id):
+    unit = get_object_or_404(Unit, id=unit_id)
+    form = TopicForm(request.POST)
+
+    if form.is_valid():
+        topic = form.save(commit=False)
+        topic.unit = unit
+        topic.order = (unit.topic_set.aggregate(Max("order"))["order__max"] or 0) + 1
+        topic.save()
+        topics = unit.topic_set.all()
+        return render(request, "base/partials/topic_list.html", {"topics": topics, "unit": unit})
+
+    return render(request, "base/partials/topic_form.html", {"form": form, "unit": unit})

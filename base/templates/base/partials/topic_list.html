@@ -1,0 +1,8 @@
+<div class="flex flex-col gap-4 p-4">
+    {% for topic in unit.topic_set.all %}
+      {% include "base/components/topic_card.html" with topic=topic %}
+    {% empty %}
+      <p class="text-base-content/70">No topics available for this unit.</p>
+    {% endfor %}
+  </div>
+  
