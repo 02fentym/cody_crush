@@ -1,7 +1,5 @@
-<p class="text-xs text-success">🟢 Rendering unit_form.html</p>
-
-
-<form method="POST" hx-post="{% url 'submit_unit_form' course.id %}" hx-target="#unit-list" hx-swap="outerHTML" hx-on="htmx:afterRequest: document.getElementById('shared-modal').checked = false">
+<form method="POST" hx-post="{% url 'submit_unit_form' course.id %}" hx-target="#unit-list" hx-swap="outerHTML"
+  hx-on="htmx:afterRequest: document.getElementById('shared-modal').checked = false">
   {% csrf_token %}
   <h3 class="font-bold text-lg mb-4">Add New Unit</h3>
 
