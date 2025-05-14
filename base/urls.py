@@ -22,8 +22,8 @@ urlpatterns = [
     
     # deletion views
     path("course/<int:course_id>/delete/", views.delete_course, name="delete-course"),
-    path("course/<int:course_id>/unit/<int:unit_id>/delete/", views.delete_unit, name="delete-unit"),
-    path("course/<int:course_id>/unit/<int:unit_id>/topic/<int:topic_id>/delete/", views.delete_topic, name="delete-topic"),
+    #path("course/<int:course_id>/unit/<int:unit_id>/delete/", views.delete_unit, name="delete-unit"),
+    #path("course/<int:course_id>/unit/<int:unit_id>/topic/<int:topic_id>/delete/", views.delete_topic, name="delete-topic"),
     path("activity/delete/<int:activity_id>/", views.delete_activity, name="delete-activity"),
 
     # question uploading
@@ -37,7 +37,6 @@ urlpatterns = [
     path("topic/<topic_id>/lesson/<int:lesson_id>/edit/", views.edit_lesson, name="edit-lesson"),
 
     # dmoj exercise views
-    path("topic/<topic_id>/create_dmoj_exercise/", views.create_dmoj_exercise, name="create-dmoj-exercise"),
     path("topic/<topic_id>/update_dmoj/", views.update_dmoj_exercises, name="update-dmoj-exercises"),
 
     

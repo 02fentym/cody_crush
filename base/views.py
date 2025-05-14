@@ -291,60 +291,23 @@ def course(request, course_id):
     if request.method == "POST":
         form_type = request.POST.get("form_type")
 
-        # Unit creation
-        if form_type == "unit":
-            unit_form = UnitForm(request.POST)
-            if unit_form.is_valid():
-                unit = unit_form.save(commit=False)
-                unit.course = course
-                last_order = course.unit_set.aggregate(Max('order'))['order__max'] or 0
-                unit.order = last_order + 1
-                unit.save()
-                messages.success(request, "Unit created successfully!")
-                return redirect("course", course_id=course_id)
-
+        form_handlers = {
+            "unit": handle_unit_creation,
+            "delete_unit": handle_unit_deletion,
+            "topic": handle_topic_creation,
+            "delete_topic": handle_topic_deletion,
+        }
+        handler = form_handlers.get(form_type)
+        if handler:
+            return handler(request, course)
+        
         # Course password update
-        elif form_type == "password":
+        if form_type == "password":
             password_form = EnrollmentPasswordForm(request.POST, instance=course)
             if password_form.is_valid():
                 password_form.save()
                 messages.success(request, "Enrollment password updated!")
                 return redirect("course", course_id=course_id)
-
-        # Unit deletion
-        elif form_type == "delete_unit":
-            unit_id = request.POST.get("unit_id")
-            unit_to_delete = get_object_or_404(Unit, id=unit_id, course=course)
-            unit_to_delete.delete()
-            messages.success(request, "Unit deleted successfully!")
-            return redirect("course", course_id=course_id)
-        
-        # Topic creation
-        elif form_type == "topic":
-            unit_id = request.POST.get("unit_id")
-            if unit_id:
-                unit = get_object_or_404(Unit, id=unit_id, course=course)
-
-                topic_form = TopicForm(request.POST)
-                if topic_form.is_valid():
-                    topic = topic_form.save(commit=False)
-                    topic.unit = unit
-
-                    last_order = unit.topic_set.aggregate(Max('order'))['order__max'] or 0
-                    topic.order = last_order + 1
-                    topic.save()
-
-                    messages.success(request, "Topic created successfully!")
-                    return redirect("course", course_id=course_id)
-
-        
-        # Topic deletion
-        elif form_type == "delete_topic":
-            topic_id = request.POST.get("topic_id")
-            topic_to_delete = get_object_or_404(Topic, id=topic_id, unit__course=course)
-            topic_to_delete.delete()
-            messages.success(request, "Topic deleted successfully!")
-            return redirect("course", course_id=course_id)
         
 
     # Prefetch Topics and Activities inside Topics
@@ -352,6 +315,48 @@ def course(request, course_id):
 
     context = {"courses": courses, "course": course, "units": units, "unit_form": unit_form, "password_form": password_form,}
     return render(request, "base/course.html", context)
+
+def handle_unit_creation(request, course):
+    unit_form = UnitForm(request.POST)
+    if unit_form.is_valid():
+        unit = unit_form.save(commit=False)
+        unit.course = course
+        last_order = course.unit_set.aggregate(Max('order'))['order__max'] or 0
+        unit.order = last_order + 1
+        unit.save()
+        messages.success(request, "Unit created successfully!")
+        return redirect("course", course_id=course.id)
+    
+def handle_unit_deletion(request, course):
+    unit_id = request.POST.get("unit_id")
+    unit_to_delete = get_object_or_404(Unit, id=unit_id, course=course)
+    unit_to_delete.delete()
+    messages.success(request, "Unit deleted successfully!")
+    return redirect("course", course_id=course.id)
+
+def handle_topic_creation(request, course):
+    unit_id = request.POST.get("unit_id")
+    if unit_id:
+        unit = get_object_or_404(Unit, id=unit_id, course=course)
+
+        topic_form = TopicForm(request.POST)
+        if topic_form.is_valid():
+            topic = topic_form.save(commit=False)
+            topic.unit = unit
+
+            last_order = unit.topic_set.aggregate(Max('order'))['order__max'] or 0
+            topic.order = last_order + 1
+            topic.save()
+
+            messages.success(request, "Topic created successfully!")
+            return redirect("course", course_id=course.id)
+
+def handle_topic_deletion(request, course):
+    topic_id = request.POST.get("topic_id")
+    topic_to_delete = get_object_or_404(Topic, id=topic_id, unit__course=course)
+    topic_to_delete.delete()
+    messages.success(request, "Topic deleted successfully!")
+    return redirect("course", course_id=course.id)
 
 
 def delete_course(request, course_id):
@@ -361,7 +366,7 @@ def delete_course(request, course_id):
     return redirect("home")
 
 
-def delete_unit(request, course_id, unit_id):
+'''def delete_unit(request, course_id, unit_id):
     unit = get_object_or_404(Unit, id=unit_id, course__id=course_id)
     unit.delete()
     messages.success(request, "Unit deleted successfully!")
@@ -372,7 +377,7 @@ def delete_topic(request, course_id, unit_id, topic_id):
     topic = get_object_or_404(Topic, id=topic_id, unit__id=unit_id, unit__course__id=course_id)
     topic.delete()
     messages.success(request, "Topic deleted successfully!")
-    return redirect("unit", course_id=course_id, unit_id=unit_id)
+    return redirect("unit", course_id=course_id, unit_id=unit_id)'''
 
 
 def create_quiz(request, topic_id):
