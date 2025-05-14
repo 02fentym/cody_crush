@@ -19,7 +19,7 @@
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
-    
+
 
 </head>
 
@@ -60,6 +60,21 @@
 
     <!-- File that runs all javascript -->
     <script src="{% static 'js/main.js' %}"></script>
+
+    <!--
+    This section defines a modal component using HTML. 
+    - The `<input>` element with `id="modal-wrapper"` acts as a toggle for the modal, controlled by the `modal-toggle` class.
+    - The `<div>` with `class="modal"` represents the modal container.
+    - Inside the modal, the `<div>` with `id="modal-body"` serves as the content area where dynamic forms will be injected using HTMX.
+    -->
+    <input type="checkbox" id="modal-wrapper" class="modal-toggle" />
+    <div class="modal">
+        <div class="modal-box" id="modal-body">
+            <!-- HTMX will inject forms here -->
+        </div>
+    </div>
+
+
 </body>
 
 </html>

@@ -22,8 +22,6 @@ urlpatterns = [
     
     # deletion views
     path("course/<int:course_id>/delete/", views.delete_course, name="delete-course"),
-    #path("course/<int:course_id>/unit/<int:unit_id>/delete/", views.delete_unit, name="delete-unit"),
-    #path("course/<int:course_id>/unit/<int:unit_id>/topic/<int:topic_id>/delete/", views.delete_topic, name="delete-topic"),
     path("activity/delete/<int:activity_id>/", views.delete_activity, name="delete-activity"),
 
     # question uploading
@@ -41,9 +39,12 @@ urlpatterns = [
 
     
     # ADD CONTENT
-    # These urls are for adding units, topics and more.
+    # Unit Creation
     path("unit-form/<int:course_id>/", views.get_unit_form, name="get_unit_form"),
     path("submit-unit-form/<int:course_id>/", views.submit_unit_form, name="submit_unit_form"),
+
+    # Unit Deletion
+    path("units/<int:unit_id>/delete/", views.delete_unit, name="delete_unit"),
 
     path("topic-form/<int:unit_id>/", views.get_topic_form, name="get_topic_form"),
     path("submit-topic-form/<int:unit_id>/", views.submit_topic_form, name="submit_topic_form"),

@@ -96,7 +96,7 @@ class UnitForm(ModelForm):
         fields = ["title", "description"]
         widgets = {
             'title': forms.TextInput(attrs={
-                'placeholder': 'Course title...',
+                'placeholder': 'Unit title...',
                 'class': 'input input-bordered w-full'
             }),
             'description': forms.Textarea(attrs={

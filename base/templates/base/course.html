@@ -17,33 +17,11 @@
     </div>
 </div>
 
-<!-- Modal for creating new unit or topic -->
-<input type="checkbox" id="shared-modal" class="modal-toggle" />
-<div class="modal">
-    <div class="modal-box" id="modal-body">
-        <h3 class="font-bold text-lg mb-4" id="modal-title">Create</h3>
-        <form method="POST" class="space-y-4" id="shared-form">
-            {% csrf_token %}
-            <input type="hidden" name="form_type" id="form-type">
-            <input type="hidden" name="unit_id" id="unit-id">
-
-            <div id="form-fields">
-                <!-- We'll dynamically inject form fields here -->
-            </div>
-
-            <div class="modal-action">
-                <button type="submit" class="btn btn-primary">Create</button>
-                <label for="shared-modal" class="btn">Cancel</label>
-            </div>
-        </form>
-    </div>
-</div>
-
 <!-- Add Unit Button -->
 <div class="flex justify-center mt-6">
     <button hx-get="{% url 'get_unit_form' course.id %}" hx-target="#modal-body" hx-swap="innerHTML"
-        class="btn btn-primary rounded-full px-6 text-base"
-        onclick="document.getElementById('shared-modal').checked = true">
+        onclick="document.getElementById('modal-wrapper').checked = true"
+        class="btn btn-primary rounded-full px-6 text-base">
         + Unit
     </button>
 </div>
