@@ -291,14 +291,6 @@ def course(request, course_id):
     if request.method == "POST":
         form_type = request.POST.get("form_type")
 
-        form_handlers = {
-            "topic": handle_topic_creation,
-            "delete_topic": handle_topic_deletion,
-        }
-        handler = form_handlers.get(form_type)
-        if handler:
-            return handler(request, course)
-        
         # Course password update
         if form_type == "password":
             password_form = EnrollmentPasswordForm(request.POST, instance=course)
@@ -313,32 +305,6 @@ def course(request, course_id):
 
     context = {"courses": courses, "course": course, "units": units, "unit_form": unit_form, "password_form": password_form,}
     return render(request, "base/course.html", context)
-
-
-def handle_topic_creation(request, course):
-    unit_id = request.POST.get("unit_id")
-    if unit_id:
-        unit = get_object_or_404(Unit, id=unit_id, course=course)
-
-        topic_form = TopicForm(request.POST)
-        if topic_form.is_valid():
-            topic = topic_form.save(commit=False)
-            topic.unit = unit
-
-            last_order = unit.topic_set.aggregate(Max('order'))['order__max'] or 0
-            topic.order = last_order + 1
-            topic.save()
-
-            messages.success(request, "Topic created successfully!")
-            return redirect("course", course_id=course.id)
-
-def handle_topic_deletion(request, course):
-    topic_id = request.POST.get("topic_id")
-    topic_to_delete = get_object_or_404(Topic, id=topic_id, unit__course=course)
-    topic_to_delete.delete()
-    messages.success(request, "Topic deleted successfully!")
-    return redirect("course", course_id=course.id)
-
 
 def delete_course(request, course_id):
     course = get_object_or_404(Course, id=course_id, teacher=request.user)
@@ -615,7 +581,7 @@ def update_dmoj_exercises(request, topic_id):
 
 
 
-################## SECTION: Forms for adding things (unites, topics, lessons, quizzes, etc)
+################## SECTION: Forms for adding things (units, topics, lessons, quizzes, etc)
 
 # Unit Creation
 @login_required(login_url="login")
@@ -645,6 +611,7 @@ def submit_unit_form(request, course_id):
     context = {"form": form, "course": course}
     return render(request, "base/partials/unit_form.html", context)
 
+
 # Unit Deletion
 @require_POST
 @login_required(login_url="login")
@@ -658,8 +625,7 @@ def delete_unit(request, unit_id):
     return render(request, "base/partials/unit_list.html", {"units": units, "course": course})
 
 
-
-# New Topic Form: Renders the form for creating a new topic
+# Topic Addition
 @login_required(login_url="login")
 @allowed_roles(["teacher"])
 def get_topic_form(request, unit_id):
@@ -685,7 +651,20 @@ def submit_topic_form(request, unit_id):
 
     return render(request, "base/partials/topic_form.html", {"form": form, "unit": unit})
 
-# New DMOJ Exercise Form: Renders the form for creating a DMOJ exercise
+# Topic Deletion
+@require_POST
+@login_required
+@allowed_roles(["teacher"])
+def delete_topic(request, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id, unit__course__teacher=request.user)
+    unit = topic.unit
+    topic.delete()
+
+    topics = unit.topic_set.all()
+    return render(request, "base/partials/topic_list.html", {"topics": topics, "unit": unit})
+
+
+# DMOJ Exercise Addition
 def get_dmoj_form(request, topic_id):
     topic = Topic.objects.get(id=topic_id)
     form = DmojForm()

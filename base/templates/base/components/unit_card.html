@@ -34,8 +34,8 @@
             <!-- Add Topic Button -->
             <div class="flex justify-center">
                 <button hx-get="{% url 'get_topic_form' unit.id %}" hx-target="#modal-body" hx-swap="innerHTML"
-                    class="btn btn-primary rounded-full px-6 text-base"
-                    onclick="document.getElementById('shared-modal').checked = true">
+                    onclick="document.getElementById('modal-wrapper').checked = true"
+                    class="btn btn-primary rounded-full px-6 text-base">
                     + Topic
                 </button>
             </div>

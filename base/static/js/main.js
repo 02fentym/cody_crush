@@ -41,9 +41,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 // Adds the CSRF token globally for HTMX actions
-document.body.addEventListener('htmx:configRequest', function (event) {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+document.body.addEventListener("htmx:configRequest", function (event) {
+    const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]")?.value;
     if (csrfToken) {
-        event.detail.headers['X-CSRFToken'] = csrfToken;
+        event.detail.headers["X-CSRFToken"] = csrfToken;
     }
 });

@@ -46,9 +46,14 @@ urlpatterns = [
     # Unit Deletion
     path("units/<int:unit_id>/delete/", views.delete_unit, name="delete_unit"),
 
+    # Topic Creation
     path("topic-form/<int:unit_id>/", views.get_topic_form, name="get_topic_form"),
     path("submit-topic-form/<int:unit_id>/", views.submit_topic_form, name="submit_topic_form"),
 
+    # Topic Deletion
+    path("topics/<int:topic_id>/delete/", views.delete_topic, name="delete_topic"),
+
+    # DMOJ Exercise Creation
     path("get_dmoj_form/<int:topic_id>/", views.get_dmoj_form, name="get_dmoj_form"),
     path("submit_dmoj_form/<int:topic_id>/", views.submit_dmoj_form, name="submit_dmoj_form"),
 

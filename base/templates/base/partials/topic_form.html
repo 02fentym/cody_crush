@@ -1,5 +1,5 @@
 <form method="POST" hx-post="{% url 'submit_topic_form' unit.id %}" hx-target="#topic-list-{{ unit.id }}"
-    hx-swap="outerHTML" hx-on="htmx:afterRequest: document.getElementById('shared-modal').checked = false">
+    hx-swap="outerHTML" hx-on="htmx:afterRequest: document.getElementById('modal-wrapper').checked = false">
     {% csrf_token %}
     <h3 class="font-bold text-lg mb-4">Add Topic</h3>
 
@@ -12,6 +12,7 @@
 
     <div class="modal-action">
         <button type="submit" class="btn btn-primary">Create</button>
-        <label for="shared-modal" class="btn">Cancel</label>
+        <label for="modal-wrapper" class="btn">Cancel</label>
     </div>
 </form>
+
