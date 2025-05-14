@@ -351,6 +351,7 @@ def create_quiz(request, topic_id):
 
 def delete_activity(request, activity_id):
     activity = get_object_or_404(Activity, id=activity_id)
+    unit = activity.topic.unit
 
      # Delete the associated object, whether it's a lesson or quiz_template
     activity.content_object.delete()
@@ -359,7 +360,7 @@ def delete_activity(request, activity_id):
     activity.delete()
 
     messages.success(request, "Activity deleted successfully!")
-    return redirect("course", course_id=activity.topic.unit.course.id)
+    return render(request, "base/partials/topic_list.html", {"unit": unit})
 
 
 @allowed_roles(["teacher"])
@@ -706,3 +707,5 @@ def submit_dmoj_form(request, topic_id):
     
     # Return modal with form and errors if needed
     return render(request, "base/partials/dmoj_form.html", {"form": form, "topic": topic})
+
+#
