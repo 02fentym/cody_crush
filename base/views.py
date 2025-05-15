@@ -285,7 +285,7 @@ def course(request, course_id):
     course = get_object_or_404(qs)
 
     unit_form = UnitForm()
-    password_form = EnrollmentPasswordForm(instance=course)
+    password_form = EnrollmentPasswordForm()
 
     # Handle unit creation, course password update and unit deletion
     if request.method == "POST":
@@ -293,7 +293,7 @@ def course(request, course_id):
 
         # Course password update
         if form_type == "password":
-            password_form = EnrollmentPasswordForm(request.POST, instance=course)
+            password_form = EnrollmentPasswordForm(request.POST)
             if password_form.is_valid():
                 password_form.save()
                 messages.success(request, "Enrollment password updated!")
@@ -729,3 +729,23 @@ def submit_dmoj_form(request, topic_id):
 
     # If form is invalid, re-render the modal with errors
     return render(request, "base/partials/dmoj_form.html", {"form": form, "topic": topic})
+
+# Join Course
+@login_required
+def get_enrolment_form(request):
+    form = EnrollmentPasswordForm()
+    return render(request, "base/components/course_enrolment_form.html", {"form": form})
+
+@login_required
+def enrol_in_course(request):
+    if request.method == "POST":
+        form = EnrollmentPasswordForm(request.POST)
+        if form.is_valid():
+            password = form.cleaned_data["password"]
+            course = Course.objects.filter(enrollment_password=password).first()
+
+            if course:
+                course.students.add(request.user)
+                return render(request, "base/partials/course_card.html", {"course": course})
+            return HttpResponse("<div class='text-error'>Invalid course password.</div>")
+    return HttpResponse("<div class='text-error'>Submission failed.</div>")

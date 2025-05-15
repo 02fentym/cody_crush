@@ -125,16 +125,15 @@ class TopicForm(forms.ModelForm):
 
 
 # This is a form to update the enrollment password
-class EnrollmentPasswordForm(forms.ModelForm):
-    class Meta:
-        model = Course
-        fields = ["enrollment_password"]
-        widgets = {
-            "enrollment_password": forms.TextInput(attrs={
-                "placeholder": "Enter password",
-                "style": "padding:4px 8px; border:1px solid #ccc; border-radius:4px;"
-            }),
-        }
+class EnrollmentPasswordForm(forms.Form):
+    password = forms.CharField(
+        label="",
+        widget=forms.TextInput(attrs={
+            "placeholder": "Enter course password",
+            "class": "input input-bordered w-full"
+        })
+    )
+
 
 class LessonForm(forms.ModelForm):
     class Meta:

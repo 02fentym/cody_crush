@@ -2,43 +2,28 @@
 
 {% block content %}
 
-<!--
-{% if user.profile.role == "student" %}
-{% include "base/components/course_enrolment_form.html" %}
-{% endif %}
--->
-
 <h1>Courses</h1>
 
+<!-- Join Course Button -->
+{% if user.profile.role == "student" %}
+<div class="mb-4">
+    <button class="btn btn-secondary" hx-get="{% url 'get_enrolment_form' %}" hx-target="#modal-body"
+        hx-swap="innerHTML" onclick="document.getElementById('modal-wrapper').checked = true">
+        + Join a Course
+    </button>
+</div>
+{% endif %}
+<div id="enrolment-feedback" class="my-4"></div> <!-- HTMX injects success/failure feedback -->
+
 <!-- List of courses -->
-{% if courses %}
-<div class="flex flex-wrap gap-4">
-    {% for course in courses %}
-    <div class="card card-sm card-border bg-base-100 w-96 shadow-sm hover:shadow-md relative">
-        {% if user.profile.role == "teacher" %}
-
-        <!-- Delete course -->
-        <div class="absolute top-2 right-2">
-            {% include "base/components/delete_course_form.html" with course=course %}
-        </div>
-        {% endif %}
-
-        <a href="{% url 'course' course.id %}" class="block">
-            <div class="card-body">
-                <span class="card-title">{{ course.title }}</span>
-                <p>{{ course.description }}</p>
-            </div>
-        </a>
-    </div>
-    {% endfor %}
-    {% else %}
-    <p class="empty-message">No courses yet.</p>
-    {% endif %}
+<div id="course-list">
+    {% include "base/partials/course_list.html" %}
 
     <!-- Create New Course -->
     {% if user.profile.role == "teacher" %}
     {% include "base/components/create_course_form.html" %}
     {% endif %}
+    </div>
 </div>
 
 

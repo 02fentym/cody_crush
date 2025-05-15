@@ -1,12 +1,16 @@
-<form method="POST" action="" class="flex-center-gap">
+<form method="POST" hx-post="{% url 'enrol_in_course' %}" hx-target="#course-list" hx-swap="beforeend"
+    hx-trigger="submit" hx-on="htmx:afterRequest: document.getElementById('modal-wrapper').checked = false"
+    class="space-y-4">
+
     {% csrf_token %}
+    <h3 class="font-bold text-lg mb-2">Join a Course</h3>
 
-    <input type="hidden" name="form_type" value="password"> <!-- Hidden field to indicate form type -->
+    <div class="form-control">
+        {{ form.password }}
+    </div>
 
-    <label for="id_enrollment_password" class="form-label">Join class:</label>
-    <input type="text" name="enrollment_password" required class="input-field">
-
-    <button type="submit" class="add-button">
-        Enroll
-    </button>
+    <div class="modal-action">
+        <button type="submit" class="btn btn-primary">Join</button>
+        <label for="modal-wrapper" class="btn">Cancel</label>
+    </div>
 </form>
