@@ -18,6 +18,7 @@
 </div>
 
 <!-- Add Unit Button -->
+{% if user.profile.role == "teacher" %}
 <div class="flex justify-center mt-6">
     <button hx-get="{% url 'get_unit_form' course.id %}" hx-target="#modal-body" hx-swap="innerHTML"
         onclick="document.getElementById('modal-wrapper').checked = true"
@@ -25,5 +26,6 @@
         + Unit
     </button>
 </div>
+{% endif %}
 
 {% endblock %}
