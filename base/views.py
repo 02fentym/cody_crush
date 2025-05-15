@@ -349,20 +349,6 @@ def create_quiz(request, topic_id):
     return redirect("course", course_id=course_id)
 
 
-def delete_activity(request, activity_id):
-    activity = get_object_or_404(Activity, id=activity_id)
-    unit = activity.topic.unit
-
-     # Delete the associated object, whether it's a lesson or quiz_template
-    activity.content_object.delete()
-
-    # Delete the Activity itself too
-    activity.delete()
-
-    messages.success(request, "Activity deleted successfully!")
-    return render(request, "base/partials/topic_list.html", {"unit": unit})
-
-
 @allowed_roles(["teacher"])
 @login_required(login_url="login")
 def upload_questions(request):
@@ -665,47 +651,81 @@ def delete_topic(request, topic_id):
     return render(request, "base/partials/topic_list.html", {"topics": topics, "unit": unit})
 
 
+# Activity Deletion
+@require_POST
+@login_required(login_url="login")
+@allowed_roles(["teacher"])
+def delete_activity(request, activity_id):
+    activity = get_object_or_404(Activity, id=activity_id)
+    unit = activity.topic.unit
+
+     # Delete the associated object, whether it's a lesson or quiz_template
+    activity.content_object.delete()
+
+    # Delete the Activity itself too
+    activity.delete()
+
+    messages.success(request, "Activity deleted successfully!")
+    return render(request, "base/partials/topic_list.html", {"unit": unit})
+
+
 # DMOJ Exercise Addition
 def get_dmoj_form(request, topic_id):
     topic = Topic.objects.get(id=topic_id)
     form = DmojForm()
     return render(request, "base/partials/dmoj_form.html", {"form": form, "topic": topic})
 
+
+@login_required(login_url="login")
+@allowed_roles(["teacher"])
+@require_POST
 def submit_dmoj_form(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
-    course = topic.unit.course
+    form = DmojForm(request.POST)
 
-    if request.method == "POST":
-        form = DmojForm(request.POST)
-        if form.is_valid():
-            url = form.cleaned_data["url"]
-            metadata = fetch_dmoj_metadata_from_url(url)
+    if form.is_valid():
+        url = form.cleaned_data["url"]
+        metadata = fetch_dmoj_metadata_from_url(url)
 
-            if metadata:
-                dmoj_exercise = DmojExercise.objects.create(
-                    title=metadata["title"],
-                    url=url,
-                    problem_code=metadata["problem_code"],
-                    points=metadata["points"]
-                )
+        if not metadata:
+            messages.error(request, "Failed to fetch DMOJ metadata. Please check the URL.")
+            return render(request, "base/partials/dmoj_form.html", {"form": form, "topic": topic})
 
-                Activity.objects.create(
-                    topic=topic,
-                    order=topic.activity_set.count() + 1,
-                    content_type=ContentType.objects.get_for_model(dmoj_exercise),
-                    object_id=dmoj_exercise.id
-                )
+        # Try to get or create the DmojExercise
+        dmoj_exercise, created = DmojExercise.objects.get_or_create(
+            problem_code=metadata["problem_code"],
+            defaults={
+                "title": metadata["title"],
+                "url": url,
+                "points": metadata["points"],
+            }
+        )
 
-                messages.success(request, "DMOJ exercise created successfully!")
+        # Prevent duplicate assignment to the same topic
+        already_assigned = Activity.objects.filter(
+            topic=topic,
+            content_type=ContentType.objects.get_for_model(DmojExercise),
+            object_id=dmoj_exercise.id
+        ).exists()
 
-                # HTMX response: replace topic list
-                return render(request, "base/partials/topic_list.html", {"unit": topic.unit})
-            else:
-                messages.error(request, "Failed to fetch DMOJ metadata. Please check the URL.")
-        else:
-            messages.error(request, "Form validation failed.")
-    
-    # Return modal with form and errors if needed
+        if already_assigned:
+            messages.error(request, "This DMOJ problem is already assigned to this topic.")
+            response = render(request, "base/partials/dmoj_form.html", {"form": form, "topic": topic})
+            response["HX-Reswap"] = "innerHTML"
+            response["HX-Retarget"] = "#modal-body"
+            return response
+
+
+        # Create the activity
+        Activity.objects.create(
+            topic=topic,
+            order=topic.activity_set.count() + 1,
+            content_type=ContentType.objects.get_for_model(DmojExercise),
+            object_id=dmoj_exercise.id
+        )
+
+        messages.success(request, "DMOJ exercise created successfully!")
+        return render(request, "base/partials/topic_list.html", {"unit": topic.unit})
+
+    # If form is invalid, re-render the modal with errors
     return render(request, "base/partials/dmoj_form.html", {"form": form, "topic": topic})
-
-#

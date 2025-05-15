@@ -5,14 +5,19 @@
     <h3 class="font-bold text-lg mb-4">Add DMOJ Exercise</h3>
 
     <div class="form-control mb-4">
-        {{ form.title }}
-    </div>
-    <div class="form-control mb-4">
         {{ form.url }}
     </div>
 
     <div class="modal-action">
         <button type="submit" class="btn btn-primary">Add</button>
-        <label for="shared-modal" class="btn">Cancel</label>
+        <label for="modal-wrapper" class="btn">Cancel</label>
     </div>
 </form>
+
+{% if messages %}
+  <ul class="text-error text-sm mb-2">
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
