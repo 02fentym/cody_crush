@@ -39,6 +39,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+// Topic Card: Only allows one to be open at a time
+document.querySelectorAll(".topic-toggle").forEach((checkbox) => {
+    checkbox.addEventListener("change", function () {
+        if (checkbox.checked) {
+            document.querySelectorAll(".topic-toggle").forEach((other) => {
+                if (other !== checkbox) other.checked = false;
+            });
+        }
+    });
+});
+
 
 // Adds the CSRF token globally for HTMX actions
 document.body.addEventListener("htmx:configRequest", function (event) {
