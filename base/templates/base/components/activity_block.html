@@ -1,41 +1,23 @@
-<li>
-    {% if activity.content_type.model == "lesson" %}
+{% if activity.content_type.model == "dmojexercise" %}
+<li class="list-row items-center gap-4 bg-base-200 rounded-lg px-4 py-3 hover:bg-base-300 transition">
+    <!-- Icon -->
+    <div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-primary" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h4" />
+        </svg>
+    </div>
 
-        <!-- Lesson Card -->
-        {% if user.profile.role == "teacher" %}
-        📚 Lesson: <a href="{% url 'edit-lesson' activity.topic.id activity.object_id %}">{{ activity.content_object.title|striptags }}</a>
-        {% else %}
-        📚 Lesson: <a href="{% url 'view-lesson' activity.object_id %}">{{ activity.content_object.title|striptags }}</a>
-        {% endif %}
-
-    <!-- Quiz Card -->
-    {% elif activity.content_type.model == "quiztemplate" %}
-        {% if user.profile.role == "teacher" %}
-            📝 {{ activity.content_object.quiz_type }}
-        {% else %}
-            📝 {{ activity.content_object.quiz_type }}: <a href="{% url 'start-quiz' activity.id %}">{{ activity.content_object.topic.title|striptags }}</a>
-        {% endif %}
-
-    <!-- Dmoj Exercise Card -->
-    {% elif activity.content_type.model == "dmojexercise" %}
-        💻 DMOJ Problem: <a href="{{ activity.content_object.url }}" target="_blank">{{ activity.content_object.title|striptags }}</a>
-
-    <!-- Unknown Activity Type-->
-    {% else %}
-        ❓ Unknown activity type
-    {% endif %}
-
-    <!-- Delete activity -->
-    {% if user.profile.role == "teacher" %}
-        {% include "base/components/delete_activity_form.html" with activity=activity %}
-    {% endif %}
-
-    <!-- Activity completion status -->
-    {% if user.profile.role == "student" %}
-        {% if activity.completed %}
-        <span class="activity-status">✅</span>
-        {% else %}
-        <span class="activity-status">❌</span>
-        {% endif %}
-    {% endif %}
+    <!-- Title and Type -->
+    <div>
+        <div class="text-xs uppercase font-semibold opacity-60">
+            DMOJ Exercise
+        </div>
+        <div>
+            <a href="{{ activity.content_object.url }}" target="_blank" class="font-semibold">
+                {{ activity.content_object.title|striptags }}
+            </a>
+        </div>
+    </div>
 </li>
+{% endif %}
