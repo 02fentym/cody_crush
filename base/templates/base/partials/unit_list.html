@@ -1,4 +1,6 @@
 {# templates/base/partials/unit_list.html #}
+
+<div id="unit-list">
 {% if units %}
 <div class="flex flex-col gap-4">
     {% for unit in units %}
@@ -7,4 +9,5 @@
     {% else %}
         <p class="text-base-content/70">No topics available for this unit.</p>
     {% endif %}
+</div>
 </div>

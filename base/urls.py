@@ -62,4 +62,9 @@ urlpatterns = [
     path("get_dmoj_form/<int:topic_id>/", views.get_dmoj_form, name="get_dmoj_form"),
     path("submit_dmoj_form/<int:topic_id>/", views.submit_dmoj_form, name="submit_dmoj_form"),
 
+    # Quiz Creation
+    path("topic/<int:topic_id>/quiz-form/", views.get_quiz_form, name="get_quiz_form"),
+    path("topic/<int:topic_id>/submit-quiz/", views.submit_quiz_form, name="submit_quiz_form"),
+
+
 ]

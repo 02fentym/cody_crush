@@ -730,6 +730,43 @@ def submit_dmoj_form(request, topic_id):
     # If form is invalid, re-render the modal with errors
     return render(request, "base/partials/dmoj_form.html", {"form": form, "topic": topic})
 
+
+# Quiz Addition
+@login_required
+@allowed_roles(["teacher"])
+def get_quiz_form(request, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id)
+    return render(request, "base/components/quiz_form.html", {"topic": topic})
+
+@login_required
+@allowed_roles(["teacher"])
+def submit_quiz_form(request, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id)
+
+    if request.method == "POST":
+        question_count = int(request.POST.get("question_count"))
+        question_type = request.POST.get("question_type")
+
+        quiz_template = QuizTemplate.objects.create(
+            topic=topic,
+            question_count=question_count,
+            question_type=question_type,
+        )
+
+        # Create the activity
+        Activity.objects.create(
+            topic=topic,
+            order=topic.activity_set.count() + 1,
+            content_type=ContentType.objects.get_for_model(QuizTemplate),
+            object_id=quiz_template.id
+        )
+
+        # Rerender the full topic list (with new activity) for that unit
+        return render(request, "base/partials/topic_list.html", {"unit": topic.unit})
+
+    return HttpResponse("<div class='text-error'>Failed to create quiz</div>")
+
+
 # Join Course
 @login_required
 def get_enrolment_form(request):

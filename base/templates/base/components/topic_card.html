@@ -22,13 +22,22 @@
                     {% endif %}
                 </div>
 
-                <!-- DMOJ Exercise Creation -->
+                <!-- Add Activities -->
                 {% if user.profile.role == "teacher" %}
                 <div class="flex justify-center gap-2 p-4">
+
+                    <!-- DMOJ Exercise Creation -->
                     <button class="btn btn-sm btn-outline" hx-get="{% url 'get_dmoj_form' topic.id %}"
                         hx-target="#modal-body" hx-swap="innerHTML"
                         onclick="document.getElementById('modal-wrapper').checked = true">
                         + DMOJ
+                    </button>
+
+                    <!-- Quiz Creation -->
+                    <button class="btn btn-sm btn-outline" hx-get="{% url 'get_quiz_form' topic.id %}"
+                        hx-target="#modal-body" hx-swap="innerHTML"
+                        onclick="document.getElementById('modal-wrapper').checked = true">
+                        + Quiz
                     </button>
                 </div>
                 {% endif %}

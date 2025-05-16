@@ -1,0 +1,31 @@
+<form method="POST" hx-post="{% url 'submit_quiz_form' topic.id %}" hx-target="#topic-list-{{ topic.unit.id }}"
+    hx-swap="outerHTML" hx-on="htmx:afterRequest: document.getElementById('modal-wrapper').checked = false"
+    class="space-y-4">
+
+    {% csrf_token %}
+    <h3 class="font-bold text-lg">Create a Quiz</h3>
+    <p class="text-sm text-base-content/60">Generate a quiz from the topic’s question pool.</p>
+
+    <div class="form-control">
+        <label class="label" for="question_count">Number of Questions</label>
+        <select name="question_count" id="question_count" class="select select-bordered w-full" required>
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+        </select>
+    </div>
+
+    <div class="form-control">
+        <label class="label" for="question_type">Question Type</label>
+        <select name="question_type" id="question_type" class="select select-bordered w-full" required>
+            <option value="multiple_choice" selected>Multiple Choice</option>
+            <option value="tracing">Tracing</option>
+        </select>
+    </div>
+
+    <div class="modal-action">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <label for="modal-wrapper" class="btn">Cancel</label>
+    </div>
+</form>

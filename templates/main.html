@@ -24,6 +24,9 @@
 </head>
 
 <body>
+    <form style="display:none;">
+        {% csrf_token %}
+      </form>
     <div class="min-h-screen px-80">
         {% include "navbar.html" %}
 

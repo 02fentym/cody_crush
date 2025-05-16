@@ -26,6 +26,7 @@
     </nav>
 
     <!-- TEACHING TOOLS -->
+    {% if user.profile.role == "teacher" %}
     <nav>
         <p class="menu-title">Teaching Tools</p>
         <ul class="menu">
@@ -33,4 +34,5 @@
             <li><a>Upload Questions</a></li>
         </ul>
     </nav>
+    {% endif %}
 </aside>
