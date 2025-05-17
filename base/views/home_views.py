@@ -1,15 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import (Unit, Topic, Quiz, Answer, Profile, Course, QuizTemplate, Activity, Lesson, 
+from base.models import (Unit, Topic, Quiz, Answer, Profile, Course, QuizTemplate, Activity, Lesson, 
     MultipleChoiceQuestion, TracingQuestion, DmojExercise, ActivityCompletion, Language, CourseTopic, CourseUnit,
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .forms import UserForm, CourseForm, UnitForm, TopicForm, EnrollmentPasswordForm, LessonForm, DmojForm, CourseUnitForm
+from base.forms import UserForm, CourseForm, UnitForm, TopicForm, EnrollmentPasswordForm, LessonForm, DmojForm, CourseUnitForm
 from django.contrib.contenttypes.models import ContentType
-from .decorators import allowed_roles
-from .utils import fetch_dmoj_metadata_from_url, fetch_dmoj_user_data
+from base.decorators import allowed_roles
+from base.utils import fetch_dmoj_metadata_from_url, fetch_dmoj_user_data
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Max
@@ -784,41 +784,4 @@ def enrol_in_course(request):
 
 
 ################## SECTION: Course Management
-
-# Managing Units
-@login_required
-@allowed_roles(["teacher"])
-def manage_units(request):
-    units = Unit.objects.all().order_by("-updated")  # or whatever ordering you want
-    return render(request, "base/manage_units.html", {"units": units})
-
-@login_required
-@allowed_roles(["teacher"])
-def get_unit_form(request):
-    form = UnitForm()
-    return render(request, "base/partials/unit_form.html", {"form": form})
-
-
-@login_required
-@allowed_roles(["teacher"])
-def submit_unit_form_manage(request):
-    if request.method == "POST":
-        form = UnitForm(request.POST)
-        if form.is_valid():
-            form.save()
-            units = Unit.objects.all().order_by("-updated")
-            return render(request, "base/manage_units_table.html", {"units": units})
-    else:
-        form = UnitForm()
-
-    return render(request, "base/partials/unit_form.html", {"form": form})
-
-
-# Managing Topics
-@login_required
-@allowed_roles(["teacher"])
-def manage_topics(request):
-    topics = Topic.objects.all().order_by("-updated")
-    return render(request, "manage_topics.html", {"topics": topics})
-
 
