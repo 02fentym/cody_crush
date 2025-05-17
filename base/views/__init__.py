@@ -1,7 +1,10 @@
-from .course_content_views import *
-from .course_management_views import *
+from .activity_views import *
+from .course_topic_views import *
+from .course_unit_views import *
+from .dmoj_views import *
 from .home_views import *
-from .student_quiz_views import *
-from .teacher_quiz_views import *
+from .lesson_views import *
+from .question_upload_views import *
+from .quiz_views import *
+from .unit_topic_managements_views import *
 from .user_views import *
-

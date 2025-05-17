@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.db.models import Max
 
 from base.decorators import allowed_roles
 from base.models import Unit, Topic
