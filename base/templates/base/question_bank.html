@@ -1,0 +1,44 @@
+{% extends "main.html" %}
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-6">Question Bank</h1>
+
+<!-- Question Table -->
+<div class="overflow-x-auto shadow rounded-lg mb-6">
+    <table class="table table-zebra w-full">
+        <thead>
+            <tr>
+                <th>Unit</th>
+                <th>Topic</th>
+                <th>Type</th>
+                <th>Prompt</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for question in questions %}
+            <tr>
+                <td>{{ question.topic.unit.title }}</td>
+                <td>{{ question.topic.title }}</td>
+                <td class="capitalize">{{ question.get_type_display|default:"MC" }}</td>
+                <td>{{ question.prompt|truncatechars:60 }}</td>
+                <td>{{ question.created|date:"Y-m-d" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-base-content/70">No questions uploaded yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Upload Button -->
+<div class="flex justify-center">
+    <button class="btn btn-primary" hx-get="{% url 'get-upload-questions-form' %}" hx-target="#modal-body"
+        hx-swap="innerHTML" onclick="document.getElementById('modal-wrapper').checked = true">
+        + Upload Questions
+    </button>
+</div>
+
+{% endblock %}

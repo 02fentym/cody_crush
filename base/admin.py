@@ -2,22 +2,21 @@ from django.contrib import admin
 from .models import (
     Unit, Topic, Quiz, Answer, Profile, Course, Activity,
     QuizTemplate, Lesson, MultipleChoiceQuestion, TracingQuestion,
-    DmojExercise, ActivityCompletion
+    DmojExercise, ActivityCompletion, Language, CourseUnit, CourseTopic
 )
 
 # --- Customized Admin Classes ---
 
 @admin.register(Unit) # Register the Unit model with a custom admin class
 class UnitAdmin(admin.ModelAdmin):
-    list_display = ('title', 'course')
+    list_display = ('title',)
     search_fields = ('title',)
-    list_filter = ('course',)
 
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
-    list_display = ('title', 'unit')
+    list_display = ('title',)
     search_fields = ('title',)
-    list_filter = ('unit',)
+    list_filter = ('title',)
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
@@ -53,6 +52,24 @@ class ActivityCompletionAdmin(admin.ModelAdmin):
     list_display = ('student', 'activity', 'completed', 'date_completed')
     list_filter = ('completed', 'date_completed')
     search_fields = ('student__username', 'activity__id')
+
+@admin.register(Language)
+class LanguageAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+
+@admin.register(CourseUnit)
+class CourseUnitAdmin(admin.ModelAdmin):
+    list_display = ("course", "unit", "order")
+    list_filter = ("course",)
+    search_fields = ("course__title", "unit__title")
+
+@admin.register(CourseTopic)
+class CourseTopicAdmin(admin.ModelAdmin):
+    list_display = ("unit", "topic", "order",)
+    list_filter = ("unit", "topic",)
+    search_fields = ("unit__title", "topic__title",)
+
 
 # --- Default Simple Registrations ---
 

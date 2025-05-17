@@ -16,17 +16,17 @@ class Profile(models.Model):
         return f"{self.user.username} ({self.role.title()})"
 
 
-class Course(models.Model):
-    LANGUAGE_CHOICES = [
-        ('python', 'Python'),
-        ('java', 'Java'),
-        ('cpp', 'C++'),
-        # Add more if needed
-    ]
+class Language(models.Model):
+    name = models.CharField(max_length=50, unique=True)
 
+    def __str__(self):
+        return self.name
+
+
+class Course(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES, default='python')  # ← Add this
+    language = models.ForeignKey("Language", on_delete=models.SET_NULL, null=True)
     teacher = models.ForeignKey(User, on_delete=models.CASCADE)
     students = models.ManyToManyField(User, blank=True, related_name="enrolled_courses")
     enrollment_password = models.CharField(max_length=20, null=True, blank=True, help_text="Set a password students must enter to join.")
@@ -38,33 +38,54 @@ class Course(models.Model):
     
 
 class Unit(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
-    description = models.TextField()
-    order = models.PositiveIntegerField(default=0)
-    created = models.DateTimeField(auto_now_add=True, null=True)
-    updated = models.DateTimeField(auto_now=True, null=True)
-
-    class Meta:
-        ordering = ['order']
+    description = models.TextField(blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
 
 
-class Topic(models.Model):
+class CourseUnit(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
-    title = models.CharField(max_length=200)
-    description = models.TextField()
     order = models.PositiveIntegerField(default=0)
-    created = models.DateTimeField(auto_now_add=True, null=True)
-    updated = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        unique_together = ("course", "unit")
+        ordering = ["order"]
+
+    def __str__(self):
+        return f"{self.course.title} → {self.unit.title}"
+
+
+class Topic(models.Model):
+    title = models.CharField(max_length=200, unique=True)
+    description = models.TextField(blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['title']
+
+    def __str__(self):
+        return self.title
+
+
+class CourseTopic(models.Model):
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)  # universal topic
+    order = models.PositiveIntegerField(default=0)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['order']
+        unique_together = ('unit', 'topic')
 
     def __str__(self):
-        return f"{self.unit.title} - {self.title}"
+        return f"{self.unit.title} → {self.topic.title}"
 
 
 class QuizQuestion(models.Model):
@@ -92,11 +113,7 @@ class MultipleChoiceQuestion(models.Model):
         choices=[('a', 'A'), ('b', 'B'), ('c', 'C'), ('d', 'D')]
     )
     explanation = models.TextField()
-    language = models.CharField(
-        max_length=20,
-        choices=Course.LANGUAGE_CHOICES,
-        default='python'
-    )
+    language = models.ForeignKey("Language", on_delete=models.SET_NULL, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -110,11 +127,7 @@ class TracingQuestion(models.Model):
     expected_output = models.TextField()
 
     explanation = models.TextField()
-    language = models.CharField(
-        max_length=20,
-        choices=Course.LANGUAGE_CHOICES,
-        default='python'
-    )
+    language = models.ForeignKey("Language", on_delete=models.SET_NULL, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 

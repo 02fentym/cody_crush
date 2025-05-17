@@ -1,0 +1,16 @@
+<form method="POST" hx-post="{% url 'submit-course-topic-form' %}" hx-target="#topic-list-{{ unit.id }}"
+  hx-swap="outerHTML" hx-on="htmx:afterRequest: document.getElementById('modal-wrapper').checked = false">
+  {% csrf_token %}
+  <input type="hidden" name="unit_id" value="{{ unit.id }}">
+
+  <h3 class="font-bold text-lg mb-4">Add Topic</h3>
+
+  <div class="form-control mb-4">
+    {{ form.topic }}
+  </div>
+
+  <div class="modal-action">
+    <button type="submit" class="btn btn-primary">Assign</button>
+    <label for="modal-wrapper" class="btn">Cancel</label>
+  </div>
+</form>
