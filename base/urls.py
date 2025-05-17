@@ -14,8 +14,8 @@ urlpatterns = [
     # STUDENT
 
     # Course Enrolment
-    path("enrolment-form/", views.get_enrolment_form, name="get_enrolment_form"),
-    path("enrol/", views.enrol_in_course, name="enrol_in_course"),
+    path("enrolment-form/", views.get_enrolment_form, name="get-enrolment-form"),
+    path("enrol/", views.enrol_in_course, name="enrol-in-course"),
 
     path("activity/<int:activity_id>/start-quiz/", views.start_quiz, name="start-quiz"),
     path('quiz/<int:quiz_id>/activity/<int:activity_id>/take-quiz/', views.take_quiz, name='take-quiz'),
@@ -44,38 +44,42 @@ urlpatterns = [
 
     
     # ADD CONTENT
-    # Unit Creation
-    path("course/<int:course_id>/get-course-unit-form/", views.get_course_unit_form, name="get_course_unit_form"),
-    path("submit-course-unit-form/", views.submit_course_unit_form, name="submit_course_unit_form"),
 
 
     # Unit Deletion
-    path("units/<int:unit_id>/delete/", views.delete_unit, name="delete_unit"),
 
-    # Topic Creation
-    path("topic-form/<int:unit_id>/", views.get_topic_form, name="get_topic_form"),
-    path("submit-topic-form/<int:unit_id>/", views.submit_topic_form, name="submit_topic_form"),
-
-    # Topic Deletion
-    path("topics/<int:topic_id>/delete/", views.delete_topic, name="delete_topic"),
 
     # DMOJ Exercise Creation
-    path("get_dmoj_form/<int:topic_id>/", views.get_dmoj_form, name="get_dmoj_form"),
-    path("submit_dmoj_form/<int:topic_id>/", views.submit_dmoj_form, name="submit_dmoj_form"),
+    path("get_dmoj_form/<int:topic_id>/", views.get_dmoj_form, name="get-dmoj-form"),
+    path("submit_dmoj_form/<int:topic_id>/", views.submit_dmoj_form, name="submit-dmoj-form"),
 
     # Quiz Creation
-    path("topic/<int:topic_id>/quiz-form/", views.get_quiz_form, name="get_quiz_form"),
-    path("topic/<int:topic_id>/submit-quiz/", views.submit_quiz_form, name="submit_quiz_form"),
+    path("topic/<int:topic_id>/quiz-form/", views.get_quiz_form, name="get-quiz-form"),
+    path("topic/<int:topic_id>/submit-quiz/", views.submit_quiz_form, name="submit-quiz-form"),
+    
 
-    # COURSE MANAGEMENT
-    # Unit Management
-    path("manage-units/", views.manage_units, name="manage_units"),
+
+    # URLS for course_unit_views.py
+    path("course/<int:course_id>/get-course-unit-form/", views.get_course_unit_form, name="get-course-unit-form"),
+    path("submit-course-unit-form/", views.submit_course_unit_form, name="submit-course-unit-form"),
+    path("delete-course-unit/<int:course_unit_id>/", views.delete_course_unit, name="delete-course-unit"),
+
+
+    # URLS for course_topic_views.py
+    path("get-course-topic-form/<int:unit_id>/", views.get_course_topic_form, name="get-course-topic-form"),
+    path("submit-course-topic-form/", views.submit_course_topic_form, name="submit-course-topic-form"),
+    path("delete-course-topic/<int:course_topic_id>/", views.delete_course_topic, name="delete-course-topic"),
+
+
+    # URLS for unit_topic_management_views.py
+    # Units
+    path("manage-units/", views.manage_units, name="manage-units"),
     path("get-unit-form/", views.get_unit_form, name="get-unit-form"),
-    path("submit-unit-form-manage/", views.submit_unit_form_manage, name="submit_unit_form_manage"),
+    path("submit-unit-form-manage/", views.submit_unit_form_manage, name="submit-unit-form-manage"),
 
-
-    # Topic Creation
-    path("manage-topics/", views.manage_topics, name="manage_topics"),
-
+    # Topics
+    path("manage-topics/", views.manage_topics, name="manage-topics"),
+    path("get-topic-form/", views.get_topic_form, name="get-topic-form"),
+    path("submit-topic-form/", views.submit_topic_form, name="submit-topic-form"),
 
 ]

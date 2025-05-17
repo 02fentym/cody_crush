@@ -2,7 +2,7 @@
 
 <div id="unit-list">
     {% for cu in course_units %}
-        {% include "base/components/unit_card.html" with unit=cu.unit order=cu.order %}
+        {% include "base/components/unit_card.html" with unit=cu order=cu.order %}
     {% empty %}
         <p class="text-base-content/70">No units assigned to this course.</p>
     {% endfor %}

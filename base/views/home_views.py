@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from base.models import (Course, CourseUnit,)
+from base.models import (Course, CourseUnit, CourseTopic, )
 from django.contrib.auth.decorators import login_required
 from base.forms import CourseForm, EnrollmentPasswordForm
 from django.http import HttpResponse
@@ -66,6 +66,15 @@ def course(request, course_id):
     # Show CourseUnit list instead of old Unit list
     course_units = CourseUnit.objects.filter(course=course).select_related("unit")
 
+    # Get all course topics for these units
+    course_topics = CourseTopic.objects.filter(unit__in=[cu.unit for cu in course_units]).select_related("topic")
+
+    # Attach the relevant topics to each CourseUnit
+    for cu in course_units:
+        cu.topics = [ct for ct in course_topics if ct.unit.id == cu.unit.id]
+        print(f"> {cu.unit.title} has {len(cu.topics)} topic(s)")
+
+
     password_form = EnrollmentPasswordForm()
 
     if request.method == "POST":
@@ -79,7 +88,8 @@ def course(request, course_id):
                 messages.success(request, "Enrollment password updated!")
                 return redirect("course", course_id=course_id)
 
-    context = {"courses": courses, "course": course, "course_units": course_units, "password_form": password_form,}
+    context = {"courses": courses, "course": course, "course_units": course_units, "course_topics": course_topics, "password_form": password_form, }
+
     return render(request, "base/course.html", context)
 
 

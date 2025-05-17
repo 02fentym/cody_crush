@@ -6,5 +6,5 @@ from .home_views import *
 from .lesson_views import *
 from .question_upload_views import *
 from .quiz_views import *
-from .unit_topic_managements_views import *
+from .unit_topic_management_views import *
 from .user_views import *

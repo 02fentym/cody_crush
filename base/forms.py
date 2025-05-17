@@ -121,7 +121,7 @@ class TopicForm(forms.ModelForm):
         fields = ['title', 'description']
         widgets = {
             'title': forms.TextInput(attrs={
-                'placeholder': 'Course title...',
+                'placeholder': 'Topic title...',
                 'class': 'input input-bordered w-full'
             }),
             'description': forms.Textarea(attrs={
@@ -129,6 +129,14 @@ class TopicForm(forms.ModelForm):
                 'class': 'textarea textarea-bordered w-full',
                 'rows': 1
             }),
+        }
+
+class CourseTopicForm(forms.ModelForm):
+    class Meta:
+        model = CourseTopic
+        fields = ["topic"]
+        widgets = {
+            "topic": forms.Select(attrs={"class": "select select-bordered w-full"})
         }
 
 
