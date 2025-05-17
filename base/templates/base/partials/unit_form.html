@@ -1,17 +1,17 @@
-<form method="POST" hx-post="{% url 'submit_unit_form' course.id %}" hx-target="#unit-list" hx-swap="outerHTML"
-  hx-on="htmx:afterRequest: document.getElementById('modal-wrapper').checked = false">
-  {% csrf_token %}
-  <h3 class="font-bold text-lg mb-4">Add New Unit</h3>
+<form method="POST" hx-post="{% url 'submit_unit_form_manage' %}" hx-target="#unit-table" hx-swap="outerHTML"
+    hx-on="htmx:afterRequest: document.getElementById('modal-wrapper').checked = false">
+    {% csrf_token %}
+    <h3 class="font-bold text-lg mb-4">Add Unit</h3>
 
-  <div class="form-control mb-4">
-    {{ form.title }}
-  </div>
-  <div class="form-control mb-4">
-    {{ form.description }}
-  </div>
+    <div class="form-control mb-4">
+        {{ form.title }}
+    </div>
+    <div class="form-control mb-4">
+        {{ form.description }}
+    </div>
 
-  <div class="modal-action">
-    <button type="submit" class="btn btn-primary">Create</button>
-    <label for="modal-wrapper" class="btn">Cancel</label>
-  </div>
+    <div class="modal-action">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <label for="modal-wrapper" class="btn">Cancel</label>
+    </div>
 </form>

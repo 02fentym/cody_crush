@@ -2,11 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .models import (Unit, Topic, Quiz, Answer, Profile, Course, QuizTemplate, Activity, Lesson, 
-    MultipleChoiceQuestion, TracingQuestion, DmojExercise, ActivityCompletion
+    MultipleChoiceQuestion, TracingQuestion, DmojExercise, ActivityCompletion, Language, CourseTopic, CourseUnit,
 )
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .forms import UserForm, CourseForm, UnitForm, TopicForm, EnrollmentPasswordForm, LessonForm, DmojForm
+from .forms import UserForm, CourseForm, UnitForm, TopicForm, EnrollmentPasswordForm, LessonForm, DmojForm, CourseUnitForm
 from django.contrib.contenttypes.models import ContentType
 from .decorators import allowed_roles
 from .utils import fetch_dmoj_metadata_from_url, fetch_dmoj_user_data
@@ -99,7 +99,6 @@ def home(request):
             if course_form.is_valid():
                 course = course_form.save(commit=False)
                 course.teacher = request.user
-                course.language = request.POST.get("language")
                 course.save()
                 messages.success(request, "Course created successfully!")
                 return redirect("home")
@@ -273,6 +272,7 @@ def quiz_results(request, ac_id):
 
 ###################### TEACHER VIEWS
 
+@login_required(login_url="login")
 def course(request, course_id):
     user = request.user
     courses = get_all_courses(user.profile.role, user)
@@ -284,10 +284,11 @@ def course(request, course_id):
 
     course = get_object_or_404(qs)
 
-    unit_form = UnitForm()
+    # Show CourseUnit list instead of old Unit list
+    course_units = CourseUnit.objects.filter(course=course).select_related("unit")
+
     password_form = EnrollmentPasswordForm()
 
-    # Handle unit creation, course password update and unit deletion
     if request.method == "POST":
         form_type = request.POST.get("form_type")
 
@@ -298,13 +299,10 @@ def course(request, course_id):
                 password_form.save()
                 messages.success(request, "Enrollment password updated!")
                 return redirect("course", course_id=course_id)
-        
 
-    # Prefetch Topics and Activities inside Topics
-    units = course.unit_set.prefetch_related('topic_set__activity_set').all()
-
-    context = {"courses": courses, "course": course, "units": units, "unit_form": unit_form, "password_form": password_form,}
+    context = {"courses": courses, "course": course, "course_units": course_units, "password_form": password_form,}
     return render(request, "base/course.html", context)
+
 
 def delete_course(request, course_id):
     course = get_object_or_404(Course, id=course_id, teacher=request.user)
@@ -571,32 +569,29 @@ def update_dmoj_exercises(request, topic_id):
 ################## SECTION: Forms for adding things (units, topics, lessons, quizzes, etc)
 
 # Unit Creation
-@login_required(login_url="login")
+@login_required
 @allowed_roles(["teacher"])
-def get_unit_form(request, course_id):
+def get_course_unit_form(request, course_id):
     course = get_object_or_404(Course, id=course_id)
-    form = UnitForm()
-    context = {"form": form, "course": course}
-    return render(request, "base/partials/unit_form.html", context)
+    form = CourseUnitForm()
+    return render(request, "base/partials/course_unit_form.html", {"form": form, "course": course})
 
-@require_POST
-@login_required(login_url="login")
+
+@login_required
 @allowed_roles(["teacher"])
-def submit_unit_form(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
-    form = UnitForm(request.POST)
+def submit_course_unit_form(request):
+    if request.method == "POST":
+        form = CourseUnitForm(request.POST)
+        course_id = request.POST.get("course_id")
+        course = get_object_or_404(Course, id=course_id)
 
-    if form.is_valid():
-        unit = form.save(commit=False)
-        unit.course = course
-        unit.order = (course.unit_set.aggregate(Max("order"))["order__max"] or 0) + 1
-        unit.save()
-        units = course.unit_set.prefetch_related('topic_set__activity_set').all()
-        return render(request, "base/partials/unit_list.html", {"units": units, "course": course})
+        if form.is_valid():
+            unit = form.cleaned_data["unit"]
+            CourseUnit.objects.get_or_create(course=course, unit=unit)
 
+        course_units = CourseUnit.objects.filter(course=course).select_related("unit")
+        return render(request, "base/partials/unit_list.html", {"course_units": course_units})
 
-    context = {"form": form, "course": course}
-    return render(request, "base/partials/unit_form.html", context)
 
 
 # Unit Deletion
@@ -786,3 +781,44 @@ def enrol_in_course(request):
                 return render(request, "base/partials/course_card.html", {"course": course})
             return HttpResponse("<div class='text-error'>Invalid course password.</div>")
     return HttpResponse("<div class='text-error'>Submission failed.</div>")
+
+
+################## SECTION: Course Management
+
+# Managing Units
+@login_required
+@allowed_roles(["teacher"])
+def manage_units(request):
+    units = Unit.objects.all().order_by("-updated")  # or whatever ordering you want
+    return render(request, "base/manage_units.html", {"units": units})
+
+@login_required
+@allowed_roles(["teacher"])
+def get_unit_form(request):
+    form = UnitForm()
+    return render(request, "base/partials/unit_form.html", {"form": form})
+
+
+@login_required
+@allowed_roles(["teacher"])
+def submit_unit_form_manage(request):
+    if request.method == "POST":
+        form = UnitForm(request.POST)
+        if form.is_valid():
+            form.save()
+            units = Unit.objects.all().order_by("-updated")
+            return render(request, "base/manage_units_table.html", {"units": units})
+    else:
+        form = UnitForm()
+
+    return render(request, "base/partials/unit_form.html", {"form": form})
+
+
+# Managing Topics
+@login_required
+@allowed_roles(["teacher"])
+def manage_topics(request):
+    topics = Topic.objects.all().order_by("-updated")
+    return render(request, "manage_topics.html", {"topics": topics})
+
+

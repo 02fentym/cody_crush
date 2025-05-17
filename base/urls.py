@@ -45,8 +45,9 @@ urlpatterns = [
     
     # ADD CONTENT
     # Unit Creation
-    path("unit-form/<int:course_id>/", views.get_unit_form, name="get_unit_form"),
-    path("submit-unit-form/<int:course_id>/", views.submit_unit_form, name="submit_unit_form"),
+    path("course/<int:course_id>/get-course-unit-form/", views.get_course_unit_form, name="get_course_unit_form"),
+    path("submit-course-unit-form/", views.submit_course_unit_form, name="submit_course_unit_form"),
+
 
     # Unit Deletion
     path("units/<int:unit_id>/delete/", views.delete_unit, name="delete_unit"),
@@ -65,6 +66,16 @@ urlpatterns = [
     # Quiz Creation
     path("topic/<int:topic_id>/quiz-form/", views.get_quiz_form, name="get_quiz_form"),
     path("topic/<int:topic_id>/submit-quiz/", views.submit_quiz_form, name="submit_quiz_form"),
+
+    # COURSE MANAGEMENT
+    # Unit Management
+    path("manage-units/", views.manage_units, name="manage_units"),
+    path("get-unit-form/", views.get_unit_form, name="get-unit-form"),
+    path("submit-unit-form-manage/", views.submit_unit_form_manage, name="submit_unit_form_manage"),
+
+
+    # Topic Creation
+    path("manage-topics/", views.manage_topics, name="manage_topics"),
 
 
 ]

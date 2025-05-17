@@ -8,7 +8,7 @@
                 <!-- Circle icon for Unit number -->
                 <div class="flex items-center justify-center bg-primary text-primary-content font-bold text-sm"
                     style="width: 2.5rem; height: 2.5rem; border-radius: 9999px;">
-                    {{ unit.order }}
+                    {{ order }}
                 </div>
 
                 <!-- Unit title and description -->
@@ -28,7 +28,7 @@
 
             <!-- Topic Cards -->
             <div id="topic-list-{{ unit.id }}">
-                {% include "base/partials/topic_list.html" with unit=unit %}
+                {% include "base/partials/course_topic_list.html" with unit=unit %}
             </div>
 
             {% if user.profile.role == "teacher" %}

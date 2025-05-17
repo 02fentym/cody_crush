@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Course, Unit, Topic, Lesson, DmojExercise, Profile
+from .models import Course, Unit, Topic, Lesson, DmojExercise, Profile, CourseUnit, CourseTopic
 
 
 class UserForm(UserCreationForm):
@@ -104,6 +104,14 @@ class UnitForm(ModelForm):
                 'class': 'textarea textarea-bordered w-full',
                 'rows': 1
             }),
+        }
+
+class CourseUnitForm(forms.ModelForm):
+    class Meta:
+        model = CourseUnit
+        fields = ["unit"]
+        widgets = {
+            "unit": forms.Select(attrs={"class": "select select-bordered w-full"})
         }
 
 

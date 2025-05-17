@@ -1,13 +1,9 @@
 {# templates/base/partials/unit_list.html #}
 
 <div id="unit-list">
-{% if units %}
-<div class="flex flex-col gap-4">
-    {% for unit in units %}
-        {% include "base/components/unit_card.html" with unit=unit %}
+    {% for cu in course_units %}
+        {% include "base/components/unit_card.html" with unit=cu.unit order=cu.order %}
+    {% empty %}
+        <p class="text-base-content/70">No units assigned to this course.</p>
     {% endfor %}
-    {% else %}
-        <p class="text-base-content/70">No topics available for this unit.</p>
-    {% endif %}
-</div>
 </div>
