@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 from base.decorators import allowed_roles
 from base.models import Course, CourseUnit
 from base.forms import CourseUnitForm
+from django.db.models import Max
 
 
 @login_required
@@ -26,10 +27,19 @@ def submit_course_unit_form(request):
 
         if form.is_valid():
             unit = form.cleaned_data["unit"]
-            CourseUnit.objects.get_or_create(course=course, unit=unit)
+
+            # Check if it already exists
+            course_unit, created = CourseUnit.objects.get_or_create(course=course, unit=unit)
+
+            if created:
+                # Assign next available order
+                max_order = CourseUnit.objects.filter(course=course).aggregate(Max("order"))["order__max"] or 0
+                course_unit.order = max_order + 1
+                course_unit.save()
 
         course_units = CourseUnit.objects.filter(course=course).select_related("unit")
         return render(request, "base/partials/unit_list.html", {"course_units": course_units})
+
 
 
 @require_POST
