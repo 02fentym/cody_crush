@@ -1,5 +1,3 @@
-print("✅ course_management_views loaded")
-
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
@@ -27,7 +25,6 @@ def get_unit_form(request):
 @allowed_roles(["teacher"])
 def submit_unit_form_manage(request):
     if request.method == "POST":
-        print("IT'S ALIVE!!!!!")
         form = UnitForm(request.POST)
         if form.is_valid():
             form.save()
