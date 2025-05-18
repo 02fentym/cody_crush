@@ -50,6 +50,13 @@ def get_topic_form(request):
     return render(request, "base/partials/topic_form.html", {"form": form})
 
 
+@login_required
+@allowed_roles(["teacher"])
+def get_topic_form(request):
+    form = TopicForm()
+    return render(request, "base/partials/topic_form.html", {"form": form})
+
+
 @require_POST
 @login_required
 @allowed_roles(["teacher"])

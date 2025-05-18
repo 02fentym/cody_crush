@@ -65,6 +65,8 @@ urlpatterns = [
     path("delete-course-unit/<int:course_unit_id>/", views.delete_course_unit, name="delete-course-unit"),
 
 
+
+
     # URLS for course_topic_views.py
     path("get-course-topic-form/<int:unit_id>/", views.get_course_topic_form, name="get-course-topic-form"),
     path("submit-course-topic-form/", views.submit_course_topic_form, name="submit-course-topic-form"),

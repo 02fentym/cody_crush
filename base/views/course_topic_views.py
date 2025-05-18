@@ -13,8 +13,13 @@ from base.forms import CourseTopicForm
 @allowed_roles(["teacher"])
 def get_course_topic_form(request, unit_id):
     unit = get_object_or_404(Unit, id=unit_id)
+
+    # Only show topics that belong to this unit
     form = CourseTopicForm()
+    form.fields["topic"].queryset = unit.topics.exclude(title="").exclude(description="")
+
     return render(request, "base/partials/course_topic_form.html", {"form": form, "unit": unit})
+
 
 @login_required
 @allowed_roles(["teacher"])
@@ -23,11 +28,6 @@ def submit_course_topic_form(request):
     form = CourseTopicForm(request.POST)
     unit_id = request.POST.get("unit_id")
     unit = get_object_or_404(Unit, id=unit_id)
-
-    print("POST data:", request.POST)
-    print("Form valid:", form.is_valid())
-    print("Errors:", form.errors)
-
 
     if form.is_valid():
         topic = form.cleaned_data["topic"]

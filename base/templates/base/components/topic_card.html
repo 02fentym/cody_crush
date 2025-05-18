@@ -24,6 +24,7 @@
 
                 <!-- Add Activities -->
                 {% if user.profile.role == "teacher" %}
+                {% if topic.id %}
                 <div class="flex justify-center gap-2 p-4">
 
                     <!-- DMOJ Exercise Creation -->
@@ -40,6 +41,7 @@
                         + Quiz
                     </button>
                 </div>
+                {% endif %}
                 {% endif %}
             </div>
         </div>

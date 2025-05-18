@@ -2080,6 +2080,12 @@
   .text-primary-content {
     color: var(--color-primary-content);
   }
+  .text-red-500 {
+    color: var(--color-red-500);
+  }
+  .text-warning {
+    color: var(--color-warning);
+  }
   .text-white {
     color: var(--color-white);
   }

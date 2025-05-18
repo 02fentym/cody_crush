@@ -63,6 +63,7 @@ class CourseUnit(models.Model):
 class Topic(models.Model):
     title = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True)
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="topics")
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 

@@ -63,24 +63,17 @@ def course(request, course_id):
 
     course = get_object_or_404(qs)
 
-    # Show CourseUnit list instead of old Unit list
+    # Get CourseUnits and preload related Unit
     course_units = CourseUnit.objects.filter(course=course).select_related("unit")
 
-    # Get all course topics for these units
-    course_topics = CourseTopic.objects.filter(unit__in=[cu.unit for cu in course_units]).select_related("topic")
-
-    # Attach the relevant topics to each CourseUnit
+    # Attach topics to each CourseUnit's unit
     for cu in course_units:
-        cu.topics = [ct for ct in course_topics if ct.unit.id == cu.unit.id]
-        print(f"> {cu.unit.title} has {len(cu.topics)} topic(s)")
-
+        cu.unit.course_topics = CourseTopic.objects.filter(unit=cu.unit).select_related("topic")
 
     password_form = EnrollmentPasswordForm()
 
     if request.method == "POST":
         form_type = request.POST.get("form_type")
-
-        # Course password update
         if form_type == "password":
             password_form = EnrollmentPasswordForm(request.POST)
             if password_form.is_valid():
@@ -88,9 +81,15 @@ def course(request, course_id):
                 messages.success(request, "Enrollment password updated!")
                 return redirect("course", course_id=course_id)
 
-    context = {"courses": courses, "course": course, "course_units": course_units, "course_topics": course_topics, "password_form": password_form, }
+    context = {"courses": courses, "course": course, "course_units": course_units, "password_form": password_form, }
+
+    for cu in course_units:
+        print(f">>> UNIT: {cu.unit.title} (id={cu.unit.id})")
+        for ct in cu.unit.course_topics:
+            print(f"     - {ct.topic.title}")
 
     return render(request, "base/course.html", context)
+
 
 
 def delete_course(request, course_id):
