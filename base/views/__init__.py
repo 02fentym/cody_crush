@@ -1,6 +1,7 @@
 from .activity_views import *
 from .course_topic_views import *
 from .course_unit_views import *
+from .course_views import *
 from .dmoj_views import *
 from .home_views import *
 from .lesson_views import *
