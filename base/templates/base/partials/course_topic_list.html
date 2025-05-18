@@ -2,7 +2,7 @@
   <div class="flex flex-col gap-4 p-4">
     {% if course_topics %}
       {% for ct in course_topics %}
-        {% include "base/components/topic_card.html" with ct=ct topic=ct.topic %}
+        {% include "base/components/course_topic_card.html" with ct=ct topic=ct.topic %}
       {% endfor %}
     {% else %}
       <p class="text-base-content/70">No topics available for this unit.</p>
