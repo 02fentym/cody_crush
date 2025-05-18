@@ -14,9 +14,9 @@ class UnitAdmin(admin.ModelAdmin):
 
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
-    list_display = ('title',)
-    search_fields = ('title',)
-    list_filter = ('title',)
+    list_display = ('title', 'unit', 'description')
+    search_fields = ('unit', 'title',)
+    list_filter = ('unit', 'title',)
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
