@@ -1,5 +1,3 @@
-{# templates/base/partials/unit_list.html #}
-
 <div id="unit-list">
     {% for cu in course_units %}
         {% include "base/components/unit_card.html" with unit=cu order=cu.order %}

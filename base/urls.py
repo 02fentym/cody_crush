@@ -2,14 +2,17 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # GENERIC
+    # URLS for home_views.py
     path("", views.home, name="home"),
+    path("course/<int:course_id>/", views.course, name="course"),
+    
 
+    ### URLS for user_views.py
     path("login/", views.login_user, name="login"),
     path("register/", views.register_user, name="register-user"),
     path("logout/", views.logout_user, name = "logout"),
 
-    path("course/<int:course_id>/", views.course, name="course"),
+    
 
     # STUDENT
 
@@ -42,12 +45,6 @@ urlpatterns = [
     # dmoj exercise views
     path("topic/<topic_id>/update_dmoj/", views.update_dmoj_exercises, name="update-dmoj-exercises"),
 
-    
-    # ADD CONTENT
-
-
-    # Unit Deletion
-
 
     # DMOJ Exercise Creation
     path("get_dmoj_form/<int:topic_id>/", views.get_dmoj_form, name="get-dmoj-form"),
@@ -59,21 +56,19 @@ urlpatterns = [
     
 
 
-    # URLS for course_unit_views.py
+    ### URLS for course_unit_views.py
     path("course/<int:course_id>/get-course-unit-form/", views.get_course_unit_form, name="get-course-unit-form"),
     path("submit-course-unit-form/", views.submit_course_unit_form, name="submit-course-unit-form"),
     path("delete-course-unit/<int:course_unit_id>/", views.delete_course_unit, name="delete-course-unit"),
 
 
-
-
-    # URLS for course_topic_views.py
+    ### URLS for course_topic_views.py
     path("get-course-topic-form/<int:unit_id>/", views.get_course_topic_form, name="get-course-topic-form"),
     path("submit-course-topic-form/", views.submit_course_topic_form, name="submit-course-topic-form"),
     path("delete-course-topic/<int:course_topic_id>/", views.delete_course_topic, name="delete-course-topic"),
 
 
-    # URLS for unit_topic_management_views.py
+    ### URLS for unit_topic_management_views.py
     # Units
     path("manage-units/", views.manage_units, name="manage-units"),
     path("get-unit-form/", views.get_unit_form, name="get-unit-form"),

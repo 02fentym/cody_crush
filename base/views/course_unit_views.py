@@ -38,7 +38,7 @@ def submit_course_unit_form(request):
                 course_unit.save()
 
         course_units = CourseUnit.objects.filter(course=course).select_related("unit")
-        return render(request, "base/partials/unit_list.html", {"course_units": course_units})
+        return render(request, "base/partials/course_unit_list.html", {"course_units": course_units})
 
 
 
@@ -57,5 +57,5 @@ def delete_course_unit(request, course_unit_id):
 
     # Refresh CourseUnit list
     course_units = CourseUnit.objects.filter(course=course).select_related("unit")
-    return render(request, "base/partials/unit_list.html", {"course_units": course_units})
+    return render(request, "base/partials/course_unit_list.html", {"course_units": course_units})
 

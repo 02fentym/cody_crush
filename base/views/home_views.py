@@ -82,12 +82,6 @@ def course(request, course_id):
                 return redirect("course", course_id=course_id)
 
     context = {"courses": courses, "course": course, "course_units": course_units, "password_form": password_form, }
-
-    for cu in course_units:
-        print(f">>> UNIT: {cu.unit.title} (id={cu.unit.id})")
-        for ct in cu.unit.course_topics:
-            print(f"     - {ct.topic.title}")
-
     return render(request, "base/course.html", context)
 
 
