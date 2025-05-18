@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 
 from base.decorators import allowed_roles
-from base.models import Unit, Topic
+from base.models import Unit, Topic, Course
 from base.forms import UnitForm, TopicForm
 
 
@@ -11,8 +11,9 @@ from base.forms import UnitForm, TopicForm
 @login_required
 @allowed_roles(["teacher"])
 def manage_units(request):
-    units = Unit.objects.all().order_by("-updated")  # or whatever ordering you want
-    return render(request, "base/manage_units.html", {"units": units})
+    courses = Course.objects.filter(teacher=request.user)
+    units = Unit.objects.all().order_by("-updated")
+    return render(request, "base/manage_units.html", {"units": units,"courses": courses})
 
 @login_required
 @allowed_roles(["teacher"])
@@ -40,8 +41,9 @@ def submit_unit_form_manage(request):
 @login_required
 @allowed_roles(["teacher"])
 def manage_topics(request):
+    courses = Course.objects.filter(teacher=request.user)
     topics = Topic.objects.all().order_by("-updated")
-    return render(request, "base/manage_topics.html", {"topics": topics})
+    return render(request, "base/manage_topics.html", {"topics": topics, "courses": courses})
 
 @login_required
 @allowed_roles(["teacher"])
