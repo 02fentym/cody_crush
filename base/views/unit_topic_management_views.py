@@ -30,7 +30,7 @@ def submit_unit_form_manage(request):
         if form.is_valid():
             form.save()
             units = Unit.objects.all().order_by("-updated")
-            return render(request, "base/manage_units_table.html", {"units": units})
+            return render(request, "base/partials/manage_units_table.html", {"units": units})
     else:
         form = UnitForm()
 
@@ -67,6 +67,6 @@ def submit_topic_form(request):
     if form.is_valid():
         form.save()
         topics = Topic.objects.all().order_by("-updated")
-        return render(request, "base/manage_topics_table.html", {"topics": topics})
+        return render(request, "base/partials/manage_topics_table.html", {"topics": topics})
     return render(request, "base/partials/topic_form.html", {"form": form})
 
