@@ -60,7 +60,7 @@ def delete_course(request, course_id):
 @login_required
 def get_enrolment_form(request):
     form = EnrollmentPasswordForm()
-    return render(request, "base/components/course_enrolment_form.html", {"form": form})
+    return render(request, "base/partials/course_enrolment_form.html", {"form": form})
 
 @login_required
 def enrol_in_course(request):

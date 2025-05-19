@@ -20,7 +20,7 @@ from base.models import (
 @allowed_roles(["teacher"])
 def get_quiz_form(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
-    return render(request, "base/components/quiz_form.html", {"topic": topic})
+    return render(request, "base/partials/quiz_form.html", {"topic": topic})
 
 @login_required
 @allowed_roles(["teacher"])
