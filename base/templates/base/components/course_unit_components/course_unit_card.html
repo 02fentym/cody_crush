@@ -26,7 +26,7 @@
 
             <!-- Topic Cards -->
             <div id="topic-list-{{ unit.unit.id }}">
-                {% include "base/partials/course_topic_list.html" with unit=unit course_topics=unit.unit.course_topics %}
+                {% include "base/components/course_topic_components/course_topic_list.html" with unit=unit course_topics=unit.unit.course_topics %}
             </div>
 
             {% if user.profile.role == "teacher" %}

@@ -18,7 +18,7 @@ def get_course_topic_form(request, unit_id):
     form = CourseTopicForm()
     form.fields["topic"].queryset = unit.topics.exclude(title="").exclude(description="")
 
-    return render(request, "base/partials/course_topic_form.html", {"form": form, "unit": unit})
+    return render(request, "base/components/course_topic_components/course_topic_form.html", {"form": form, "unit": unit})
 
 
 @login_required
@@ -34,7 +34,7 @@ def submit_course_topic_form(request):
         CourseTopic.objects.get_or_create(unit=unit, topic=topic)
 
     course_topics = CourseTopic.objects.filter(unit=unit).select_related("topic")
-    return render(request, "base/partials/course_topic_list.html", {"course_topics": course_topics, "unit": unit})
+    return render(request, "base/components/course_topic_components/course_topic_list.html", {"course_topics": course_topics, "unit": unit})
 
 
 @require_POST
@@ -51,4 +51,4 @@ def delete_course_topic(request, course_topic_id):
     course_topic.delete()
 
     course_topics = CourseTopic.objects.filter(unit=unit).select_related("topic")
-    return render(request, "base/partials/course_topic_list.html", {"course_topics": course_topics, "unit": unit, })
+    return render(request, "base/components/course_topic_components/course_topic_list.html", {"course_topics": course_topics, "unit": unit, })

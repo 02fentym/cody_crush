@@ -14,7 +14,7 @@
                 <div class="max-h-32 overflow-y-auto">
                     <ul class="list bg-base-100 shadow-md max-h-32 overflow-y-auto">
                         {% for activity in topic.activity_set.all %}
-                        {% include "base/components/activity_block.html" with activity=activity %}
+                        {% include "base/components/activity_components/activity_block.html" with activity=activity %}
                         {% endfor %}
                     </ul>
                     {% if topic.activity_set.all.count == 0 %}

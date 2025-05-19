@@ -13,13 +13,13 @@ from base.forms import UnitForm, TopicForm
 def manage_units(request):
     courses = Course.objects.filter(teacher=request.user)
     units = Unit.objects.all().order_by("-updated")
-    return render(request, "base/manage_units.html", {"units": units,"courses": courses})
+    return render(request, "base/main/manage_units.html", {"units": units,"courses": courses})
 
 @login_required
 @allowed_roles(["teacher"])
 def get_unit_form(request):
     form = UnitForm()
-    return render(request, "base/partials/unit_form.html", {"form": form})
+    return render(request, "base/components/unit_components/unit_form.html", {"form": form})
 
 
 @login_required
@@ -30,11 +30,11 @@ def submit_unit_form_manage(request):
         if form.is_valid():
             form.save()
             units = Unit.objects.all().order_by("-updated")
-            return render(request, "base/partials/manage_units_table.html", {"units": units})
+            return render(request, "base/components/unit_components/manage_units_table.html", {"units": units})
     else:
         form = UnitForm()
 
-    return render(request, "base/partials/unit_form.html", {"form": form})
+    return render(request, "base/components/unit_components/unit_form.html", {"form": form})
 
 
 # Managing Topics
@@ -43,21 +43,13 @@ def submit_unit_form_manage(request):
 def manage_topics(request):
     courses = Course.objects.filter(teacher=request.user)
     topics = Topic.objects.all().order_by("-updated")
-    return render(request, "base/manage_topics.html", {"topics": topics, "courses": courses})
+    return render(request, "base/main/manage_topics.html", {"topics": topics, "courses": courses})
 
 @login_required
 @allowed_roles(["teacher"])
 def get_topic_form(request):
     form = TopicForm()
-    return render(request, "base/partials/topic_form.html", {"form": form})
-
-
-@login_required
-@allowed_roles(["teacher"])
-def get_topic_form(request):
-    form = TopicForm()
-    return render(request, "base/partials/topic_form.html", {"form": form})
-
+    return render(request, "base/components/topic_components/topic_form.html", {"form": form})
 
 @require_POST
 @login_required
@@ -67,6 +59,6 @@ def submit_topic_form(request):
     if form.is_valid():
         form.save()
         topics = Topic.objects.all().order_by("-updated")
-        return render(request, "base/partials/manage_topics_table.html", {"topics": topics})
-    return render(request, "base/partials/topic_form.html", {"form": form})
+        return render(request, "base/components/topic_components/manage_topics_table.html", {"topics": topics})
+    return render(request, "base/components/topic_components/topic_form.html", {"form": form})
 

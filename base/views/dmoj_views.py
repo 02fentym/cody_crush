@@ -18,7 +18,7 @@ from base.utils import fetch_dmoj_metadata_from_url, fetch_dmoj_user_data
 def get_dmoj_form(request, topic_id):
     topic = Topic.objects.get(id=topic_id)
     form = DmojForm()
-    return render(request, "base/partials/dmoj_form.html", {"form": form, "topic": topic})
+    return render(request, "base/components/activity_components/dmoj_form.html", {"form": form, "topic": topic})
 
 
 @login_required(login_url="login")
@@ -34,7 +34,7 @@ def submit_dmoj_form(request, topic_id):
 
         if not metadata:
             messages.error(request, "Failed to fetch DMOJ metadata. Please check the URL.")
-            return render(request, "base/partials/dmoj_form.html", {"form": form, "topic": topic})
+            return render(request, "base/components/activity_components/dmoj_form.html", {"form": form, "topic": topic})
 
         # Try to get or create the DmojExercise
         dmoj_exercise, created = DmojExercise.objects.get_or_create(
@@ -55,7 +55,7 @@ def submit_dmoj_form(request, topic_id):
 
         if already_assigned:
             messages.error(request, "This DMOJ problem is already assigned to this topic.")
-            response = render(request, "base/partials/dmoj_form.html", {"form": form, "topic": topic})
+            response = render(request, "base/components/activity_components/dmoj_form.html", {"form": form, "topic": topic})
             response["HX-Reswap"] = "innerHTML"
             response["HX-Retarget"] = "#modal-body"
             return response
@@ -73,7 +73,7 @@ def submit_dmoj_form(request, topic_id):
         return render(request, "base/partials/topic_list.html", {"unit": topic.unit})
 
     # If form is invalid, re-render the modal with errors
-    return render(request, "base/partials/dmoj_form.html", {"form": form, "topic": topic})
+    return render(request, "base/components/activity_components/dmoj_form.html", {"form": form, "topic": topic})
 
 
 def update_dmoj_exercises(request, topic_id):

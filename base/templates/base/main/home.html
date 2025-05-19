@@ -17,11 +17,11 @@
 
 <!-- List of courses -->
 <div id="course-list">
-    {% include "base/partials/course_list.html" %}
+    {% include "base/components/course_components/course_list.html" %}
 
     <!-- Create New Course -->
     {% if user.profile.role == "teacher" %}
-    {% include "base/partials/create_course_form.html" %}
+    {% include "base/components/course_components/create_course_form.html" %}
     {% endif %}
     </div>
 </div>

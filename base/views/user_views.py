@@ -31,7 +31,7 @@ def login_user(request):
             return redirect("home")
 
     context = {"page": page}
-    return render(request, "base/login.html", context)
+    return render(request, "base/main/login.html", context)
 
 
 def register_user(request):
@@ -47,7 +47,7 @@ def register_user(request):
             messages.error(request, "An error occurred during registration")
 
     context = {"page": "register", "form": form}
-    return render(request, "base/register.html", context)
+    return render(request, "base/main/register.html", context)
 
 
 

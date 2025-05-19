@@ -38,7 +38,7 @@ def create_lesson(request, topic_id):
 
         
     context = {"topic": topic, "form": form, "is_edit": False}
-    return render(request, "base/create_edit_lesson.html", context)
+    return render(request, "base/main/create_edit_lesson.html", context)
 
 
 def edit_lesson(request, topic_id, lesson_id):
@@ -54,7 +54,7 @@ def edit_lesson(request, topic_id, lesson_id):
             return redirect("course", topic.unit.course.id)
 
     context = {"form": form, "is_edit": True}
-    return render(request, "base/create_edit_lesson.html", context)
+    return render(request, "base/main/create_edit_lesson.html", context)
 
 
 # STUDENT VIEWS
@@ -101,4 +101,4 @@ def view_lesson(request, lesson_id):
         "activity": activity,
         "completed": completed,
     }
-    return render(request, "base/view_lesson.html", context)
+    return render(request, "base/main/view_lesson.html", context)

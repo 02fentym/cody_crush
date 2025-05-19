@@ -38,7 +38,7 @@ def home(request):
         password_form = EnrollmentPasswordForm()
 
     context = {"courses": courses, "course_form": course_form, "password_form": password_form}
-    return render(request, "base/home.html", context)
+    return render(request, "base/main/home.html", context)
 
 
 # Helper function to get all courses

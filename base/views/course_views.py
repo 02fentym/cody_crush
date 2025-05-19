@@ -39,7 +39,7 @@ def course(request, course_id):
                 return redirect("course", course_id=course_id)
 
     context = {"courses": courses, "course": course, "course_units": course_units, "password_form": password_form, }
-    return render(request, "base/course.html", context)
+    return render(request, "base/main/course.html", context)
 
 # Helper function
 def get_all_courses(role, user):
@@ -60,7 +60,7 @@ def delete_course(request, course_id):
 @login_required
 def get_enrolment_form(request):
     form = EnrollmentPasswordForm()
-    return render(request, "base/partials/course_enrolment_form.html", {"form": form})
+    return render(request, "base/components/course_components/course_enrolment_form.html", {"form": form})
 
 @login_required
 def enrol_in_course(request):
@@ -72,6 +72,6 @@ def enrol_in_course(request):
 
             if course:
                 course.students.add(request.user)
-                return render(request, "base/partials/course_card.html", {"course": course})
+                return render(request, "base/components/course_components/course_card.html", {"course": course})
             return HttpResponse("<div class='text-error'>Invalid course password.</div>")
     return HttpResponse("<div class='text-error'>Submission failed.</div>")

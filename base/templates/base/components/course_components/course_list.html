@@ -1,8 +1,7 @@
-{# base/partials/course_list.html #}
 <div id="course-list" class="flex flex-wrap gap-4">
     {% if courses %}
         {% for course in courses %}
-        {% include "base/partials/course_card.html" with course=course %}
+        {% include "base/components/course_components/course_card.html" with course=course %}
         {% endfor %}
     </div>
 

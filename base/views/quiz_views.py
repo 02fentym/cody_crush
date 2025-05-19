@@ -20,7 +20,7 @@ from base.models import (
 @allowed_roles(["teacher"])
 def get_quiz_form(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
-    return render(request, "base/partials/quiz_form.html", {"topic": topic})
+    return render(request, "base/components/activity_components/quiz_form.html", {"topic": topic})
 
 @login_required
 @allowed_roles(["teacher"])
@@ -194,7 +194,7 @@ def take_quiz(request, quiz_id, activity_id):
 
     # GET request → show the quiz
     context = {"quiz": quiz, "questions": [qq.question for qq in quiz_questions]}
-    return render(request, "base/quiz.html", context)
+    return render(request, "base/main/quiz.html", context)
 
 
 
@@ -219,4 +219,4 @@ def quiz_results(request, ac_id):
         "answers": answers,
     }
 
-    return render(request, "base/quiz_results.html", context)
+    return render(request, "base/main/quiz_results.html", context)
