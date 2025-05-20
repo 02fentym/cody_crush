@@ -7,45 +7,18 @@ from .models import (
 
 # --- Customized Admin Classes ---
 
-@admin.register(Unit) # Register the Unit model with a custom admin class
-class UnitAdmin(admin.ModelAdmin):
-    list_display = ('title',)
-    search_fields = ('title',)
+@admin.register(Activity)
+class ActivityAdmin(admin.ModelAdmin):
+    list_display = ('id',  'object_id','topic_title', 'activity_type', 'created')
 
-@admin.register(Topic)
-class TopicAdmin(admin.ModelAdmin):
-    list_display = ('title', 'unit', 'description')
-    search_fields = ('unit', 'title',)
-    list_filter = ('unit', 'title',)
+    def topic_title(self, obj):
+        return obj.course_topic.topic.title
+    topic_title.short_description = "Topic"
 
-@admin.register(Course)
-class CourseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'language', 'enrollment_password')
-    search_fields = ('title', 'language')
-    list_filter = ('language',)
+    def activity_type(self, obj):
+        return obj.content_type.name.title()
+    activity_type.short_description = "Type"
 
-@admin.register(Profile)
-class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'role', 'dmoj_username')
-    search_fields = ('user__username', 'dmoj_username')
-    list_filter = ('role',)
-
-@admin.register(Lesson)
-class LessonAdmin(admin.ModelAdmin):
-    list_display = ('title',)
-    search_fields = ('title',)
-
-@admin.register(QuizTemplate)
-class QuizTemplateAdmin(admin.ModelAdmin):
-    list_display = ('topic', 'question_type', 'question_count')
-    search_fields = ('topic__title',)
-    list_filter = ('question_type',)
-
-@admin.register(DmojExercise)
-class DmojExerciseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'problem_code', 'points')
-    search_fields = ('title', 'problem_code')
-    list_filter = ('points',)
 
 @admin.register(ActivityCompletion)
 class ActivityCompletionAdmin(admin.ModelAdmin):
@@ -53,16 +26,13 @@ class ActivityCompletionAdmin(admin.ModelAdmin):
     list_filter = ('completed', 'date_completed')
     search_fields = ('student__username', 'activity__id')
 
-@admin.register(Language)
-class LanguageAdmin(admin.ModelAdmin):
-    list_display = ("name",)
-    search_fields = ("name",)
 
-@admin.register(CourseUnit)
-class CourseUnitAdmin(admin.ModelAdmin):
-    list_display = ("course", "unit", "order")
-    list_filter = ("course",)
-    search_fields = ("course__title", "unit__title")
+@admin.register(Course)
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ('title', 'language', 'enrollment_password')
+    search_fields = ('title', 'language')
+    list_filter = ('language',)
+
 
 @admin.register(CourseTopic)
 class CourseTopicAdmin(admin.ModelAdmin):
@@ -71,9 +41,63 @@ class CourseTopicAdmin(admin.ModelAdmin):
     search_fields = ("unit__title", "topic__title",)
 
 
+@admin.register(CourseUnit)
+class CourseUnitAdmin(admin.ModelAdmin):
+    list_display = ("course", "unit", "order")
+    list_filter = ("course",)
+    search_fields = ("course__title", "unit__title")
+
+
+@admin.register(DmojExercise)
+class DmojExerciseAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'problem_code', 'points')
+    search_fields = ('title', 'problem_code')
+    list_filter = ('points',)
+
+
+@admin.register(Language)
+class LanguageAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+
+
+@admin.register(Lesson)
+class LessonAdmin(admin.ModelAdmin):
+    list_display = ('title',)
+    search_fields = ('title',)
+
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'role', 'dmoj_username')
+    search_fields = ('user__username', 'dmoj_username')
+    list_filter = ('role',)
+
+
+@admin.register(QuizTemplate)
+class QuizTemplateAdmin(admin.ModelAdmin):
+    list_display = ('course_topic', 'question_type', 'question_count')
+    search_fields = ('course_topic__title',)
+    list_filter = ('question_type',)
+
+
+@admin.register(Topic)
+class TopicAdmin(admin.ModelAdmin):
+    list_display = ('title', 'unit', 'description')
+    search_fields = ('unit', 'title',)
+    list_filter = ('unit', 'title',)
+
+
+@admin.register(Unit) # Register the Unit model with a custom admin class
+class UnitAdmin(admin.ModelAdmin):
+    list_display = ('title',)
+    search_fields = ('title',)
+
+
+
+
 # --- Default Simple Registrations ---
 
-admin.site.register(Activity)
 admin.site.register(Quiz)
 admin.site.register(Answer)
 admin.site.register(MultipleChoiceQuestion)

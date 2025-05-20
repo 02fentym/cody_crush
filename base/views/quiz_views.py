@@ -7,7 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from base.decorators import allowed_roles
 from base.models import (
-    Topic, Activity, Quiz, QuizTemplate, QuizQuestion,
+    CourseTopic, Activity, Quiz, QuizTemplate, QuizQuestion,
     MultipleChoiceQuestion, TracingQuestion,
     Answer, ActivityCompletion
 )
@@ -18,42 +18,42 @@ from base.models import (
 # Quiz Addition
 @login_required
 @allowed_roles(["teacher"])
-def get_quiz_form(request, topic_id):
-    topic = get_object_or_404(Topic, id=topic_id)
-    return render(request, "base/components/activity_components/quiz_form.html", {"topic": topic})
+def get_quiz_form(request, course_topic_id):
+    course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
+    return render(request, "base/components/activity_components/quiz_form.html", {"ct": course_topic})
 
 @login_required
 @allowed_roles(["teacher"])
-def submit_quiz_form(request, topic_id):
-    topic = get_object_or_404(Topic, id=topic_id)
+def submit_quiz_form(request, course_topic_id):
+    course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
 
     if request.method == "POST":
         question_count = int(request.POST.get("question_count"))
         question_type = request.POST.get("question_type")
 
         quiz_template = QuizTemplate.objects.create(
-            topic=topic,
+            topic=course_topic,
             question_count=question_count,
             question_type=question_type,
         )
 
         # Create the activity
         Activity.objects.create(
-            topic=topic,
-            order=topic.activity_set.count() + 1,
+            course_topic=course_topic,
+            order=course_topic.activity_set.count() + 1,
             content_type=ContentType.objects.get_for_model(QuizTemplate),
             object_id=quiz_template.id
         )
 
         # Rerender the full topic list (with new activity) for that unit
-        return render(request, "base/partials/topic_list.html", {"unit": topic.unit})
+        return render(request, "base/components/course_topic_components/course_topic_list.html", {"unit": course_topic.unit})
 
     return HttpResponse("<div class='text-error'>Failed to create quiz</div>")
 
 
-def create_quiz(request, topic_id):
-    topic = get_object_or_404(Topic, id=topic_id)
-    course_id = topic.unit.course.id
+def create_quiz(request, course_topic_id):
+    course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
+    course_id = course_topic.unit.course.id
     
     question_count = int(request.POST.get("question_count", 5)) # Default to 5 if not provided
     question_type = request.POST.get("question_type")
@@ -64,21 +64,21 @@ def create_quiz(request, topic_id):
         "tracing": TracingQuestion,
     }
     question_model = QUESTION_TYPE_MAP.get(question_type)
-    available_count = question_model.objects.filter(topic=topic).count()
+    available_count = question_model.objects.filter(topic=course_topic).count()
     if available_count < question_count:
         messages.error(request, f"Only {available_count} questions available for this topic.")
         return redirect("course", course_id=course_id)
 
     
     quiz_template = QuizTemplate.objects.create(
-        topic=topic,
+        topic=course_topic,
         question_count=question_count,
         question_type=question_type
     )
 
     Activity.objects.create(
-        topic=topic,
-        order=topic.activity_set.count() + 1,
+        course_topic=course_topic,
+        order=course_topic.activity_set.count() + 1,
         content_type=ContentType.objects.get_for_model(quiz_template),
         object_id=quiz_template.id
     )
@@ -93,7 +93,7 @@ def create_quiz(request, topic_id):
 @login_required(login_url="login")
 def start_quiz(request, activity_id):
     activity = get_object_or_404(Activity, id=activity_id)
-    topic = activity.topic
+    course_topic = activity.course_topic
     template = activity.content_object
 
     # Determine the question model
@@ -103,18 +103,18 @@ def start_quiz(request, activity_id):
         model = TracingQuestion
     else:
         messages.error(request, "Unsupported question type.")
-        return redirect("topic", topic.unit.course.id, topic.unit.id, topic.id)
+        return redirect("topic", course_topic.unit.course.id, course_topic.unit.id, course_topic.id)
 
     # Get content type for the selected question model
     content_type = ContentType.objects.get_for_model(model)
 
     # Random questions
-    questions = model.objects.filter(topic=topic).order_by("?")[:template.question_count]
+    questions = model.objects.filter(topic=course_topic).order_by("?")[:template.question_count]
 
     # Create Quiz
     quiz = Quiz.objects.create(
         student=request.user,
-        topic=topic,
+        topic=course_topic,
         question_type=template.question_type
     )
 

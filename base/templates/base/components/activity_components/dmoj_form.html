@@ -1,4 +1,4 @@
-<form method="POST" hx-post="{% url 'submit_dmoj_form' topic.id %}" hx-target="#topic-list-{{ topic.unit.id }}"
+<form method="POST" hx-post="{% url 'submit-dmoj-form' ct.id %}" hx-target="#topic-list-{{ ct.unit.id }}"
     hx-swap="outerHTML" hx-on="htmx:afterRequest: document.getElementById('modal-wrapper').checked = false">
 
     {% csrf_token %}

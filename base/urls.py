@@ -46,10 +46,6 @@ urlpatterns = [
     path("topic/<topic_id>/update_dmoj/", views.update_dmoj_exercises, name="update-dmoj-exercises"),
 
 
-    # DMOJ Exercise Creation
-    path("get_dmoj_form/<int:topic_id>/", views.get_dmoj_form, name="get-dmoj-form"),
-    path("submit_dmoj_form/<int:topic_id>/", views.submit_dmoj_form, name="submit-dmoj-form"),
-
     # Quiz Creation
     path("topic/<int:topic_id>/quiz-form/", views.get_quiz_form, name="get-quiz-form"),
     path("topic/<int:topic_id>/submit-quiz/", views.submit_quiz_form, name="submit-quiz-form"),
@@ -78,5 +74,11 @@ urlpatterns = [
     path("manage-topics/", views.manage_topics, name="manage-topics"),
     path("get-topic-form/", views.get_topic_form, name="get-topic-form"),
     path("submit-topic-form/", views.submit_topic_form, name="submit-topic-form"),
+
+
+    ### URLS for dmoj_views.py
+    # DMOJ Exercise Creation
+    path("get-dmoj-form/<int:course_topic_id>/", views.get_dmoj_form, name="get-dmoj-form"),
+    path("submit-dmoj-form/<int:course_topic_id>/", views.submit_dmoj_form, name="submit-dmoj-form"),
 
 ]

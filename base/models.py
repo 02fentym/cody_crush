@@ -75,7 +75,7 @@ class Topic(models.Model):
 
 
 class CourseTopic(models.Model):
-    unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE) # universal unit
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)  # universal topic
     order = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
@@ -191,7 +191,7 @@ Used by the teacher to create a quiz template. This template can be used to gene
 The template will have a set number of questions and a type (multiple choice or tracing).
 '''
 class QuizTemplate(models.Model):
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    course_topic = models.ForeignKey(CourseTopic, on_delete=models.CASCADE)
     question_count = models.PositiveIntegerField(default=5)
     question_type = models.CharField(max_length=30, choices=Quiz.QUESTION_TYPE_CHOICES)
     created = models.DateTimeField(auto_now_add=True)
@@ -213,7 +213,7 @@ class QuizTemplate(models.Model):
 
 
 class Activity(models.Model):
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    course_topic = models.ForeignKey("CourseTopic", on_delete=models.CASCADE, related_name="activities")
     order = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -228,7 +228,7 @@ class Activity(models.Model):
             raise ValidationError("Unknown activity type.")
 
     def __str__(self):
-        return f"{self.topic.title} - {self.content_object.__class__.__name__}"
+        return f"{self.course_topic.topic.title} - {self.content_object.__class__.__name__}"
     
 
 class ActivityCompletion(models.Model):

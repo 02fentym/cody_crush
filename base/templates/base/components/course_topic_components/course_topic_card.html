@@ -13,11 +13,11 @@
             <div class="collapse-content">
                 <div class="max-h-32 overflow-y-auto">
                     <ul class="list bg-base-100 shadow-md max-h-32 overflow-y-auto">
-                        {% for activity in topic.activity_set.all %}
+                        {% for activity in ct.activities.all %}
                         {% include "base/components/activity_components/activity_block.html" with activity=activity %}
                         {% endfor %}
                     </ul>
-                    {% if topic.activity_set.all.count == 0 %}
+                    {% if ct.activities.count == 0 %}
                     <p class="text-base-content/70">No activities available for this topic.</p>
                     {% endif %}
                 </div>
@@ -28,7 +28,7 @@
                 <div class="flex justify-center gap-2 p-4">
 
                     <!-- DMOJ Exercise Creation -->
-                    <button class="btn btn-sm btn-outline" hx-get="{% url 'get-dmoj-form' topic.id %}"
+                    <button class="btn btn-sm btn-outline" hx-get="{% url 'get-dmoj-form' ct.id %}"
                         hx-target="#modal-body" hx-swap="innerHTML"
                         onclick="document.getElementById('modal-wrapper').checked = true">
                         + DMOJ
