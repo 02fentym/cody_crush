@@ -67,6 +67,13 @@ class LessonAdmin(admin.ModelAdmin):
     search_fields = ('title',)
 
 
+@admin.register(MultipleChoiceQuestion)
+class MultipleChoiceQuestionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'topic__title', 'prompt', 'language', 'created',)    
+    search_fields = ('topic__title', 'prompt', 'language',)
+    list_filter = ('language',)
+
+
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'role', 'dmoj_username')
@@ -100,5 +107,4 @@ class UnitAdmin(admin.ModelAdmin):
 
 admin.site.register(Quiz)
 admin.site.register(Answer)
-admin.site.register(MultipleChoiceQuestion)
 admin.site.register(TracingQuestion)

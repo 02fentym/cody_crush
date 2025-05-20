@@ -1,13 +1,38 @@
 import csv
 import io
 
-from django.shortcuts import redirect
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 from base.decorators import allowed_roles
-from base.models import Topic, MultipleChoiceQuestion, TracingQuestion
+from base.forms import MultipleChoiceQuestionForm
+from base.models import Topic, MultipleChoiceQuestion, TracingQuestion, Course, Language
 
+
+@allowed_roles(["teacher"])
+@login_required(login_url="login")
+def question_bank(request):
+    courses = Course.objects.filter(teacher=request.user)
+    mc_questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by("-created")
+    tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by("-created")
+
+    template = "base/main/question_bank_table.html" if request.headers.get("Hx-Request") else "base/main/question_bank.html"
+
+    return render(request, template, {
+        "mc_questions": mc_questions,
+        "tracing_questions": tracing_questions,
+        "courses": courses,
+    })
+
+def get_all_courses(role, user):
+    if role == "student":
+        courses = user.enrolled_courses.all()
+    else:
+        courses = Course.objects.filter(teacher=user)
+    return courses
+        
 
 @allowed_roles(["teacher"])
 @login_required(login_url="login")
@@ -15,26 +40,25 @@ def upload_questions(request):
     errors = []
 
     if request.method == "POST":
-
-        # Step 1: Open csv file
         file = request.FILES["file"]
         data = file.read().decode("utf-8")
         csv_file = io.StringIO(data)
         reader = csv.DictReader(csv_file)
 
+        topic = Topic.objects.get(id=request.POST.get("topic_id"))
+        question_type = request.POST.get("question_type").strip().lower()
+        
         for i, row in enumerate(reader, start=2):
-            # Step 2: Validate row data
-            result = question_data_validation(i, row)
+            result = question_data_validation(i, question_type,row)
             if result:
                 errors.append(result)
                 continue
 
-            # Step 3: Get topic and question type
-            topic = Topic.objects.get(id=row["topic_id"])
-            question_type = row["question_type"].strip().lower()
-
             try:
-                # Step 3: Create appropriate question subclass
+                # Get question language
+                language_name = row.get("language", "").strip()
+                language = Language.objects.filter(name__iexact=language_name).first()
+
                 if question_type == "multiple_choice":
                     MultipleChoiceQuestion.objects.create(
                         topic=topic,
@@ -45,50 +69,41 @@ def upload_questions(request):
                         choice_d=row["choice_d"],
                         correct_choice=row["correct_choice"].lower(),
                         explanation=row["explanation"],
-                        language=row.get("language", "")
+                        language=language
                     )
                 elif question_type == "tracing":
-                    print(f"Row {i} expected_output:", repr(row["expected_output"]))
                     TracingQuestion.objects.create(
                         topic=topic,
                         prompt=row["prompt"],
                         expected_output=row["expected_output"],
                         explanation=row["explanation"],
-                        language=row.get("language", "")
+                        language=language
                     )
             except Exception as e:
                 errors.append(f"Row {i}: Failed to create question. Error: {str(e)}")
 
-        # Final message
         if not errors:
-            messages.success(request, "Questions uploaded successfully.")
-        else:
-            messages.error(request, f"{len(errors)} errors occurred during upload.")
-            for err in errors:
-                messages.error(request, err)
+            # ✅ Return a small success message block to HTMX
+            return HttpResponse("""
+                <script>
+                document.getElementById('modal-wrapper').checked = false;
+                htmx.trigger(document.body, 'refresh-question-bank');
+                </script>
+                """, content_type="text/html")
 
-    return redirect("home")
+        # Otherwise fall through to show form with errors
+
+    topics = Topic.objects.all()
+    return render(request, "base/components/upload_questions_components/upload_questions_form.html", {"topics": topics, "errors": errors, })
 
 
 # Helper function to validate question data
-def question_data_validation(i, row):
-    # Validate that the topic exists
-    topic_id = row.get("topic_id")
-    try:
-        Topic.objects.get(id=topic_id)
-    except Topic.DoesNotExist:
-        return f"Row {i}: topic ID {topic_id} does not exist."
-
-    # Validate question type
-    question_type = row.get("question_type", "").strip().lower()
-    if question_type not in ["multiple_choice", "tracing"]:
-        return f"Row {i}: Invalid or missing question_type."
-
+def question_data_validation(i, question_type, row):
     # Validate required fields based on question type
     if question_type == "multiple_choice":
-        required_fields = ["prompt", "choice_a", "choice_b", "choice_c", "choice_d", "correct_choice", "explanation", "language", "topic_id"]
+        required_fields = ["prompt", "choice_a", "choice_b", "choice_c", "choice_d", "correct_choice", "explanation", "language"]
     elif question_type == "tracing":
-        required_fields = ["prompt", "expected_output", "explanation", "language", "topic_id"]
+        required_fields = ["prompt", "expected_output", "explanation", "language"]
 
     # Validate required fields for the given type
     for field in required_fields:
@@ -96,3 +111,22 @@ def question_data_validation(i, row):
             return f"Row {i}: Missing value for '{field}' ({question_type} question)."
 
     return ""  # If all is well
+
+
+
+def edit_mc_question(request, question_id):
+    question = get_object_or_404(MultipleChoiceQuestion, id=question_id)
+
+    if request.method == "POST":
+        form = MultipleChoiceQuestionForm(request.POST, instance=question)
+        if form.is_valid():
+            form.save()
+            return redirect("question-bank")  # or show a success screen
+    else:
+        form = MultipleChoiceQuestionForm(instance=question)
+
+    if request.headers.get("Hx-Request"):
+        template = "base/components/upload_questions_components/edit_mc_question_form.html"
+    else:
+        template = "base/components/upload_questions_components/edit_mc_question.html"
+    return render(request, template, {"form": form, "question": question})

@@ -99,8 +99,7 @@ class QuizQuestion(models.Model):
 
     def __str__(self):
         return f"{self.quiz} → {self.question}"
-
-    
+ 
 
 class MultipleChoiceQuestion(models.Model):
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
@@ -176,7 +175,6 @@ class Answer(models.Model):
         return f"Answer by {self.quiz.student.username}"
 
 
-
 class Lesson(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
@@ -209,7 +207,7 @@ class QuizTemplate(models.Model):
         return "Unknown Quiz Type"
 
     def __str__(self):
-        return f"Quiz Template: {self.topic.title} ({self.question_count} questions)"
+        return f"Quiz Template: {self.course_topic.topic.title} ({self.question_count} questions)"
 
 
 class Activity(models.Model):

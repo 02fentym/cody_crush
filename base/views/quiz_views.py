@@ -71,14 +71,14 @@ def create_quiz(request, course_topic_id):
 
     
     quiz_template = QuizTemplate.objects.create(
-        topic=course_topic,
+        course_topic=course_topic,
         question_count=question_count,
         question_type=question_type
     )
 
     Activity.objects.create(
         course_topic=course_topic,
-        order=course_topic.activity_set.count() + 1,
+        order=course_topic.activities.count() + 1,
         content_type=ContentType.objects.get_for_model(quiz_template),
         object_id=quiz_template.id
     )

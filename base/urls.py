@@ -32,9 +32,6 @@ urlpatterns = [
     path("course/<int:course_id>/delete/", views.delete_course, name="delete-course"),
     path("activity/delete/<int:activity_id>/", views.delete_activity, name="delete-activity"),
 
-    # question uploading
-    path("upload-questions/", views.upload_questions, name="upload-questions"),
-
     # quiz views
     path("topic/<int:topic_id>/create-quiz/", views.create_quiz, name="create-quiz"),
 
@@ -80,5 +77,15 @@ urlpatterns = [
     # DMOJ Exercise Creation
     path("get-dmoj-form/<int:course_topic_id>/", views.get_dmoj_form, name="get-dmoj-form"),
     path("submit-dmoj-form/<int:course_topic_id>/", views.submit_dmoj_form, name="submit-dmoj-form"),
+
+
+    ### URLS for question_upload_views.py
+    # question uploading
+    path("question-bank/", views.question_bank, name="question-bank"),
+    path("upload-questions/", views.upload_questions, name="upload-questions"),
+
+    # question editing
+    path("edit-mc-question/<int:question_id>/", views.edit_mc_question, name="edit-mc-question"),
+
 
 ]

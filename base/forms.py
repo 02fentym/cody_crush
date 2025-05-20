@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Course, Unit, Topic, Lesson, DmojExercise, Profile, CourseUnit, CourseTopic
+from .models import Course, Unit, Topic, Lesson, DmojExercise, Profile, CourseUnit, CourseTopic, MultipleChoiceQuestion, TracingQuestion
 
 
 class UserForm(UserCreationForm):
@@ -170,6 +170,7 @@ class LessonForm(forms.ModelForm):
             })
         }
 
+
 class DmojForm(forms.ModelForm):
     class Meta:
         model = DmojExercise
@@ -179,4 +180,23 @@ class DmojForm(forms.ModelForm):
                 "placeholder": "https://dmoj.ca/problem/ccc07j3",
                 "class": "input input-bordered w-full"
             })
+        }
+
+
+class MultipleChoiceQuestionForm(forms.ModelForm):
+    class Meta:
+        model = MultipleChoiceQuestion
+        fields = [
+            "language", "prompt", "choice_a", "choice_b", "choice_c", "choice_d",
+            "correct_choice", "explanation"
+        ]
+        widgets = {
+            "language": forms.Select(attrs={"class": "select select-sm select-bordered text-sm"}),
+            "prompt": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
+            "choice_a": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
+            "choice_b": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
+            "choice_c": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
+            "choice_d": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
+            "correct_choice": forms.Select(attrs={"class": "select select-sm select-bordered text-sm"}),
+            "explanation": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
         }

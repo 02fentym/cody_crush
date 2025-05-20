@@ -58,3 +58,35 @@ document.body.addEventListener("htmx:configRequest", function (event) {
         event.detail.headers["X-CSRFToken"] = csrfToken;
     }
 });
+
+/*
+    Live Resizing
+
+    Dynamically changes height of textareas when typing
+    Needed for forms.py -> MultipleChoiceQuestionForm
+*/
+function autoResize(el) {
+  el.style.height = "0px"; // Force reset
+  el.style.height = el.scrollHeight + "px"; // Set new height
+}
+
+function autoResizeTextareas(scope) {
+  scope.querySelectorAll("textarea").forEach(autoResize);
+}
+
+// Live resizing
+document.addEventListener("input", function (e) {
+  if (e.target.tagName === "TEXTAREA") {
+    autoResize(e.target);
+  }
+});
+
+// After modal content is swapped in
+document.body.addEventListener("htmx:afterSwap", function (e) {
+  if (e.detail.target.id === "modal-body") {
+    requestAnimationFrame(() => {
+      autoResizeTextareas(e.detail.target);
+    });
+  }
+});
+
