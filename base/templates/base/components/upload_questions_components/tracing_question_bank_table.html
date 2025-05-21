@@ -12,13 +12,7 @@
         <tbody>
             {% for q in tracing_questions %}
             {% if q.id %}
-            <tr
-                hx-get="{% url 'edit-tracing-question' q.id %}"
-                hx-target="#modal-body"
-                hx-swap="innerHTML"
-                onclick="document.getElementById('modal-wrapper').checked = true"
-                class="cursor-pointer hover:bg-base-300 transition"
-            >
+            <tr>
                 <td>{{ q.topic.unit.title|truncatechars:30 }}</td>
                 <td>{{ q.topic.title|truncatechars:30 }}</td>
                 <td>{{ q.prompt|truncatechars:85 }}</td>

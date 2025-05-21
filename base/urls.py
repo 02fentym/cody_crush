@@ -80,14 +80,6 @@ urlpatterns = [
 
 
     ### URLS for question_upload_views.py
-    # question uploading
-    path("question-bank/", views.question_bank, name="question-bank"),
-    path("upload-questions/", views.upload_questions, name="upload-questions"),
-
-    # question editing
-    path("edit-mc-question/<int:question_id>/", views.edit_mc_question, name="edit-mc-question"),
-    path("edit-tracing-question/<int:question_id>/", views.edit_tracing_question, name="edit-tracing-question"),
-
     # multiple choice questions
     path("questions/multiple-choice/", views.mc_questions, name="mc-questions"),
     path("questions/multiple-choice/upload/", views.upload_mc_questions, name="upload-mc-questions"),
@@ -95,5 +87,4 @@ urlpatterns = [
     # tracing questions
     path("questions/tracing/", views.tracing_questions, name="tracing-questions"),
     path("questions/tracing/upload/", views.upload_tracing_questions, name="upload-tracing-questions"),
-
 ]
