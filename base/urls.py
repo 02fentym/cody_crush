@@ -87,4 +87,13 @@ urlpatterns = [
     # question editing
     path("edit-mc-question/<int:question_id>/", views.edit_mc_question, name="edit-mc-question"),
     path("edit-tracing-question/<int:question_id>/", views.edit_tracing_question, name="edit-tracing-question"),
+
+    # multiple choice questions
+    path("questions/multiple-choice/", views.mc_questions, name="mc-questions"),
+    path("questions/multiple-choice/upload/", views.upload_mc_questions, name="upload-mc-questions"),
+
+    # tracing questions
+    path("questions/tracing/", views.tracing_questions, name="tracing-questions"),
+    path("questions/tracing/upload/", views.upload_tracing_questions, name="upload-tracing-questions"),
+
 ]

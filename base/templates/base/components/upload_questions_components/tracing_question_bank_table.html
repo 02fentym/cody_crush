@@ -1,0 +1,37 @@
+<!-- Tracing Questions -->
+<div class="overflow-x-auto shadow rounded-lg mb-10 max-h-[200px]">
+    <table class="table table-xs table-zebra w-full">
+        <thead class="sticky top-0 bg-base-200 z-10">
+            <tr>
+                <th>Unit</th>
+                <th>Topic</th>
+                <th>Prompt</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for q in tracing_questions %}
+            {% if q.id %}
+            <tr
+                hx-get="{% url 'edit-tracing-question' q.id %}"
+                hx-target="#modal-body"
+                hx-swap="innerHTML"
+                onclick="document.getElementById('modal-wrapper').checked = true"
+                class="cursor-pointer hover:bg-base-300 transition"
+            >
+                <td>{{ q.topic.unit.title|truncatechars:30 }}</td>
+                <td>{{ q.topic.title|truncatechars:30 }}</td>
+                <td>{{ q.prompt|truncatechars:85 }}</td>
+                <td>{{ q.created|date:"Y-m-d" }}</td>
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-base-content/70">
+                    No tracing questions yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

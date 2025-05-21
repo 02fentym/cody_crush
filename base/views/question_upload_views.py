@@ -34,6 +34,7 @@ def get_all_courses(role, user):
     return courses
         
 
+### REMOVE ONCE INDIVIDUAL UPLOADS ARE IMPLEMENTED
 @allowed_roles(["teacher"])
 @login_required(login_url="login")
 def upload_questions(request):
@@ -128,6 +129,76 @@ def question_data_validation(i, question_type, row):
     return ""  # If all is well
 
 
+@login_required
+@allowed_roles(["teacher"])
+def mc_questions(request):
+    mc_questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by("-created")
+    return render(request, "base/main/mc_questions.html", {"mc_questions": mc_questions})
+
+
+@allowed_roles(["teacher"])
+@login_required(login_url="login")
+def upload_mc_questions(request):
+    errors = []
+
+    if request.method == "POST":
+        file = request.FILES.get("file")
+        topic_id = request.POST.get("topic_id")
+
+        if not file or not topic_id:
+            errors.append("All fields are required.")
+        else:
+            try:
+                topic = Topic.objects.get(id=topic_id)
+            except Topic.DoesNotExist:
+                errors.append("Invalid topic selected.")
+                topic = None
+
+            if topic:
+                try:
+                    data = file.read().decode("utf-8")
+                    csv_file = io.StringIO(data)
+                    reader = csv.DictReader(csv_file)
+
+                    for i, row in enumerate(reader, start=2):
+                        result = question_data_validation(i, "multiple_choice", row)
+                        if result:
+                            errors.append(result)
+                            continue
+
+                        try:
+                            language_name = row.get("language", "").strip()
+                            language = Language.objects.filter(name__iexact=language_name).first()
+
+                            MultipleChoiceQuestion.objects.create(
+                                topic=topic,
+                                prompt=row["prompt"],
+                                choice_a=row["choice_a"],
+                                choice_b=row["choice_b"],
+                                choice_c=row["choice_c"],
+                                choice_d=row["choice_d"],
+                                correct_choice=row["correct_choice"].lower(),
+                                explanation=row["explanation"],
+                                language=language
+                            )
+                        except Exception as e:
+                            errors.append(f"Row {i}: Failed to create question. Error: {str(e)}")
+
+                except Exception as e:
+                    errors.append(f"Failed to read CSV: {str(e)}")
+
+        if not errors:
+            mc_questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by("-created")
+            return render(request, "base/components/upload_questions_components/mc_question_bank_table.html", {
+                "mc_questions": mc_questions,
+            })
+
+    topics = Topic.objects.all()
+    return render(request, "base/components/upload_questions_components/upload_mc_questions_form.html", {
+        "topics": topics,
+        "errors": errors
+    })
+
 
 def edit_mc_question(request, question_id):
     question = get_object_or_404(MultipleChoiceQuestion, id=question_id)
@@ -145,6 +216,73 @@ def edit_mc_question(request, question_id):
     else:
         template = "base/components/upload_questions_components/edit_mc_question.html"
     return render(request, template, {"form": form, "question": question})
+
+
+@login_required
+@allowed_roles(["teacher"])
+def tracing_questions(request):
+    tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by("-created")
+    return render(request, "base/main/tracing_questions.html", {"tracing_questions": tracing_questions})
+
+
+@allowed_roles(["teacher"])
+@login_required(login_url="login")
+def upload_tracing_questions(request):
+    errors = []
+
+    if request.method == "POST":
+        file = request.FILES.get("file")
+        topic_id = request.POST.get("topic_id")
+
+        if not file or not topic_id:
+            errors.append("All fields are required.")
+        else:
+            try:
+                topic = Topic.objects.get(id=topic_id)
+            except Topic.DoesNotExist:
+                errors.append("Invalid topic selected.")
+                topic = None
+
+            if topic:
+                try:
+                    data = file.read().decode("utf-8")
+                    csv_file = io.StringIO(data)
+                    reader = csv.DictReader(csv_file)
+
+                    for i, row in enumerate(reader, start=2):
+                        result = question_data_validation(i, "tracing", row)
+                        if result:
+                            errors.append(result)
+                            continue
+
+                        try:
+                            language_name = row.get("language", "").strip()
+                            language = Language.objects.filter(name__iexact=language_name).first()
+
+                            TracingQuestion.objects.create(
+                                topic=topic,
+                                prompt=row["prompt"],
+                                expected_output=row["expected_output"],
+                                explanation=row["explanation"],
+                                language=language
+                            )
+                        except Exception as e:
+                            errors.append(f"Row {i}: Failed to create question. Error: {str(e)}")
+
+                except Exception as e:
+                    errors.append(f"Failed to read CSV: {str(e)}")
+
+        if not errors:
+            tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by("-created")
+            return render(request, "base/components/upload_questions_components/tracing_question_bank_table.html", {
+                "tracing_questions": tracing_questions,
+            })
+
+    topics = Topic.objects.all()
+    return render(request, "base/components/upload_questions_components/upload_tracing_questions_form.html", {
+        "topics": topics,
+        "errors": errors
+    })
 
 
 def edit_tracing_question(request, question_id):

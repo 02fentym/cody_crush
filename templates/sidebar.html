@@ -3,22 +3,21 @@
         <!-- HOME -->
         <ul class="menu border-b pb-2 mb-2 w-full px-0">
             <li>
-                <a href="{% url 'home' %}" class="block">
-                    Home
-                </a>
+                <a href="{% url 'home' %}" class="block"> Home </a>
             </li>
         </ul>
 
-
         <!-- COURSE MANAGEMENT -->
         <p class="menu-title">Course Management</p>
-        <ul class="menu border-b pb-2 mb-2 w-full"> <!-- ⭐️ added border-b here -->
+        <ul class="menu border-b pb-2 mb-2 w-full">
+            <!-- ⭐️ added border-b here -->
             {% if courses %}
-            {% for course in courses %}
-            <li>
-                <a {% if course.is_active %}class="active" {% endif %} href="{% url 'course' course.id %}">{{ course.title }}</a>
-            </li>
-            {% endfor %}
+                {% for course in courses %}
+                <li>
+                    <a {% if course.is_active %}class="active" {% endif %} href="{% url 'course' course.id %}">
+                        {{ course.title }}</a>
+                </li>
+                {% endfor %}
             {% else %}
             <li><span class="text-gray-500 italic">No courses yet</span></li>
             {% endif %}
@@ -29,10 +28,25 @@
     {% if user.profile.role == "teacher" %}
     <nav>
         <p class="menu-title">Teaching Tools</p>
-        <ul class="menu">
+        <ul class="menu pb-2 mb-2 w-full">
             <li><a href="{% url 'manage-units' %}">Manage Units</a></li>
             <li><a href="{% url 'manage-topics' %}">Manage Topics</a></li>
-            <li><a href="{% url 'question-bank' %}">Question Bank</a></li>
+
+            <li>
+                <details>
+                    <summary class="cursor-pointer px-2 py-2 hover:bg-base-300 rounded">
+                        Question Bank
+                    </summary>
+                    <ul class="ml-4">
+                        <li>
+                            <a href="{% url 'mc-questions' %}">Multiple Choice</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'tracing-questions' %}">Tracing</a>
+                        </li>
+                    </ul>
+                </details>
+            </li>
         </ul>
     </nav>
     {% endif %}

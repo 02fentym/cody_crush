@@ -1,0 +1,14 @@
+{% extends "main.html" %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Tracing Questions</h1>
+
+<div>
+    <div>
+        {% include "base/components/upload_questions_components/upload_tracing_questions_button.html" %}
+    </div>
+    <div id="tracing-table">
+        {% include "base/components/upload_questions_components/tracing_question_bank_table.html" %}
+    </div>
+</div>
+{% endblock %}
