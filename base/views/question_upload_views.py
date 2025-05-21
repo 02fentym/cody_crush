@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 from base.decorators import allowed_roles
-from base.forms import MultipleChoiceQuestionForm
+from base.forms import MultipleChoiceQuestionForm, TracingQuestionForm
 from base.models import Topic, MultipleChoiceQuestion, TracingQuestion, Course, Language
 
 
@@ -40,61 +40,76 @@ def upload_questions(request):
     errors = []
 
     if request.method == "POST":
-        file = request.FILES["file"]
-        data = file.read().decode("utf-8")
-        csv_file = io.StringIO(data)
-        reader = csv.DictReader(csv_file)
+        file = request.FILES.get("file")
+        topic_id = request.POST.get("topic_id")
+        question_type = request.POST.get("question_type", "").strip().lower()
 
-        topic = Topic.objects.get(id=request.POST.get("topic_id"))
-        question_type = request.POST.get("question_type").strip().lower()
-        
-        for i, row in enumerate(reader, start=2):
-            result = question_data_validation(i, question_type,row)
-            if result:
-                errors.append(result)
-                continue
-
+        # Validate top-level form fields
+        if not file or not topic_id or not question_type:
+            errors.append("All fields are required.")
+        else:
             try:
-                # Get question language
-                language_name = row.get("language", "").strip()
-                language = Language.objects.filter(name__iexact=language_name).first()
+                topic = Topic.objects.get(id=topic_id)
+            except Topic.DoesNotExist:
+                errors.append("Invalid topic selected.")
+                topic = None
 
-                if question_type == "multiple_choice":
-                    MultipleChoiceQuestion.objects.create(
-                        topic=topic,
-                        prompt=row["prompt"],
-                        choice_a=row["choice_a"],
-                        choice_b=row["choice_b"],
-                        choice_c=row["choice_c"],
-                        choice_d=row["choice_d"],
-                        correct_choice=row["correct_choice"].lower(),
-                        explanation=row["explanation"],
-                        language=language
-                    )
-                elif question_type == "tracing":
-                    TracingQuestion.objects.create(
-                        topic=topic,
-                        prompt=row["prompt"],
-                        expected_output=row["expected_output"],
-                        explanation=row["explanation"],
-                        language=language
-                    )
-            except Exception as e:
-                errors.append(f"Row {i}: Failed to create question. Error: {str(e)}")
+            if topic:
+                try:
+                    data = file.read().decode("utf-8")
+                    csv_file = io.StringIO(data)
+                    reader = csv.DictReader(csv_file)
+
+                    for i, row in enumerate(reader, start=2):
+                        result = question_data_validation(i, question_type, row)
+                        if result:
+                            errors.append(result)
+                            continue
+
+                        try:
+                            language_name = row.get("language", "").strip()
+                            language = Language.objects.filter(name__iexact=language_name).first()
+
+                            if question_type == "multiple_choice":
+                                MultipleChoiceQuestion.objects.create(
+                                    topic=topic,
+                                    prompt=row["prompt"],
+                                    choice_a=row["choice_a"],
+                                    choice_b=row["choice_b"],
+                                    choice_c=row["choice_c"],
+                                    choice_d=row["choice_d"],
+                                    correct_choice=row["correct_choice"].lower(),
+                                    explanation=row["explanation"],
+                                    language=language
+                                )
+                            elif question_type == "tracing":
+                                TracingQuestion.objects.create(
+                                    topic=topic,
+                                    prompt=row["prompt"],
+                                    expected_output=row["expected_output"],
+                                    explanation=row["explanation"],
+                                    language=language
+                                )
+                        except Exception as e:
+                            errors.append(f"Row {i}: Failed to create question. Error: {str(e)}")
+
+                except Exception as e:
+                    errors.append(f"Failed to read CSV: {str(e)}")
 
         if not errors:
-            # ✅ Return a small success message block to HTMX
-            return HttpResponse("""
-                <script>
-                document.getElementById('modal-wrapper').checked = false;
-                htmx.trigger(document.body, 'refresh-question-bank');
-                </script>
-                """, content_type="text/html")
+            tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by("-created")
+            mc_questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by("-created")
+            return render(request, "base/components/upload_questions_components/question_bank_table.html", {
+                "tracing_questions": tracing_questions,
+                "mc_questions": mc_questions,
+            })
 
-        # Otherwise fall through to show form with errors
-
+    # For GET or POST with errors
     topics = Topic.objects.all()
-    return render(request, "base/components/upload_questions_components/upload_questions_form.html", {"topics": topics, "errors": errors, })
+    return render(request, "base/components/upload_questions_components/upload_questions_form.html", {
+        "topics": topics,
+        "errors": errors
+    })
 
 
 # Helper function to validate question data
@@ -129,4 +144,22 @@ def edit_mc_question(request, question_id):
         template = "base/components/upload_questions_components/edit_mc_question_form.html"
     else:
         template = "base/components/upload_questions_components/edit_mc_question.html"
+    return render(request, template, {"form": form, "question": question})
+
+
+def edit_tracing_question(request, question_id):
+    question = get_object_or_404(TracingQuestion, id=question_id)
+
+    if request.method == "POST":
+        form = TracingQuestionForm(request.POST, instance=question)
+        if form.is_valid():
+            form.save()
+            return redirect("question-bank")  # or show a success screen
+    else:
+        form = TracingQuestionForm(instance=question)
+
+    if request.headers.get("Hx-Request"):
+        template = "base/components/upload_questions_components/edit_tracing_question_form.html"
+    else:
+        template = "base/components/upload_questions_components/edit_tracing_question.html"
     return render(request, template, {"form": form, "question": question})

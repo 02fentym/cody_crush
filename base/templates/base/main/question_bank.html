@@ -17,7 +17,7 @@
 <!-- HTMX-wrapped question bank section -->
 <div id="question-bank"
      hx-get="{% url 'question-bank' %}"
-     hx-trigger="refresh-question-bank from:body"
+     hx-trigger="refresh-question-bank"
      hx-swap="innerHTML">
 
     {% include "base/components/upload_questions_components/question_bank_table.html" %}

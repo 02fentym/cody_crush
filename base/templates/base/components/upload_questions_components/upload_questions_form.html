@@ -1,12 +1,20 @@
-<form method="POST"
-      hx-post="{% url 'upload-questions' %}"
-      hx-target="#modal-body"
-      hx-swap="innerHTML"
-      enctype="multipart/form-data"
-      hx-on="htmx:afterSwap: if (!document.querySelector('.text-error')) document.getElementById('modal-wrapper').checked = false"
-      class="space-y-4">
-
+<form
+    method="POST"
+    hx-post="{% url 'upload-questions' %}"
+    hx-target="#question-bank"
+    hx-swap="innerHTML"
+    hx-on="htmx:afterRequest: document.getElementById('modal-wrapper').checked = false"
+    enctype="multipart/form-data"
+    class="space-y-4"
+>
     {% csrf_token %}
+
+    <button
+        type="button"
+        id="close-upload-modal"
+        class="hidden"
+        onclick="document.getElementById('modal-wrapper').checked = false;"
+    ></button>
 
     <h3 class="font-bold text-lg mb-2">Upload Questions (CSV)</h3>
 

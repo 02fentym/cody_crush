@@ -86,6 +86,5 @@ urlpatterns = [
 
     # question editing
     path("edit-mc-question/<int:question_id>/", views.edit_mc_question, name="edit-mc-question"),
-
-
+    path("edit-tracing-question/<int:question_id>/", views.edit_tracing_question, name="edit-tracing-question"),
 ]
