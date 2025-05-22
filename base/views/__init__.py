@@ -5,7 +5,7 @@ from .course_views import *
 from .dmoj_views import *
 from .home_views import *
 from .lesson_views import *
-from .question_upload_views import *
+from .upload_question_views import *
 from .quiz_views import *
 from .unit_topic_management_views import *
 from .user_views import *

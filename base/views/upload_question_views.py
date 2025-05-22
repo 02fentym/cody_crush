@@ -106,6 +106,22 @@ def upload_mc_questions(request):
     })
 
 
+def edit_mc_question(request, question_id):
+    question = get_object_or_404(MultipleChoiceQuestion, pk=question_id)
+    if request.method == "POST":
+        form = MultipleChoiceQuestionForm(request.POST, instance=question)
+        if form.is_valid():
+            form.save()
+            mc_questions = MultipleChoiceQuestion.objects.all()
+            return render(request, "base/components/upload_questions_components/mc_question_bank_table.html", {"mc_questions": mc_questions})
+    else:
+        form = MultipleChoiceQuestionForm(instance=question)
+    return render(request, "base/components/upload_questions_components/edit_mc_questions_form.html", {"form": form, "question": question})
+
+
+
+### TRACING QUESTIONS
+
 @login_required
 @allowed_roles(["teacher"])
 def tracing_questions(request):

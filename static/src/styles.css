@@ -1,4 +1,6 @@
 @import "tailwindcss";
+
+
 @plugin "daisyui";
 
 h1 {
@@ -23,4 +25,12 @@ h5 {
 
 h6 {
     @apply text-sm font-medium;
+}
+
+/* Make textarea width 100% */
+@layer utilities {
+  .textarea {
+    width: 100% !important; /* Override the default clamp */
+    max-width: none !important; /* Remove upper limit */
+  }
 }

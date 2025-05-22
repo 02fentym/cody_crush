@@ -79,10 +79,11 @@ urlpatterns = [
     path("submit-dmoj-form/<int:course_topic_id>/", views.submit_dmoj_form, name="submit-dmoj-form"),
 
 
-    ### URLS for question_upload_views.py
+    ### URLS for upload_questions_views.py
     # multiple choice questions
     path("questions/multiple-choice/", views.mc_questions, name="mc-questions"),
     path("questions/multiple-choice/upload/", views.upload_mc_questions, name="upload-mc-questions"),
+    path("mc-question/<int:question_id>/edit/", views.edit_mc_question, name="edit-mc-question"),
 
     # tracing questions
     path("questions/tracing/", views.tracing_questions, name="tracing-questions"),
