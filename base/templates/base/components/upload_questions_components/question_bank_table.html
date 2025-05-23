@@ -1,6 +1,5 @@
-<!-- MC Questions -->
 <div class="overflow-x-auto shadow rounded-lg mb-10 max-h-[200px]">
-    <table class="table table-xs table-zebra w-full ">
+    <table class="table table-xs table-zebra w-full">
         <thead class="sticky top-0 bg-base-200 z-10">
             <tr>
                 <th>Unit</th>
@@ -10,8 +9,10 @@
             </tr>
         </thead>
         <tbody>
-            {% for q in mc_questions %}
-            <tr hx-get="{% url 'edit-mc-question' q.id %}" hx-target="#edit-form-container" hx-swap="innerHTML"
+            {% for q in questions %}
+            <tr hx-get="{% url row_url_name q.id %}"
+                hx-target="#{{ form_container_id }}"
+                hx-swap="innerHTML"
                 class="cursor-pointer hover:bg-base-300 transition">
 
                 <td>{{ q.topic.unit.title|truncatechars:30 }}</td>
@@ -22,7 +23,7 @@
             {% empty %}
             <tr>
                 <td colspan="4" class="text-center text-base-content/70">
-                    No multiple choice questions yet.
+                    No questions yet.
                 </td>
             </tr>
             {% endfor %}
