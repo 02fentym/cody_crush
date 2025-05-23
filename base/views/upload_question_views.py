@@ -50,7 +50,7 @@ def mc_questions(request):
         "table_template": "base/components/upload_questions_components/question_bank_table.html",
         "table_id": "mc-table",
         "row_url_name": "edit-mc-question",
-        "form_container_id": "edit-form-container",
+        "form_container_id": "mc-edit-form-container",
         "questions": questions,
     }
 
@@ -113,7 +113,7 @@ def upload_mc_questions(request):
             return render(request, "base/components/upload_questions_components/question_bank_table.html", {
                 "questions": mc_questions,
                 "row_url_name": "edit-mc-question",
-                "form_container_id": "edit-form-container",
+                "form_container_id": "tracing-edit-form-container",
             })
 
     topics = Topic.objects.all()
@@ -130,14 +130,25 @@ def edit_mc_question(request, question_id):
         if form.is_valid():
             form.save()
             mc_questions = MultipleChoiceQuestion.objects.all()
-            response = render(request, "base/components/upload_questions_components/mc_question_bank_table.html", {
-                "mc_questions": mc_questions
+            response = render(request, "base/components/upload_questions_components/question_bank_table.html", {
+                "questions": mc_questions,
+                "row_url_name": "edit-mc-question",
+                "form_container_id": "mc-edit-form-container",
             })
-            response["HX-Trigger"] = "mc-question-updated"
+
+            response["HX-Trigger"] = "question-updated"
             return response
     else:
         form = MultipleChoiceQuestionForm(instance=question)
-    return render(request, "base/components/upload_questions_components/edit_mc_questions_form.html", {"form": form, "question": question})
+    
+    context = {
+        "form": form,
+        "question": question,
+        "post_url": "edit-mc-question",
+        "form_container_id": "mc-edit-form-container",
+        "table_id": "mc-table",
+    }
+    return render(request, "base/components/upload_questions_components/edit_question_form.html", context)
 
 
 
@@ -148,6 +159,24 @@ def edit_mc_question(request, question_id):
 def tracing_questions(request):
     tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by("-created")
     return render(request, "base/main/tracing_questions.html", {"tracing_questions": tracing_questions})
+
+
+@login_required
+@allowed_roles(["teacher"])
+def tracing_questions(request):
+    tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by("-created")
+    context = {
+        "title": "Tracing Questions",
+        "questions": tracing_questions,
+        "upload_button": "base/components/upload_questions_components/upload_questions_button.html",
+        "hx_get_url": "upload-tracing-questions",
+        "table_template": "base/components/upload_questions_components/question_bank_table.html",
+        "row_url_name": "edit-tracing-question",
+        "table_id": "tracing-table",
+        "form_container_id": "tracing-edit-form-container",
+    }
+
+    return render(request, "base/main/question_bank_base.html", context)
 
 
 @allowed_roles(["teacher"])
@@ -208,3 +237,30 @@ def upload_tracing_questions(request):
         "topics": topics,
         "errors": errors
     })
+
+
+def edit_tracing_question(request, question_id):
+    question = get_object_or_404(TracingQuestion, pk=question_id)
+    if request.method == "POST":
+        form = TracingQuestionForm(request.POST, instance=question)
+        if form.is_valid():
+            form.save()
+            tracing_questions = TracingQuestion.objects.all()
+            response = render(request, "base/components/upload_questions_components/question_bank_table.html", {
+                "questions": tracing_questions,
+                "row_url_name": "edit-tracing-question",
+                "form_container_id": "tracing-edit-form-container",
+            })
+            response["HX-Trigger"] = "question-updated"
+            return response
+    else:
+        form = TracingQuestionForm(instance=question)
+    
+    context = {
+        "form": form,
+        "question": question,
+        "post_url": "edit-tracing-question",
+        "form_container_id": "tracing-edit-form-container",
+        "table_id": "tracing-table",
+    }
+    return render(request, "base/components/upload_questions_components/edit_question_form.html", context)

@@ -1,0 +1,27 @@
+<div class="w-full max-w-3xl mx-auto h-full overflow-y-auto px-4">
+    <form method="POST"
+      hx-post="{% url post_url question.id %}"
+      hx-target="#{{ table_id }}"
+      hx-swap="innerHTML"
+      hx-on="question-updated: document.getElementById('{{ form_container_id }}').innerHTML = ''"
+      class="space-y-4 w-full">
+
+        {% csrf_token %}
+
+        {% for field in form %}
+        <div>
+            <label for="{{ field.id_for_label }}" class="block font-semibold text-sm mb-1">
+                {{ field.label }}:
+            </label>
+            {{ field }}
+        </div>
+        {% endfor %}
+
+        <div class="sticky bottom-0 bg-base-100 pt-4 pb-2 flex gap-4 border-t border-base-300">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" class="btn" onclick="document.getElementById('{{ form_container_id }}').innerHTML = ''">
+                Cancel
+            </button>
+        </div>
+    </form>
+</div>

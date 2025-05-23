@@ -88,4 +88,5 @@ urlpatterns = [
     # tracing questions
     path("questions/tracing/", views.tracing_questions, name="tracing-questions"),
     path("questions/tracing/upload/", views.upload_tracing_questions, name="upload-tracing-questions"),
+    path("tracing-question/<int:question_id>/edit/", views.edit_tracing_question, name="edit-tracing-question"),
 ]
