@@ -38,8 +38,10 @@ def question_data_validation(i, question_type, row):
 @login_required
 @allowed_roles(["teacher"])
 def mc_questions(request):
+    courses = get_all_courses("teacher", request.user)
     mc_questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by("-created")
-    return render(request, "base/main/mc_questions.html", {"mc_questions": mc_questions})
+    context = {"mc_questions": mc_questions, "courses": courses}
+    return render(request, "base/main/mc_questions.html", context)
 
 
 @allowed_roles(["teacher"])
@@ -113,7 +115,11 @@ def edit_mc_question(request, question_id):
         if form.is_valid():
             form.save()
             mc_questions = MultipleChoiceQuestion.objects.all()
-            return render(request, "base/components/upload_questions_components/mc_question_bank_table.html", {"mc_questions": mc_questions})
+            response = render(request, "base/components/upload_questions_components/mc_question_bank_table.html", {
+                "mc_questions": mc_questions
+            })
+            response["HX-Trigger"] = "mc-question-updated"
+            return response
     else:
         form = MultipleChoiceQuestionForm(instance=question)
     return render(request, "base/components/upload_questions_components/edit_mc_questions_form.html", {"form": form, "question": question})

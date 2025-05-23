@@ -1,6 +1,11 @@
 <div class="w-full max-w-3xl mx-auto h-full overflow-y-auto px-4">
-    <form method="POST" hx-post="{% url 'edit-mc-question' question.id %}" hx-target="#edit-form-container"
-        hx-swap="innerHTML" class="space-y-4 w-full">
+    <form method="POST"
+      hx-post="{% url 'edit-mc-question' question.id %}"
+      hx-target="#mc-table"
+      hx-swap="innerHTML"
+      hx-on="mc-question-updated: document.getElementById('edit-form-container').innerHTML = ''"
+      class="space-y-4 w-full">
+
         {% csrf_token %}
 
         <div class="w-full">
