@@ -38,8 +38,10 @@ def question_data_validation(i, question_type, row):
 @login_required
 @allowed_roles(["teacher"])
 def mc_questions(request):
+    courses = get_all_courses(request.user.profile.role, request.user)
     questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by("-created")
     context = {
+        "courses": courses,
         "title": "Multiple Choice Questions",
 
         # Upload button
@@ -157,15 +159,10 @@ def edit_mc_question(request, question_id):
 @login_required
 @allowed_roles(["teacher"])
 def tracing_questions(request):
-    tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by("-created")
-    return render(request, "base/main/tracing_questions.html", {"tracing_questions": tracing_questions})
-
-
-@login_required
-@allowed_roles(["teacher"])
-def tracing_questions(request):
+    courses = get_all_courses(request.user.profile.role, request.user)
     tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by("-created")
     context = {
+        "courses": courses,
         "title": "Tracing Questions",
         "questions": tracing_questions,
         "upload_button": "base/components/upload_questions_components/upload_questions_button.html",

@@ -44,8 +44,8 @@ urlpatterns = [
 
 
     # Quiz Creation
-    path("topic/<int:topic_id>/quiz-form/", views.get_quiz_form, name="get-quiz-form"),
-    path("topic/<int:topic_id>/submit-quiz/", views.submit_quiz_form, name="submit-quiz-form"),
+    path("topic/<int:course_topic_id>/quiz-form/", views.get_quiz_form, name="get-quiz-form"),
+    path("topic/<int:course_topic_id>/submit-quiz/", views.submit_quiz_form, name="submit-quiz-form"),
     
 
 

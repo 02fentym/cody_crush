@@ -36,7 +36,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(CourseTopic)
 class CourseTopicAdmin(admin.ModelAdmin):
-    list_display = ("unit", "topic", "order",)
+    list_display = ("id", "unit", "topic", "order",)
     list_filter = ("unit", "topic",)
     search_fields = ("unit__title", "topic__title",)
 
@@ -90,7 +90,7 @@ class QuizTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
-    list_display = ('title', 'unit', 'description')
+    list_display = ('id', 'title', 'unit', 'description')
     search_fields = ('unit', 'title',)
     list_filter = ('unit', 'title',)
 

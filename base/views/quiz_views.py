@@ -32,7 +32,7 @@ def submit_quiz_form(request, course_topic_id):
         question_type = request.POST.get("question_type")
 
         quiz_template = QuizTemplate.objects.create(
-            topic=course_topic,
+            course_topic=course_topic,
             question_count=question_count,
             question_type=question_type,
         )
@@ -40,13 +40,16 @@ def submit_quiz_form(request, course_topic_id):
         # Create the activity
         Activity.objects.create(
             course_topic=course_topic,
-            order=course_topic.activity_set.count() + 1,
+            order=course_topic.activities.count() + 1,
             content_type=ContentType.objects.get_for_model(QuizTemplate),
             object_id=quiz_template.id
         )
 
         # Rerender the full topic list (with new activity) for that unit
-        return render(request, "base/components/course_topic_components/course_topic_list.html", {"unit": course_topic.unit})
+        return render(request, "base/components/course_topic_components/course_topic_list.html", {
+            "unit": course_topic.unit,
+            "course_topics": CourseTopic.objects.filter(unit=course_topic.unit)
+        })
 
     return HttpResponse("<div class='text-error'>Failed to create quiz</div>")
 
