@@ -1,7 +1,7 @@
 {% extends "main.html" %}
 
 {% block content %}
-<h1 class="text-2xl font-bold mb-6">Multiple Choice Questions</h1>
+<h1 class="text-2xl font-bold mb-2">Multiple Choice Questions</h1>
 
 <div class="flex flex-col h-screen">
   <div>
@@ -10,7 +10,7 @@
   <div id="mc-table">
     {% include "base/components/upload_questions_components/mc_question_bank_table.html" %}
   </div>
-  <div id="edit-form-container" class="mt-6 w-full h-[40vh]">
+  <div id="edit-form-container" class="mt-2 w-full h-[40vh]">
     {# Form is injected using HTMX #}
   </div>
 </div>

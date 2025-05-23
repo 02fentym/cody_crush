@@ -1,11 +1,6 @@
-<div class="flex gap-6 h-full">
-  <!-- Left: Form (2/3 width) -->
-  <div class="w-2/3 h-full overflow-y-auto pr-2">
-    <form method="POST"
-          hx-post="{% url 'edit-mc-question' question.id %}"
-          hx-target="#edit-form-container"
-          hx-swap="innerHTML"
-          class="space-y-4 w-full">
+<div class="w-full max-w-3xl mx-auto h-full overflow-y-auto px-4">
+    <form method="POST" hx-post="{% url 'edit-mc-question' question.id %}" hx-target="#edit-form-container"
+        hx-swap="innerHTML" class="space-y-4 w-full">
         {% csrf_token %}
 
         <div class="w-full">
@@ -39,12 +34,14 @@
         </div>
 
         <div>
-            <label for="{{ form.correct_choice.id_for_label }}" class="block font-semibold text-sm mb-1">Correct Choice:</label>
+            <label for="{{ form.correct_choice.id_for_label }}" class="block font-semibold text-sm mb-1">Correct
+                Choice:</label>
             {{ form.correct_choice }}
         </div>
 
         <div>
-            <label for="{{ form.explanation.id_for_label }}" class="block font-semibold text-sm mb-1">Explanation:</label>
+            <label for="{{ form.explanation.id_for_label }}"
+                class="block font-semibold text-sm mb-1">Explanation:</label>
             {{ form.explanation }}
         </div>
 
@@ -55,19 +52,4 @@
             </button>
         </div>
     </form>
-  </div>
-
-  <!-- Right: Preview (1/3 width) -->
-  <div class="w-1/3 h-full overflow-y-auto bg-base-200 p-4 rounded-lg text-sm">
-    <h3 class="font-semibold mb-2">Preview</h3>
-    <p class="mb-4"><strong>Prompt:</strong> {{ question.prompt }}</p>
-    <ul class="list-disc list-inside space-y-1">
-      <li><strong>A:</strong> {{ question.choice_a }}</li>
-      <li><strong>B:</strong> {{ question.choice_b }}</li>
-      <li><strong>C:</strong> {{ question.choice_c }}</li>
-      <li><strong>D:</strong> {{ question.choice_d }}</li>
-    </ul>
-    <p class="mt-4"><strong>Correct:</strong> {{ question.correct_choice }}</p>
-    <p><strong>Explanation:</strong> {{ question.explanation }}</p>
-  </div>
 </div>
