@@ -1,0 +1,19 @@
+{% extends "main.html" %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-2">{{ title }}</h1>
+
+<div class="flex flex-col h-screen">
+  <div>
+    {% include upload_button with hx_get_url=hx_get_url %}
+  </div>
+
+  <div id="{{ table_id }}">
+    {% include table_template with questions=questions row_url_name=row_url_name form_container_id=form_container_id %}
+  </div>
+
+  <div id="{{ form_container_id }}" class="mt-2 w-full h-[40vh]">
+    {# Form is injected using HTMX #}
+  </div>
+</div>
+{% endblock %}

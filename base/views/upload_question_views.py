@@ -38,10 +38,23 @@ def question_data_validation(i, question_type, row):
 @login_required
 @allowed_roles(["teacher"])
 def mc_questions(request):
-    courses = get_all_courses("teacher", request.user)
-    mc_questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by("-created")
-    context = {"mc_questions": mc_questions, "courses": courses}
-    return render(request, "base/main/mc_questions.html", context)
+    questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by("-created")
+    context = {
+        "title": "Multiple Choice Questions",
+
+        # Upload button
+        "upload_button": "base/components/upload_questions_components/upload_questions_button.html",
+        "hx_get_url": "upload-mc-questions",
+
+        # Table
+        "table_template": "base/components/upload_questions_components/question_bank_table.html",
+        "table_id": "mc-table",
+        "row_url_name": "edit-mc-question",
+        "form_container_id": "edit-form-container",
+        "questions": questions,
+    }
+
+    return render(request, "base/main/question_bank_base.html", context)
 
 
 @allowed_roles(["teacher"])
@@ -97,8 +110,10 @@ def upload_mc_questions(request):
 
         if not errors:
             mc_questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by("-created")
-            return render(request, "base/components/upload_questions_components/mc_question_bank_table.html", {
-                "mc_questions": mc_questions,
+            return render(request, "base/components/upload_questions_components/question_bank_table.html", {
+                "questions": mc_questions,
+                "row_url_name": "edit-mc-question",
+                "form_container_id": "edit-form-container",
             })
 
     topics = Topic.objects.all()
