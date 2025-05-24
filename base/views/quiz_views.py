@@ -67,7 +67,7 @@ def create_quiz(request, course_topic_id):
         "tracing": TracingQuestion,
     }
     question_model = QUESTION_TYPE_MAP.get(question_type)
-    available_count = question_model.objects.filter(topic=course_topic).count()
+    available_count = question_model.objects.filter(topic=course_topic.topic).count()
     if available_count < question_count:
         messages.error(request, f"Only {available_count} questions available for this topic.")
         return redirect("course", course_id=course_id)
@@ -106,18 +106,18 @@ def start_quiz(request, activity_id):
         model = TracingQuestion
     else:
         messages.error(request, "Unsupported question type.")
-        return redirect("topic", course_topic.unit.course.id, course_topic.unit.id, course_topic.id)
+        return redirect("topic", course_topic.topic.unit.course.id, course_topic.topic.unit.id, course_topic.id)
 
     # Get content type for the selected question model
     content_type = ContentType.objects.get_for_model(model)
 
     # Random questions
-    questions = model.objects.filter(topic=course_topic).order_by("?")[:template.question_count]
+    questions = model.objects.filter(topic=course_topic.topic).order_by("?")[:template.question_count]
 
     # Create Quiz
     quiz = Quiz.objects.create(
         student=request.user,
-        topic=course_topic,
+        course_topic=course_topic,
         question_type=template.question_type
     )
 

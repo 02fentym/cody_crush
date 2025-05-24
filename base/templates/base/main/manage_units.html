@@ -5,11 +5,13 @@
 
 <div class="flex justify-end mb-4">
     <button hx-get="{% url 'get-unit-form' %}" hx-target="#modal-body" hx-swap="innerHTML"
-        onclick="document.getElementById('modal-wrapper').checked = true" class="btn btn-sm btn-primary">+ Add
-        Unit</button>
+        onclick="document.getElementById('modal-wrapper').checked = true" class="btn btn-sm btn-primary">
+        + Add Unit
+    </button>
+
 </div>
 
-<div id="unit-table">
+<div id="unit-table" >
     {% include "base/components/unit_components/manage_units_table.html" %}
 </div>
 {% endblock %}

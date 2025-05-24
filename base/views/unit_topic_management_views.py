@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 
@@ -15,6 +15,7 @@ def manage_units(request):
     units = Unit.objects.all().order_by("-updated")
     return render(request, "base/main/manage_units.html", {"units": units,"courses": courses})
 
+
 @login_required
 @allowed_roles(["teacher"])
 def get_unit_form(request):
@@ -29,12 +30,13 @@ def submit_unit_form_manage(request):
         form = UnitForm(request.POST)
         if form.is_valid():
             form.save()
-            units = Unit.objects.all().order_by("-updated")
-            return render(request, "base/components/unit_components/manage_units_table.html", {"units": units})
+            return redirect("manage-units")  # Redirect to manage-units page
+        else:
+            # Re-render the form with errors in the modal
+            return render(request, "base/components/unit_components/unit_form.html", {"form": form})
     else:
         form = UnitForm()
-
-    return render(request, "base/components/unit_components/unit_form.html", {"form": form})
+        return render(request, "base/components/unit_components/unit_form.html", {"form": form})
 
 
 # Managing Topics
