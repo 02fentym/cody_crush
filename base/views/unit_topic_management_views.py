@@ -60,7 +60,5 @@ def submit_topic_form(request):
     form = TopicForm(request.POST)
     if form.is_valid():
         form.save()
-        topics = Topic.objects.all().order_by("-updated")
-        return render(request, "base/components/topic_components/manage_topics_table.html", {"topics": topics})
+        return redirect("manage-topics")
     return render(request, "base/components/topic_components/topic_form.html", {"form": form})
-
