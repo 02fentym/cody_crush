@@ -142,7 +142,6 @@ class Quiz(models.Model):
     ]
 
     student = models.ForeignKey(User, on_delete=models.CASCADE)
-    #topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
     course_topic = models.ForeignKey(CourseTopic, on_delete=models.CASCADE)
     grade = models.FloatField(null=True, blank=True)
     question_type = models.CharField(max_length=30, choices=QUESTION_TYPE_CHOICES)

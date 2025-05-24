@@ -20,7 +20,7 @@ from base.models import (
 @allowed_roles(["teacher"])
 def get_quiz_form(request, course_topic_id):
     course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
-    return render(request, "base/components/activity_components/quiz_form.html", {"ct": course_topic})
+    return render(request, "base/components/quiz_components/quiz_form.html", {"ct": course_topic})
 
 @login_required
 @allowed_roles(["teacher"])
@@ -94,7 +94,7 @@ def create_quiz(request, course_topic_id):
 # STUDENT VIEWS
 @allowed_roles(["student"])
 @login_required(login_url="login")
-def start_quiz(request, activity_id):
+def start_quiz(request, course_id, activity_id):
     activity = get_object_or_404(Activity, id=activity_id)
     course_topic = activity.course_topic
     template = activity.content_object
@@ -106,7 +106,7 @@ def start_quiz(request, activity_id):
         model = TracingQuestion
     else:
         messages.error(request, "Unsupported question type.")
-        return redirect("topic", course_topic.topic.unit.course.id, course_topic.topic.unit.id, course_topic.id)
+        return redirect("topic", course_id, course_topic.topic.unit.id, course_topic.id)
 
     # Get content type for the selected question model
     content_type = ContentType.objects.get_for_model(model)
@@ -129,15 +129,16 @@ def start_quiz(request, activity_id):
             object_id=question.id
         )
 
-    return redirect("take-quiz", quiz_id=quiz.id, activity_id=activity.id)
+    return redirect("take-quiz", course_id=course_id, quiz_id=quiz.id, activity_id=activity.id)
 
 
 @allowed_roles(["student"])
 @login_required(login_url="login")
-def take_quiz(request, quiz_id, activity_id):
+def take_quiz(request, course_id, quiz_id, activity_id):
     quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
     activity = get_object_or_404(Activity, id=activity_id)
     question_type = quiz.question_type
+    course_topic = activity.course_topic
     quiz_questions = quiz.quiz_questions.all()  # this gives access to both question and bridge
 
     if request.method == "POST":
@@ -193,10 +194,10 @@ def take_quiz(request, quiz_id, activity_id):
         ac.score = quiz.grade
         ac.save()
 
-        return redirect("quiz-results", ac.id)
+        return redirect("quiz-results", ac.id, course_id)
 
     # GET request → show the quiz
-    context = {"quiz": quiz, "questions": [qq.question for qq in quiz_questions]}
+    context = {"quiz": quiz, "questions": [qq.question for qq in quiz_questions], "ct": course_topic, "course_id": course_id}
     return render(request, "base/main/quiz.html", context)
 
 
@@ -209,17 +210,21 @@ def normalize_output(text):
 
 @allowed_roles(["student"])
 @login_required(login_url="login")
-def quiz_results(request, ac_id):
+def quiz_results(request, ac_id, course_id):
     ac = get_object_or_404(ActivityCompletion, id=ac_id, student=request.user)
     activity = ac.activity
     quiz_template = activity.content_object
     answers = Answer.objects.filter(activity_completion=ac).select_related('quiz_question')
+
+    quiz = answers.first().quiz if answers.exists() else None
 
     context = {
         "activity_completion": ac,
         "activity": activity,
         "quiz_template": quiz_template,
         "answers": answers,
+        "quiz": quiz,
+        "course_id": course_id
     }
 
     return render(request, "base/main/quiz_results.html", context)

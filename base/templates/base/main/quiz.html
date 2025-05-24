@@ -1,48 +1,32 @@
 {% extends "main.html" %}
 
 {% block content %}
+<h1 class="text-3xl font-bold mb-6">{{ ct.topic.title }} Quiz</h1>
 
-<h1>{{ quiz.topic.title }} Quiz</h1>
+<div class="overflow-y-auto max-h-[80vh] pr-2">
+    <form method="POST" action="" class="space-y-6">
+        {% csrf_token %}
 
-<form method="POST" action="" class="vertical-form">
-    {% csrf_token %}
-
-    <div>
         {% for question in questions %}
-        <div class="quiz-question">
-            <p class="quiz-prompt">
-                <strong>{{ forloop.counter }}.</strong> {{ question.prompt|safe }}
+        <div class="card bg-base-100 shadow-md p-6 space-y-4 mb-4">
+
+            <p class="text-lg font-semibold">
+                {{ forloop.counter }}. {{ question.prompt|safe }}
             </p>
 
             {% if quiz.question_type == "multiple_choice" %}
-                <div class="quiz-option">
-                    <input type="radio" name="q{{ question.id }}" value="a" required>
-                    <span>a) {{ question.choice_a|safe }}</span>
-                </div>
-                <div class="quiz-option">
-                    <input type="radio" name="q{{ question.id }}" value="b">
-                    <span>b) {{ question.choice_b|safe }}</span>
-                </div>
-                <div class="quiz-option">
-                    <input type="radio" name="q{{ question.id }}" value="c">
-                    <span>c) {{ question.choice_c|safe }}</span>
-                </div>
-                <div class="quiz-option">
-                    <input type="radio" name="q{{ question.id }}" value="d">
-                    <span>d) {{ question.choice_d|safe }}</span>
-                </div>
-                <hr>
+            {% include "base/components/quiz_components/mc_question_block.html" with question=question %}
             {% elif quiz.question_type == "tracing" %}
-                <label for="q{{ question.id }}" class="form-label">What's the output?</label>
-                <textarea name="q{{ question.id }}" rows="4" class="quiz-textarea" required></textarea>
+            {% include "base/components/quiz_components/tracing_question_block.html" with question=question %}
             {% else %}
-                <p class="quiz-error">Unsupported question type.</p>
+            <p class="text-error">Unsupported question type.</p>
             {% endif %}
+
         </div>
         {% endfor %}
-    </div>
 
-    <button type="submit" class="add-button quiz-submit">Submit Quiz</button>
-</form>
 
+        <button type="submit" class="btn btn-primary w-full mt-6">Submit Quiz</button>
+    </form>
+</div>
 {% endblock %}

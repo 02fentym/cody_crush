@@ -1,0 +1,18 @@
+<div class="space-y-2">
+    <label class="flex items-center gap-3 bg-base-200 px-4 py-2 rounded cursor-pointer hover:bg-base-300 transition">
+        <input type="radio" name="q{{ question.id }}" value="a" class="radio" required>
+        <span class="label-text">a) {{ question.choice_a|safe }}</span>
+    </label>
+    <label class="flex items-center gap-3 bg-base-200 px-4 py-2 rounded cursor-pointer hover:bg-base-300 transition">
+        <input type="radio" name="q{{ question.id }}" value="b" class="radio">
+        <span class="label-text">b) {{ question.choice_b|safe }}</span>
+    </label>
+    <label class="flex items-center gap-3 bg-base-200 px-4 py-2 rounded cursor-pointer hover:bg-base-300 transition">
+        <input type="radio" name="q{{ question.id }}" value="c" class="radio">
+        <span class="label-text">c) {{ question.choice_c|safe }}</span>
+    </label>
+    <label class="flex items-center gap-3 bg-base-200 px-4 py-2 rounded cursor-pointer hover:bg-base-300 transition">
+        <input type="radio" name="q{{ question.id }}" value="d" class="radio">
+        <span class="label-text">d) {{ question.choice_d|safe }}</span>
+    </label>
+</div>
