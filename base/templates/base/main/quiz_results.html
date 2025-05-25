@@ -1,19 +1,48 @@
 {% extends "main.html" %}
 
 {% block content %}
-<h2>{{ quiz_template.topic.title }} - Attempt #{{ attempt.attempt_number }}</h2>
+<h2>{{ quiz_template.course_topic.topic.title }} Quiz</h2>
 
-<p><strong>Score:</strong> {{ attempt.score }}%</p>
+<p><strong>Score:</strong> {{ quiz.grade }}%</p>
 
 {% for answer in answers %}
 <div class="quiz-result">
     <p><strong>{{ forloop.counter }}. {{ answer.quiz_question.question.prompt|safe }}</strong></p>
 
     {% if quiz_template.question_type == "multiple_choice" %}
-    <div>a) {{ answer.quiz_question.question.choice_a|safe }}</div>
-    <div>b) {{ answer.quiz_question.question.choice_b|safe }}</div>
-    <div>c) {{ answer.quiz_question.question.choice_c|safe }}</div>
-    <div>d) {{ answer.quiz_question.question.choice_d|safe }}</div>
+    <div class="space-y-1 ml-4">
+        <div
+            class="px-2 py-1 rounded
+        {% if answer.quiz_question.question.correct_choice == 'a' %} border border-green-500 text-green-800 bg-green-200 {% endif %}
+        {% if answer.selected_choice == 'a' and not answer.is_correct %} border border-error text-error bg-error/10 {% endif %}">
+            a) {{ answer.quiz_question.question.choice_a|safe }}
+        </div>
+
+        <div
+            class="px-2 py-1 rounded
+        {% if answer.quiz_question.question.correct_choice == 'b' %} border border-green-500 text-green-800 bg-green-200 {% endif %}
+        {% if answer.selected_choice == 'b' and not answer.is_correct %} border border-error text-error bg-error/10 {% endif %}">
+            b) {{ answer.quiz_question.question.choice_b|safe }}
+        </div>
+
+        <div
+            class="px-2 py-1 rounded
+        {% if answer.quiz_question.question.correct_choice == 'c' %} border border-green-500 text-green-800 bg-green-200 {% endif %}
+        {% if answer.selected_choice == 'c' and not answer.is_correct %} border border-error text-error bg-error/10 {% endif %}">
+            c) {{ answer.quiz_question.question.choice_c|safe }}
+        </div>
+
+        <div
+            class="px-2 py-1 rounded
+        {% if answer.quiz_question.question.correct_choice == 'd' %} border border-green-500 text-green-800 bg-green-200 {% endif %}
+        {% if answer.selected_choice == 'd' and not answer.is_correct %} border border-error text-error bg-error/10 {% endif %}">
+            d) {{ answer.quiz_question.question.choice_d|safe }}
+        </div>
+    </div>
+
+
+
+
 
     <p>Your answer: {{ answer.selected_choice }}</p>
     <p>Correct answer: {{ answer.quiz_question.question.correct_choice }}</p>
@@ -38,7 +67,8 @@
     {% endif %}
     {% endif %}
 
-    <button type="button" onclick="toggleExplanation('{{ forloop.counter0 }}', this)" class="link-button" style="font-size: 0.9em;">
+    <button type="button" onclick="toggleExplanation('{{ forloop.counter0 }}', this)" class="link-button"
+        style="font-size: 0.9em;">
         Show Explanation
     </button>
 
