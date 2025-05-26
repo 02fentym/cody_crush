@@ -3,8 +3,6 @@
 {% block content %}
 <h2>{{ quiz_template.course_topic.topic.title }} Quiz</h2>
 
-{{ course_id }}
-
 <div class="flex items-center gap-4 mb-6">
     <div class="radial-progress text-secondary"
         style="--value: {{ quiz.grade|floatformat:0 }}; --size:4rem; --thickness:6px;">

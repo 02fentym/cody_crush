@@ -7,8 +7,8 @@
         <!-- Option A -->
         <div
             class="flex items-center gap-4 px-4 py-3 rounded-lg transition-colors
-            {% if answer.quiz_question.question.correct_choice == 'a' %} text-slate-700 bg-green-400 {% endif %}
-            {% if answer.selected_choice == 'a' and answer.selected_choice != answer.quiz_question.question.correct_choice %} text-slate-700 bg-red-400 {% endif %}">
+            {% if answer.quiz_question.question.correct_choice == 'a' %} text-success-content bg-success {% endif %}
+            {% if answer.selected_choice == 'a' and answer.selected_choice != answer.quiz_question.question.correct_choice %} text-error-content bg-error {% endif %}">
             <div class="w-8 h-8 rounded-full bg-black/40 text-white/40 flex items-center justify-center font-bold text-sm">
                 A
             </div>
@@ -19,8 +19,8 @@
         <!-- Option B -->
         <div
             class="flex items-center gap-4 px-4 py-3 rounded-lg transition-colors
-            {% if answer.quiz_question.question.correct_choice == 'b' %}  text-slate-700 bg-green-400 {% endif %}
-            {% if answer.selected_choice == 'b' and answer.selected_choice != answer.quiz_question.question.correct_choice %}  text-slate-700 bg-red-400 {% endif %}">
+            {% if answer.quiz_question.question.correct_choice == 'b' %}  text-success-content bg-success {% endif %}
+            {% if answer.selected_choice == 'b' and answer.selected_choice != answer.quiz_question.question.correct_choice %}  text-error-content bg-error {% endif %}">
             <div class="w-8 h-8 rounded-full bg-black/40 text-white/40 flex items-center justify-center font-bold text-sm">
                 B</div>
             <span class="text-sm">{{ answer.quiz_question.question.choice_b|safe }}</span>
@@ -29,8 +29,8 @@
         <!-- Option C -->
         <div
             class="flex items-center gap-4 px-4 py-3 rounded-lg transition-colors
-            {% if answer.quiz_question.question.correct_choice == 'c' %}  text-slate-700 bg-green-400 {% endif %}
-            {% if answer.selected_choice == 'c' and answer.selected_choice != answer.quiz_question.question.correct_choice %}  text-slate-700 bg-red-400 {% endif %}">
+            {% if answer.quiz_question.question.correct_choice == 'c' %}  text-success-content bg-success {% endif %}
+            {% if answer.selected_choice == 'c' and answer.selected_choice != answer.quiz_question.question.correct_choice %}  text-error-content bg-error {% endif %}">
             <div class="w-8 h-8 rounded-full bg-black/40 text-white/40 flex items-center justify-center font-bold text-sm">
                 C</div>
             <span class="text-sm">{{ answer.quiz_question.question.choice_c|safe }}</span>
@@ -39,8 +39,8 @@
         <!-- Option D -->
         <div
             class="flex items-center gap-4 px-4 py-3 rounded-lg transition-colors
-            {% if answer.quiz_question.question.correct_choice == 'd' %}  text-slate-700 bg-green-400 {% endif %}
-            {% if answer.selected_choice == 'd' and answer.selected_choice != answer.quiz_question.question.correct_choice %}  text-slate-700 bg-red-400 {% endif %}">
+            {% if answer.quiz_question.question.correct_choice == 'd' %}  text-success-content bg-success {% endif %}
+            {% if answer.selected_choice == 'd' and answer.selected_choice != answer.quiz_question.question.correct_choice %}  text-error-content bg-error {% endif %}">
             <div class="w-8 h-8 rounded-full bg-black/40 text-white/40 flex items-center justify-center font-bold text-sm">
                 D</div>
             <span class="text-sm">{{ answer.quiz_question.question.choice_d|safe }}</span>

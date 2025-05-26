@@ -9,7 +9,7 @@ from base.decorators import allowed_roles
 from base.models import (
     CourseTopic, Activity, Quiz, QuizTemplate, QuizQuestion,
     MultipleChoiceQuestion, TracingQuestion,
-    Answer, ActivityCompletion, CourseUnit
+    Answer, ActivityCompletion, CourseUnit, Course
 )
 
 
@@ -211,6 +211,7 @@ def normalize_output(text):
 @allowed_roles(["student"])
 @login_required(login_url="login")
 def quiz_results(request, ac_id):
+    courses = Course.objects.filter(students=request.user)
     ac = get_object_or_404(ActivityCompletion, id=ac_id, student=request.user)
     activity = ac.activity
     quiz_template = activity.content_object
@@ -233,7 +234,8 @@ def quiz_results(request, ac_id):
         "quiz": quiz,
         "course_id": course_id,
         "correct": correct,
-        "total": total
+        "total": total,
+        "courses": courses
     }
 
     return render(request, "base/main/quiz_results.html", context)
