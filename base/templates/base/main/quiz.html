@@ -1,18 +1,23 @@
 {% extends "main.html" %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-6">{{ ct.topic.title }} Quiz</h1>
+<div class="mb-6 px-2 max-w-2xl mx-auto">
+    <h2 class="text-2xl font-bold mb-2">{{ ct.topic.title }} Quiz</h2>
+
+    <div class="w-full">
+        <div class="w-full bg-base-300 rounded-full h-4 overflow-hidden">
+            <div id="quiz-progress-bar" class="h-full bg-primary transition-all duration-300" style="width: 0%;"></div>
+        </div>
+        <p id="quiz-progress-label" class="text-sm text-right mt-1 text-base-content/70">0 of {{ questions|length }} answered</p>
+    </div>
+</div>
 
 <div class="overflow-y-auto max-h-[80vh] pr-2">
     <form method="POST" action="" class="space-y-6">
         {% csrf_token %}
 
         {% for question in questions %}
-        <div class="card bg-base-100 shadow-md p-6 space-y-4 mb-4">
-
-            <p class="text-lg font-semibold">
-                {{ forloop.counter }}. {{ question.prompt|safe }}
-            </p>
+        <div class="card bg-base-100 shadow-md p-4 space-y-2 mb-2">
 
             {% if quiz.question_type == "multiple_choice" %}
             {% include "base/components/quiz_components/mc_question_block.html" with question=question %}
@@ -29,4 +34,37 @@
         <button type="submit" class="btn btn-primary w-full mt-6">Submit Quiz</button>
     </form>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const progressBar = document.getElementById("quiz-progress-bar");
+        const progressLabel = document.getElementById("quiz-progress-label");
+        const total = {{ questions|length }};
+        const radios = document.querySelectorAll("input[type='radio']");
+
+        function updateProgress() {
+            const answered = new Set();
+            radios.forEach(input => {
+                if (input.checked) {
+                    answered.add(input.name);
+                }
+            });
+
+            const count = answered.size;
+            const percent = (count / total) * 100;
+            progressBar.style.width = `${percent}%`;
+            progressLabel.textContent = `${count} of ${total} answered`;
+        }
+
+        radios.forEach(input => {
+            input.addEventListener("change", updateProgress);
+        });
+
+        updateProgress();
+    });
+</script>
+
+
+
+
 {% endblock %}

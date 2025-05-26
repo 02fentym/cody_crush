@@ -1,7 +1,5 @@
-@import "tailwindcss";
-
-
 @plugin "daisyui";
+@import "tailwindcss";
 
 h1 {
     @apply text-3xl font-bold mb-4;
@@ -33,4 +31,12 @@ h6 {
     width: 100% !important; /* Override the default clamp */
     max-width: none !important; /* Remove upper limit */
   }
+}
+
+progress {
+  appearance: auto;         /* restore default style */
+  -webkit-appearance: auto;
+  display: inline-block;
+  width: 100%;
+  height: 1rem;
 }

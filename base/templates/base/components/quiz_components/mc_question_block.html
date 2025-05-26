@@ -1,18 +1,63 @@
-<div class="space-y-2">
-    <label class="flex items-center gap-3 bg-base-200 px-4 py-2 rounded cursor-pointer hover:bg-base-300 transition">
-        <input type="radio" name="q{{ question.id }}" value="a" class="radio" required>
-        <span class="label-text">a) {{ question.choice_a|safe }}</span>
-    </label>
-    <label class="flex items-center gap-3 bg-base-200 px-4 py-2 rounded cursor-pointer hover:bg-base-300 transition">
-        <input type="radio" name="q{{ question.id }}" value="b" class="radio">
-        <span class="label-text">b) {{ question.choice_b|safe }}</span>
-    </label>
-    <label class="flex items-center gap-3 bg-base-200 px-4 py-2 rounded cursor-pointer hover:bg-base-300 transition">
-        <input type="radio" name="q{{ question.id }}" value="c" class="radio">
-        <span class="label-text">c) {{ question.choice_c|safe }}</span>
-    </label>
-    <label class="flex items-center gap-3 bg-base-200 px-4 py-2 rounded cursor-pointer hover:bg-base-300 transition">
-        <input type="radio" name="q{{ question.id }}" value="d" class="radio">
-        <span class="label-text">d) {{ question.choice_d|safe }}</span>
-    </label>
+<div class="card bg-base-100 shadow p-4 space-y-2">
+    <p class="text-base font-medium text-base-content/80">
+        {{ forloop.counter }}. {{ question.prompt|safe }}
+    </p>
+
+    <div class="space-y-2" id="answers-{{ question.id }}">
+        <!-- Option A -->
+        <label class="choice flex items-center gap-4 bg-base-200 px-4 py-3 rounded-lg cursor-pointer transition-colors">
+            <input type="radio" name="q{{ question.id }}" value="a" class="hidden quiz-radio" required>
+            <div
+                class="flex items-center justify-center w-8 h-8 rounded-full bg-neutral text-neutral-content text-sm font-bold">
+                A</div>
+            <span class="text-sm">{{ question.choice_a|safe }}</span>
+        </label>
+
+        <!-- Option B -->
+        <label class="choice flex items-center gap-4 bg-base-200 px-4 py-3 rounded-lg cursor-pointer transition-colors">
+            <input type="radio" name="q{{ question.id }}" value="b" class="hidden quiz-radio">
+            <div
+                class="flex items-center justify-center w-8 h-8 rounded-full bg-neutral text-neutral-content text-sm font-bold">
+                B</div>
+            <span class="text-sm">{{ question.choice_b|safe }}</span>
+        </label>
+
+        <!-- Option C -->
+        <label class="choice flex items-center gap-4 bg-base-200 px-4 py-3 rounded-lg cursor-pointer transition-colors">
+            <input type="radio" name="q{{ question.id }}" value="c" class="hidden quiz-radio">
+            <div
+                class="flex items-center justify-center w-8 h-8 rounded-full bg-neutral text-neutral-content text-sm font-bold">
+                C</div>
+            <span class="text-sm">{{ question.choice_c|safe }}</span>
+        </label>
+
+        <!-- Option D -->
+        <label class="choice flex items-center gap-4 bg-base-200 px-4 py-3 rounded-lg cursor-pointer transition-colors">
+            <input type="radio" name="q{{ question.id }}" value="d" class="hidden quiz-radio">
+            <div
+                class="flex items-center justify-center w-8 h-8 rounded-full bg-neutral text-neutral-content text-sm font-bold">
+                D</div>
+            <span class="text-sm">{{ question.choice_d|safe }}</span>
+        </label>
+    </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".quiz-radio").forEach((radio) => {
+            radio.addEventListener("change", function () {
+                const group = radio.closest(".space-y-2").querySelectorAll(".choice");
+
+                group.forEach((label) => {
+                    label.classList.remove("bg-primary", "text-primary-content");
+                    label.classList.add("bg-base-200");
+                });
+
+                const selected = radio.closest(".choice");
+                selected.classList.remove("bg-base-200");
+                selected.classList.add("bg-primary", "text-primary-content");
+            });
+        });
+    });
+
+</script>
