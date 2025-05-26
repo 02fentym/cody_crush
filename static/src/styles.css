@@ -1,5 +1,11 @@
-@plugin "daisyui";
 @import "tailwindcss";
+@plugin "daisyui";
+
+/* Set DaisyUI theme here */
+/*
+@plugin "daisyui" {
+  themes: light --default, dark --prefersdark, abyss; 
+}*/
 
 h1 {
     @apply text-3xl font-bold mb-4;

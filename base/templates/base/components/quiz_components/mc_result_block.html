@@ -1,0 +1,63 @@
+<div class="card bg-base-100 shadow p-4 space-y-2">
+    <p class="text-base font-medium text-base-content/80">
+        {{ forloop.counter }}. {{ answer.quiz_question.question.prompt|safe }}
+    </p>
+
+    <div class="space-y-2">
+        <!-- Option A -->
+        <div
+            class="flex items-center gap-4 px-4 py-3 rounded-lg transition-colors
+            {% if answer.quiz_question.question.correct_choice == 'a' %} text-slate-700 bg-green-400 {% endif %}
+            {% if answer.selected_choice == 'a' and answer.selected_choice != answer.quiz_question.question.correct_choice %} text-slate-700 bg-red-400 {% endif %}">
+            <div class="w-8 h-8 rounded-full bg-black/40 text-white/40 flex items-center justify-center font-bold text-sm">
+                A
+            </div>
+
+            <span class="text-sm">{{ answer.quiz_question.question.choice_a|safe }}</span>
+        </div>
+
+        <!-- Option B -->
+        <div
+            class="flex items-center gap-4 px-4 py-3 rounded-lg transition-colors
+            {% if answer.quiz_question.question.correct_choice == 'b' %}  text-slate-700 bg-green-400 {% endif %}
+            {% if answer.selected_choice == 'b' and answer.selected_choice != answer.quiz_question.question.correct_choice %}  text-slate-700 bg-red-400 {% endif %}">
+            <div class="w-8 h-8 rounded-full bg-black/40 text-white/40 flex items-center justify-center font-bold text-sm">
+                B</div>
+            <span class="text-sm">{{ answer.quiz_question.question.choice_b|safe }}</span>
+        </div>
+
+        <!-- Option C -->
+        <div
+            class="flex items-center gap-4 px-4 py-3 rounded-lg transition-colors
+            {% if answer.quiz_question.question.correct_choice == 'c' %}  text-slate-700 bg-green-400 {% endif %}
+            {% if answer.selected_choice == 'c' and answer.selected_choice != answer.quiz_question.question.correct_choice %}  text-slate-700 bg-red-400 {% endif %}">
+            <div class="w-8 h-8 rounded-full bg-black/40 text-white/40 flex items-center justify-center font-bold text-sm">
+                C</div>
+            <span class="text-sm">{{ answer.quiz_question.question.choice_c|safe }}</span>
+        </div>
+
+        <!-- Option D -->
+        <div
+            class="flex items-center gap-4 px-4 py-3 rounded-lg transition-colors
+            {% if answer.quiz_question.question.correct_choice == 'd' %}  text-slate-700 bg-green-400 {% endif %}
+            {% if answer.selected_choice == 'd' and answer.selected_choice != answer.quiz_question.question.correct_choice %}  text-slate-700 bg-red-400 {% endif %}">
+            <div class="w-8 h-8 rounded-full bg-black/40 text-white/40 flex items-center justify-center font-bold text-sm">
+                D</div>
+            <span class="text-sm">{{ answer.quiz_question.question.choice_d|safe }}</span>
+        </div>
+
+        <!-- Explanation -->
+        {% if not answer.is_correct %}
+        <div tabindex="0" class="collapse collapse-arrow bg-base-200 rounded-lg">
+            <input type="checkbox" id="explanation-{{ forloop.counter0 }}" class="peer" />
+            <div class="collapse-title text-sm font-medium">
+                Explanation
+            </div>
+            <div class="collapse-content text-sm text-base-content">
+                {{ answer.quiz_question.question.explanation|linebreaksbr }}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>

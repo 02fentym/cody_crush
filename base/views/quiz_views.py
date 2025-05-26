@@ -217,6 +217,8 @@ def quiz_results(request, ac_id, course_id):
     answers = Answer.objects.filter(activity_completion=ac).select_related('quiz_question')
 
     quiz = answers.first().quiz if answers.exists() else None
+    correct = answers.filter(is_correct=True).count()
+    total = answers.count()
 
     context = {
         "activity_completion": ac,
@@ -224,7 +226,9 @@ def quiz_results(request, ac_id, course_id):
         "quiz_template": quiz_template,
         "answers": answers,
         "quiz": quiz,
-        "course_id": course_id
+        "course_id": course_id,
+        "correct": correct,
+        "total": total
     }
 
     return render(request, "base/main/quiz_results.html", context)
