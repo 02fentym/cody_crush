@@ -21,8 +21,8 @@ urlpatterns = [
     path("enrol/", views.enrol_in_course, name="enrol-in-course"),
 
     path("course/<int:course_id>/activity/<int:activity_id>/start-quiz/", views.start_quiz, name="start-quiz"),
-    path('course/<int:course_id>/quiz/<int:quiz_id>/activity/<int:activity_id>/take-quiz/', views.take_quiz, name='take-quiz'),
-    path("course/<int:course_id>/quiz/results/<int:ac_id>/", views.quiz_results, name="quiz-results"),
+    path('quiz/<int:quiz_id>/activity/<int:activity_id>/take/', views.take_quiz, name='take-quiz'),
+    path("quiz/<int:ac_id>/results/", views.quiz_results, name="quiz-results"),
 
     path("lessons/<lesson_id>/view/", views.view_lesson, name="view-lesson"),
 

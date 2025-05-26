@@ -29,7 +29,7 @@ class ActivityCompletionAdmin(admin.ModelAdmin):
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'language', 'enrollment_password')
+    list_display = ('id','title', 'language', 'enrollment_password')
     search_fields = ('title', 'language')
     list_filter = ('language',)
 

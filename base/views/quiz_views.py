@@ -9,7 +9,7 @@ from base.decorators import allowed_roles
 from base.models import (
     CourseTopic, Activity, Quiz, QuizTemplate, QuizQuestion,
     MultipleChoiceQuestion, TracingQuestion,
-    Answer, ActivityCompletion
+    Answer, ActivityCompletion, CourseUnit
 )
 
 
@@ -129,12 +129,12 @@ def start_quiz(request, course_id, activity_id):
             object_id=question.id
         )
 
-    return redirect("take-quiz", course_id=course_id, quiz_id=quiz.id, activity_id=activity.id)
+    return redirect("take-quiz", quiz_id=quiz.id, activity_id=activity.id)
 
 
 @allowed_roles(["student"])
 @login_required(login_url="login")
-def take_quiz(request, course_id, quiz_id, activity_id):
+def take_quiz(request, quiz_id, activity_id):
     quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
     activity = get_object_or_404(Activity, id=activity_id)
     question_type = quiz.question_type
@@ -194,10 +194,10 @@ def take_quiz(request, course_id, quiz_id, activity_id):
         ac.score = quiz.grade
         ac.save()
 
-        return redirect("quiz-results", ac.id, course_id)
+        return redirect("quiz-results", ac.id)
 
     # GET request → show the quiz
-    context = {"quiz": quiz, "questions": [qq.question for qq in quiz_questions], "ct": course_topic, "course_id": course_id}
+    context = {"quiz": quiz, "questions": [qq.question for qq in quiz_questions], "ct": course_topic}
     return render(request, "base/main/quiz.html", context)
 
 
@@ -210,11 +210,16 @@ def normalize_output(text):
 
 @allowed_roles(["student"])
 @login_required(login_url="login")
-def quiz_results(request, ac_id, course_id):
+def quiz_results(request, ac_id):
     ac = get_object_or_404(ActivityCompletion, id=ac_id, student=request.user)
     activity = ac.activity
     quiz_template = activity.content_object
     answers = Answer.objects.filter(activity_completion=ac).select_related('quiz_question')
+    
+    unit = ac.activity.course_topic.unit
+    course_unit = CourseUnit.objects.select_related("course").filter(unit=unit).first()
+    course_id = course_unit.course.id if course_unit else None
+
 
     quiz = answers.first().quiz if answers.exists() else None
     correct = answers.filter(is_correct=True).count()
