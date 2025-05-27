@@ -1,53 +1,95 @@
-<aside class="w-56 bg-base-200 p-4 space-y-4">
-    <nav>
-        <!-- HOME -->
-        <ul class="menu border-b pb-2 mb-2 w-full px-0">
-            <li>
-                <a href="{% url 'home' %}" class="block"> Home </a>
-            </li>
-        </ul>
+<aside class="w-64 bg-base-100 space-y-4">
+    <!-- HOME -->
+    <ul class="menu pb-2 mb-2 w-full">
+        <li>
+            <a href="{% url 'home' %}"
+                class="{% if request.resolver_match.url_name == 'home' %}bg-base-300 font-semibold{% endif %}">
+                <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                    width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                        d="m4 12 8-8 8 8M6 10.5V19a1 1 0 0 0 1 1h3v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h3a1 1 0 0 0 1-1v-8.5" />
+                </svg>
+                Home
+            </a>
+        </li>
+    </ul>
 
-        <!-- COURSE MANAGEMENT -->
-        <p class="menu-title">Course Management</p>
-        <ul class="menu border-b pb-2 mb-2 w-full">
-            <!-- ⭐️ added border-b here -->
-            {% if courses %}
-                {% for course in courses %}
-                <li>
-                    <a {% if course.is_active %}class="active" {% endif %} href="{% url 'course' course.id %}">
-                        {{ course.title }}</a>
-                </li>
-                {% endfor %}
-            {% else %}
-            <li><span class="text-gray-500 italic">No courses yet</span></li>
-            {% endif %}
-        </ul>
-    </nav>
+    <!-- COURSE MANAGEMENT -->
+    <ul class="menu pb-2 mb-2 w-full">
+        <p class="menu-title">COURSE MANAGEMENT</p>
+        <!-- ⭐️ added border-b here -->
+        {% if courses %}
+        {% for course in courses %}
+        <li>
+            <a href="{% url 'course' course.id %}"
+                class="{% if course.id|stringformat:'s' == request.resolver_match.kwargs.course_id|stringformat:'s' %}bg-base-300 font-semibold{% endif %}">
+                <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                    width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                        d="M12 6.03v13m0-13c-2.819-.831-4.715-1.076-8.029-1.023A.99.99 0 0 0 3 6v11c0 .563.466 1.014 1.03 1.007 3.122-.043 5.018.212 7.97 1.023m0-13c2.819-.831 4.715-1.076 8.029-1.023A.99.99 0 0 1 21 6v11c0 .563-.466 1.014-1.03 1.007-3.122-.043-5.018.212-7.97 1.023" />
+                </svg>
+                {{ course.title }}
+            </a>
+        </li>
+        {% endfor %}
+        {% else %}
+        <li><span class="text-base-200 italic">No courses yet</span></li>
+        {% endif %}
+    </ul>
 
     <!-- TEACHING TOOLS -->
     {% if user.profile.role == "teacher" %}
-    <nav>
-        <p class="menu-title">Teaching Tools</p>
-        <ul class="menu pb-2 mb-2 w-full">
-            <li><a href="{% url 'manage-units' %}">Manage Units</a></li>
-            <li><a href="{% url 'manage-topics' %}">Manage Topics</a></li>
+    <ul class="menu pb-2 mb-2 w-full">
+        <p class="menu-title">TEACHING TOOLS</p>
+        <li><a href="{% url 'manage-units' %}"
+                class="{% if request.resolver_match.url_name == 'manage-units' %}bg-base-300 font-semibold{% endif %}">
+                <svg class="w-6 h-6 text-success" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                    width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linejoin="round" stroke-width="1"
+                        d="M4.07141 14v6h5.99999v-6H4.07141Zm4.5-4h6.99999l-3.5-6-3.49999 6Zm7.99999 10c1.933 0 3.5-1.567 3.5-3.5s-1.567-3.5-3.5-3.5-3.5 1.567-3.5 3.5 1.567 3.5 3.5 3.5Z" />
+                </svg>
 
-            <li>
-                <details>
-                    <summary class="cursor-pointer px-3 py-2 rounded">
-                        Question Bank
-                    </summary>
-                    <ul class="ml-4">
-                        <li>
-                            <a href="{% url 'mc-questions' %}">Multiple Choice</a>
-                        </li>
-                        <li>
-                            <a href="{% url 'tracing-questions' %}">Tracing</a>
-                        </li>
-                    </ul>
-                </details>
-            </li>
-        </ul>
-    </nav>
+                Manage Units</a>
+        </li>
+        <li><a href="{% url 'manage-topics' %}"
+                class="{% if request.resolver_match.url_name == 'manage-topics' %}bg-base-300 font-semibold{% endif %}">
+                <svg class="w-6 h-6 text-warning" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                    width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                        d="M10.05 3.00002v5C7.33127 8.93351 5.05005 11.2392 5.05005 14.2c0 3.7555 3.13401 6.8 6.99995 6.8 3.866 0 7-3.0445 7-6.8 0-2.9608-2.2812-5.26649-5-6.19998v-5m-4 0h4m-4 0H8.05005m5.99995 0h2M5.09798 15H19.0021" />
+                </svg>
+                Manage Topics</a>
+        </li>
+
+        <li>
+            <details>
+                <summary class="cursor-pointer px-3 py-2 rounded">
+                    <svg class="w-6 h-6 text-error" aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                            d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+
+                    Question Bank
+                </summary>
+                <ul class="ml-4">
+                    <li>
+                        <a href="{% url 'mc-questions' %}"
+                            class="{% if request.resolver_match.url_name == 'mc-questions' %}bg-base-300 font-semibold{% endif %}">
+                            Multiple Choice
+                        </a>
+
+                    </li>
+                    <li class="">
+                        <a href="{% url 'tracing-questions' %}"
+                            class="{% if request.resolver_match.url_name == 'tracing-questions' %}bg-base-300 font-semibold{% endif %}">
+                            Tracing
+                        </a>
+
+                    </li>
+                </ul>
+            </details>
+        </li>
+    </ul>
     {% endif %}
 </aside>

@@ -21,11 +21,11 @@
 
 </head>
 
-<body>
+<body class="h-screen flex flex-col">
     <form style="display:none;">
         {% csrf_token %}
       </form>
-    <div class="min-h-screen px-80">
+    <div class="flex-1 flex flex-col">
         {% include "navbar.html" %}
 
         {% if messages %}
@@ -36,8 +36,11 @@
         </div>
         {% endif %}
 
-        <div class="flex">
+        <div class="flex flex-1">
             {% include "sidebar.html" %}
+
+            <div class="divider divider-horizontal m-0 w-px min-w-[1px] self-stretch"></div>
+
 
             <main class="flex-1 p-6">
                 {% block content %}
