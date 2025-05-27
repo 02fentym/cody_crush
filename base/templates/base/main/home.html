@@ -15,15 +15,16 @@
 {% endif %}
 <div id="enrolment-feedback" class="my-4"></div> <!-- HTMX injects success/failure feedback -->
 
+<!-- Create New Course -->
+<div class="mb-4">
+{% if user.profile.role == "teacher" %}
+{% include "base/components/course_components/create_course_form.html" %}
+{% endif %}
+</div>
+
 <!-- List of courses -->
 <div id="course-list">
     {% include "base/components/course_components/course_list.html" %}
-
-    <!-- Create New Course -->
-    {% if user.profile.role == "teacher" %}
-    {% include "base/components/course_components/create_course_form.html" %}
-    {% endif %}
-    </div>
 </div>
 
 {% endblock %}
