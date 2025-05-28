@@ -1,11 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './templates/**/*.html',  // Scans templates/ and subdirectories
-    './base/templates/**/*.html',  // Scans base/templates/ if navbar.html is there
+    './templates/**/*.html',
+    './base/templates/**/*.html',
   ],
   theme: {
     extend: {},
   },
-  plugins: [],
+  plugins: [require('daisyui')],
+  daisyui: {
+    themes: [], // add more if needed
+  },
 }

@@ -1,7 +1,7 @@
 {% if activity.content_type.model == "dmojexercise" %}
 
 <li>
-    <a class="list-row items-center gap-4 mb-4 bg-primary-content/10 px-4 py-3 hover:bg-primary-content/20 border border-primary-content/20"
+    <a class="list-row items-center gap-4 mb-4 bg-primary/10 px-4 py-3 hover:bg-primary/20 border border-primary/20"
         href="{{ activity.content_object.url }}" target="_blank">
         <!-- Icon -->
         <div>
@@ -29,7 +29,7 @@
 
 <li>
     <a href="{% url 'start-quiz' course.id activity.content_object.id %}" target="_blank"
-        class="list-row items-center mb-4 gap-4 bg-primary-content/10 px-4 py-3 hover:bg-primary-content/20 border border-primary-content/20">
+        class="list-row items-center gap-4 mb-4 bg-primary/10 px-4 py-3 hover:bg-primary/20 border border-primary/20">
         <!-- Icon -->
         <div>
             <svg class="w-6 h-6 text-base-content" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"

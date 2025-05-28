@@ -52,11 +52,11 @@
   const saved = localStorage.getItem("theme");
   if (saved) {
     html.setAttribute("data-theme", saved);
-    toggle.checked = saved === "dark";
+    toggle.checked = saved === "forest";
   }
 
   toggle.addEventListener("change", () => {
-    const theme = toggle.checked ? "dark" : "light";
+    const theme = toggle.checked ? "forest" : "light";
     html.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   });

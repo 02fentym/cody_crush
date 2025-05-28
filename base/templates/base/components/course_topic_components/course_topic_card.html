@@ -28,14 +28,14 @@
                 <div class="flex justify-center gap-2 p-4">
 
                     <!-- DMOJ Exercise Creation -->
-                    <button class="btn btn-sm bg-primary" hx-get="{% url 'get-dmoj-form' ct.id %}"
+                    <button class="btn btn-sm bg-secondary text-secondary-content" hx-get="{% url 'get-dmoj-form' ct.id %}"
                         hx-target="#modal-body" hx-swap="innerHTML"
                         onclick="document.getElementById('modal-wrapper').checked = true">
                         + DMOJ
                     </button>
 
                     <!-- Quiz Creation -->
-                    <label for="modal-wrapper" class="btn btn-sm bg-secondary"
+                    <label for="modal-wrapper" class="btn btn-sm bg-accent text-accent-content"
                         hx-get="{% url 'get-quiz-form' ct.id %}" hx-target="#modal-body" hx-swap="innerHTML">
                         + Quiz
                     </label>

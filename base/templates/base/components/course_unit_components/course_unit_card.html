@@ -12,7 +12,7 @@
         <div class="collapse-title font-medium flex justify-between items-center gap-4 p-6">
             <div class="flex items-center gap-4">
                 <!-- Circle icon for Unit number -->
-                <div class="flex items-center justify-center bg-info text-info-content font-bold text-lg rounded-lg"
+                <div class="flex items-center justify-center bg-primary text-primary-content font-bold text-lg rounded-lg"
                     style="width: 2.5rem; height: 2.5rem;">
                     {{ order }}
                 </div>
@@ -40,7 +40,7 @@
             <div class="flex justify-center">
                 <button hx-get="{% url 'get-course-topic-form' unit.unit.id %}" hx-target="#modal-body" hx-swap="innerHTML"
                     onclick="document.getElementById('modal-wrapper').checked = true"
-                    class="btn btn-info btn-md px-6">
+                    class="btn btn-primary btn-md px-6">
                     + Topic
                 </button>
             </div>
