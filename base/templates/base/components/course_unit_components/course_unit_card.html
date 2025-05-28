@@ -7,9 +7,9 @@
     </style>
 
     <!-- Unit Card -->
-    <div class="collapse collapse-arrow bg-base-100 unit-collapse mb-2" id="unit-{{ unit.unit.id }}">
+    <div class="collapse collapse-arrow bg-base-100 unit-collapse mb-6" id="unit-{{ unit.unit.id }}">
         <input type="checkbox" class="unit-toggle" />
-        <div class="collapse-title font-medium flex justify-between items-center gap-4">
+        <div class="collapse-title font-medium flex justify-between items-center gap-4 p-6">
             <div class="flex items-center gap-4">
                 <!-- Circle icon for Unit number -->
                 <div class="flex items-center justify-center bg-info text-info-content font-bold text-lg rounded-lg"
@@ -40,7 +40,7 @@
             <div class="flex justify-center">
                 <button hx-get="{% url 'get-course-topic-form' unit.unit.id %}" hx-target="#modal-body" hx-swap="innerHTML"
                     onclick="document.getElementById('modal-wrapper').checked = true"
-                    class="btn btn-primary rounded-full px-6 text-base">
+                    class="btn btn-info btn-md px-6">
                     + Topic
                 </button>
             </div>

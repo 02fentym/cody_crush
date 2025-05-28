@@ -1,7 +1,7 @@
 <div class="flex flex-row gap-4 items-center justify-between">
     <!-- Topic Card (collapsible) -->
     <div class="flex-1">
-        <div class="collapse collapse-arrow bg-base-300">
+        <div class="collapse collapse-arrow bg-base-200">
             <input type="checkbox" class="topic-toggle" />
             <div class="collapse-title font-medium flex justify-between items-center gap-4">
                 <div class="flex flex-col">
@@ -11,8 +11,8 @@
 
             <!-- Activities -->
             <div class="collapse-content">
-                <div class="max-h-32 overflow-y-auto">
-                    <ul class="list bg-base-100 shadow-md max-h-32 overflow-y-auto">
+                <div class="max-h-40 overflow-y-auto">
+                    <ul class="list max-h-40 overflow-y-auto">
                         {% for activity in ct.activities.all %}
                         {% include "base/components/activity_components/activity_block.html" with activity=activity %}
                         {% endfor %}
@@ -28,14 +28,14 @@
                 <div class="flex justify-center gap-2 p-4">
 
                     <!-- DMOJ Exercise Creation -->
-                    <button class="btn btn-sm btn-outline" hx-get="{% url 'get-dmoj-form' ct.id %}"
+                    <button class="btn btn-sm bg-primary" hx-get="{% url 'get-dmoj-form' ct.id %}"
                         hx-target="#modal-body" hx-swap="innerHTML"
                         onclick="document.getElementById('modal-wrapper').checked = true">
                         + DMOJ
                     </button>
 
                     <!-- Quiz Creation -->
-                    <label for="modal-wrapper" class="btn btn-sm btn-outline"
+                    <label for="modal-wrapper" class="btn btn-sm bg-secondary"
                         hx-get="{% url 'get-quiz-form' ct.id %}" hx-target="#modal-body" hx-swap="innerHTML">
                         + Quiz
                     </label>

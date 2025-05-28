@@ -36,10 +36,10 @@
         </div>
         {% endif %}
 
-        <div class="flex flex-1">
+        <div class="flex flex-1 bg-base-300">
             {% include "sidebar.html" %}
 
-            <main class="flex-1 p-6 bg-base-300">
+            <main class="flex-1 p-6  max-w-5xl">
                 {% block content %}
                 {% endblock %}
             </main>
