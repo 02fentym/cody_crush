@@ -38,7 +38,7 @@ def course(request, course_id):
                 messages.success(request, "Enrollment password updated!")
                 return redirect("course", course_id=course_id)
 
-    context = {"courses": courses, "course": course, "course_units": course_units, "password_form": password_form, }
+    context = {"courses": courses, "course": course, "course_units": course_units, "password_form": password_form, "course_id": course_id}
     return render(request, "base/main/course.html", context)
 
 # Helper function

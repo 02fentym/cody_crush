@@ -11,10 +11,10 @@
 
             <!-- Activities -->
             <div class="collapse-content">
-                <div class="max-h-40 overflow-y-auto">
-                    <ul class="list max-h-40 overflow-y-auto">
+                <div class="">
+                    <ul class="list">
                         {% for activity in ct.activities.all %}
-                        {% include "base/components/activity_components/activity_block.html" with activity=activity %}
+                        {% include "base/components/activity_components/activity_block.html" with activity=activity course_id=course_id %}
                         {% endfor %}
                     </ul>
                     {% if ct.activities.count == 0 %}
