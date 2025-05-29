@@ -152,7 +152,7 @@ class Quiz(models.Model):
         return [qq.question for qq in self.quiz_questions.all()]
 
     def __str__(self):
-        return f"{self.topic.title} Quiz for {self.student.username}"
+        return f"{self.course_topic.topic.title} Quiz for {self.student.username}"
 
 
 class Answer(models.Model):

@@ -2,23 +2,24 @@
 
 {% block content %}
 
-<h1>{{ course.title }}</h1>
+<div class="max-h-[80vh] overflow-y-auto px-4">
 
-<!-- Course Unit Cards -->
-<div id="unit-list">
-    {% include "base/components/course_unit_components/course_unit_list.html" with course_units=course_units %}
+    <h1>{{ course.title }}</h1>
+
+    <!-- Course Unit Cards -->
+    <div id="unit-list">
+        {% include "base/components/course_unit_components/course_unit_list.html" with course_units=course_units %}
+    </div>
+
+    <!-- Add Unit Button -->
+    {% if user.profile.role == "teacher" %}
+    <div class="flex justify-center mt-6">
+        <button hx-get="{% url 'get-course-unit-form' course.id %}" hx-target="#modal-body" hx-swap="innerHTML"
+            onclick="document.getElementById('modal-wrapper').checked = true" class="btn btn-primary btn-lg px-6">
+            + Unit
+        </button>
+    </div>
+    {% endif %}
+
+    {% endblock %}
 </div>
-
-<!-- Add Unit Button -->
-{% if user.profile.role == "teacher" %}
-<div class="flex justify-center mt-6">
-    <button hx-get="{% url 'get-course-unit-form' course.id %}" hx-target="#modal-body" hx-swap="innerHTML"
-        onclick="document.getElementById('modal-wrapper').checked = true"
-        class="btn btn-primary btn-lg px-6">
-        + Unit
-    </button>
-</div>
-{% endif %}
-
-{% endblock %}
-

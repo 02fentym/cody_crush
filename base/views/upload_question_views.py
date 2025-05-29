@@ -225,8 +225,10 @@ def upload_tracing_questions(request):
 
         if not errors:
             tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by("-created")
-            return render(request, "base/components/upload_questions_components/tracing_question_bank_table.html", {
-                "tracing_questions": tracing_questions,
+            return render(request, "base/components/upload_questions_components/question_bank_table.html", {
+                "questions": tracing_questions,
+                "row_url_name": "edit-tracing-question",             # required for HTMX row loading
+                "form_container_id": "tracing-edit-form-container",
             })
 
     topics = Topic.objects.all()

@@ -39,7 +39,7 @@
     document.addEventListener("DOMContentLoaded", function () {
         const progressBar = document.getElementById("quiz-progress-bar");
         const progressLabel = document.getElementById("quiz-progress-label");
-        const total = {{ questions|length }};
+        const total = parseInt("{{ questions|length }}", 10);
         const radios = document.querySelectorAll("input[type='radio']");
 
         function updateProgress() {
