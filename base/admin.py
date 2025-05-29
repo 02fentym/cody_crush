@@ -83,7 +83,7 @@ class ProfileAdmin(admin.ModelAdmin):
 
 @admin.register(QuizTemplate)
 class QuizTemplateAdmin(admin.ModelAdmin):
-    list_display = ('course_topic', 'question_type', 'question_count')
+    list_display = ('id', 'course_topic', 'question_type', 'question_count')
     search_fields = ('course_topic__title',)
     list_filter = ('question_type',)
 

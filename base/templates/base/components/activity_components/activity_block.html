@@ -26,31 +26,30 @@
 </li>
 
 {% elif activity.content_type.model == "quiztemplate" %}
-
+{% with activity.content_object as quiz %}
 <li>
-    <a href="{% url 'start-quiz' course.id activity.content_object.id %}" target="_blank"
+    <a href="{% url 'start-quiz' course.id activity.id %}" target="_blank"
         class="list-row items-center gap-4 mb-4 bg-secondary/5 px-4 py-3 hover:bg-secondary/20 border border-secondary/20">
         <!-- Icon -->
         <div>
-            <svg class="w-6 h-6 text-base-content" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                width="24" height="24" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                    d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28" />
-            </svg>
-
-
+            <svg class="w-6 h-6 text-base-content" ...>...</svg>
         </div>
 
         <!-- Title and Type -->
         <div>
             <div class="text-xs uppercase font-semibold opacity-60">
+                {% if quiz.question_type == "tracing" %}
+                Tracing Quiz
+                {% else %}
                 MC Quiz
+                {% endif %}
             </div>
             <div class="font-semibold">
-                {{activity.content_object.question_count}} Questions
+                {{ quiz.question_count }} Questions
             </div>
         </div>
     </a>
 </li>
+{% endwith %}
 
 {% endif %}
