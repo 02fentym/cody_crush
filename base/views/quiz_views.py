@@ -12,8 +12,12 @@ from base.models import (
     Answer, ActivityCompletion, CourseUnit, Course
 )
 
-
-# TEACHER VIEWS
+def get_all_courses(role, user):
+    if role == "student":
+        courses = user.enrolled_courses.all()
+    else:
+        courses = Course.objects.filter(teacher=user)
+    return courses
 
 # Quiz Addition
 @login_required
@@ -140,6 +144,7 @@ def take_quiz(request, quiz_id, activity_id):
     question_type = quiz.question_type
     course_topic = activity.course_topic
     quiz_questions = quiz.quiz_questions.all()  # this gives access to both question and bridge
+    courses = get_all_courses("student", request.user)
 
     if request.method == "POST":
         # Create the ActivityCompletion so we can link answers to it
@@ -197,7 +202,7 @@ def take_quiz(request, quiz_id, activity_id):
         return redirect("quiz-results", ac.id)
 
     # GET request → show the quiz
-    context = {"quiz": quiz, "questions": [qq.question for qq in quiz_questions], "ct": course_topic}
+    context = {"quiz": quiz, "questions": [qq.question for qq in quiz_questions], "ct": course_topic, "courses": courses}
     return render(request, "base/main/quiz.html", context)
 
 
