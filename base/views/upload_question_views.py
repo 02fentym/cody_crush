@@ -39,24 +39,44 @@ def question_data_validation(i, question_type, row):
 @allowed_roles(["teacher"])
 def mc_questions(request):
     courses = get_all_courses(request.user.profile.role, request.user)
-    questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by("-created")
+
+    sort_by = request.GET.get("sort_by", "created")
+    order = request.GET.get("order", "desc")
+
+    allowed_sorts = {
+        "topic__unit__title",
+        "topic__title",
+        "prompt",
+        "created",
+    }
+
+    if sort_by not in allowed_sorts:
+        sort_by = "created"
+
+    ordering = sort_by if order == "asc" else f"-{sort_by}"
+
+    questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by(ordering)
+
     context = {
         "courses": courses,
         "title": "Multiple Choice Questions",
 
-        # Upload button
         "upload_button": "base/components/upload_questions_components/upload_questions_button.html",
         "hx_get_url": "upload-mc-questions",
 
-        # Table
         "table_template": "base/components/upload_questions_components/question_bank_table.html",
         "table_id": "mc-table",
         "row_url_name": "edit-mc-question",
         "form_container_id": "mc-edit-form-container",
         "questions": questions,
+
+        # new
+        "sort_by": sort_by,
+        "order": order,
     }
 
     return render(request, "base/main/question_bank_base.html", context)
+
 
 
 @allowed_roles(["teacher"])
@@ -160,20 +180,40 @@ def edit_mc_question(request, question_id):
 @allowed_roles(["teacher"])
 def tracing_questions(request):
     courses = get_all_courses(request.user.profile.role, request.user)
-    tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by("-created")
+
+    sort_by = request.GET.get("sort_by", "created")
+    order = request.GET.get("order", "desc")
+
+    allowed_sorts = {
+        "topic__unit__title",
+        "topic__title",
+        "prompt",
+        "created",
+    }
+
+    if sort_by not in allowed_sorts:
+        sort_by = "created"
+
+    ordering = sort_by if order == "asc" else f"-{sort_by}"
+
+    questions = TracingQuestion.objects.select_related("topic__unit").order_by(ordering)
+
     context = {
         "courses": courses,
         "title": "Tracing Questions",
-        "questions": tracing_questions,
+        "questions": questions,
         "upload_button": "base/components/upload_questions_components/upload_questions_button.html",
         "hx_get_url": "upload-tracing-questions",
         "table_template": "base/components/upload_questions_components/question_bank_table.html",
         "row_url_name": "edit-tracing-question",
         "table_id": "tracing-table",
         "form_container_id": "tracing-edit-form-container",
+        "sort_by": sort_by,
+        "order": order,
     }
 
     return render(request, "base/main/question_bank_base.html", context)
+
 
 
 @allowed_roles(["teacher"])
