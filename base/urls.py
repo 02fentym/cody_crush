@@ -71,12 +71,13 @@ urlpatterns = [
     path("questions/multiple-choice/", views.mc_questions, name="mc-questions"),
     path("questions/multiple-choice/upload/", views.upload_mc_questions, name="upload-mc-questions"),
     path("mc-question/<int:question_id>/edit/", views.edit_mc_question, name="edit-mc-question"),
+    path("questions/multiple-choice/delete-selected/", views.delete_selected_mc_questions, name="delete-selected-mc-questions"),
 
     # tracing questions
     path("questions/tracing/", views.tracing_questions, name="tracing-questions"),
     path("questions/tracing/upload/", views.upload_tracing_questions, name="upload-tracing-questions"),
     path("tracing-question/<int:question_id>/edit/", views.edit_tracing_question, name="edit-tracing-question"),
-
+    path("questions/tracing-choice/delete-selected/", views.delete_selected_tracing_questions, name="delete-selected-tracing-questions"),
 
 ### URLS for user_views.py
     path("login/", views.login_user, name="login"),

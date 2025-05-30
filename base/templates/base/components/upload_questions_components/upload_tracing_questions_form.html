@@ -1,7 +1,7 @@
 <form
     method="POST"
     hx-post="{% url 'upload-tracing-questions' %}"
-    hx-target="#tracing-table"
+    hx-target="#tracing-table-wrapper"
     hx-swap="innerHTML"
     hx-on="htmx:afterRequest: document.getElementById('modal-wrapper').checked = false"
     enctype="multipart/form-data"
