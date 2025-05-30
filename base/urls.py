@@ -66,14 +66,13 @@ urlpatterns = [
     path("manage-units/", views.manage_units, name="manage-units"),
     path("get-unit-form/", views.get_unit_form, name="get-unit-form"),
     path("submit-unit-form-manage/", views.submit_unit_form_manage, name="submit-unit-form-manage"),
-    path("units/<int:unit_id>/delete/", views.delete_unit, name="delete-unit"),
-
+    path("units/delete-selected/", views.delete_selected_units, name="delete-selected-units"),
 
     # Topics
     path("manage-topics/", views.manage_topics, name="manage-topics"),
     path("get-topic-form/", views.get_topic_form, name="get-topic-form"),
     path("submit-topic-form/", views.submit_topic_form, name="submit-topic-form"),
-    path("topics/<int:topic_id>/delete/", views.delete_topic, name="delete-topic"),
+    path("topics/delete-selected/", views.delete_selected_topics, name="delete-selected-topics"),
 
 
     ### URLS for dmoj_views.py

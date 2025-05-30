@@ -3,13 +3,6 @@
 {% block content %}
 <h1 class="text-2xl font-bold mb-4">Manage Topics</h1>
 
-<div class="flex justify-end mb-4">
-    <button hx-get="{% url 'get-topic-form' %}" hx-target="#modal-body" hx-swap="innerHTML"
-      onclick="document.getElementById('modal-wrapper').checked = true"
-      class="btn btn-md btn-primary">+ Add Topic</button>
-  </div>
-  
-
   <div id="topic-table">
     {% include "base/components/topic_components/manage_topics_table.html" %}
   </div>
