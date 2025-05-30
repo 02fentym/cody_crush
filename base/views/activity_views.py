@@ -17,10 +17,6 @@ from base.forms import (
 from base.utils import fetch_dmoj_metadata_from_url
 
 
-# Course Topic Addition
-
-
-
 # Activity Deletion
 @login_required
 @allowed_roles(["teacher"])

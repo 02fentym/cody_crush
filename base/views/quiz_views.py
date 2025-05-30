@@ -66,7 +66,7 @@ def submit_quiz_form(request, course_topic_id):
     return HttpResponse("<div class='text-error'>Failed to create quiz</div>")
 
 
-def create_quiz(request, course_topic_id):
+'''def create_quiz(request, course_topic_id):
     course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
     course_id = course_topic.unit.course.id
     
@@ -100,7 +100,7 @@ def create_quiz(request, course_topic_id):
 
     messages.success(request, "Quiz created successfully!")
 
-    return redirect("course", course_id=course_id)
+    return redirect("course", course_id=course_id)'''
 
 
 # STUDENT VIEWS
