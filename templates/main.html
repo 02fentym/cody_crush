@@ -22,6 +22,14 @@
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
+    <!-- HTMX Logging -->
+    <script>
+        htmx.logger = function (elt, event, data) {
+            console.log("HTMX:", event, elt, data);
+        };
+    </script>
+
+
 </head>
 
 <body class="h-screen flex flex-col">
@@ -42,7 +50,7 @@
         <div class="flex flex-1 bg-base-300">
             {% include "sidebar.html" %}
 
-            <main class="flex-1 p-6  max-w-5xl mx-auto">
+            <main class="flex-1 p-6 max-w-5xl mx-auto">
                 {% block content %}
                 {% endblock %}
             </main>

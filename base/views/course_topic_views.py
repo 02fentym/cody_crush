@@ -20,7 +20,6 @@ def get_course_topic_form(request, unit_id):
 
     return render(request, "base/components/course_topic_components/course_topic_form.html", {"form": form, "unit": unit})
 
-
 @login_required
 @allowed_roles(["teacher"])
 @require_POST
@@ -33,22 +32,27 @@ def submit_course_topic_form(request):
         topic = form.cleaned_data["topic"]
         CourseTopic.objects.get_or_create(unit=unit, topic=topic)
 
+    # 🔧 Add this to resolve the Course
+    course_unit = CourseUnit.objects.get(unit=unit)
+    course_id = course_unit.course.id
+
     course_topics = CourseTopic.objects.filter(unit=unit).select_related("topic")
-    return render(request, "base/components/course_topic_components/course_topic_list.html", {"course_topics": course_topics, "unit": unit})
+    context = {"course_topics": course_topics, "unit": unit, "course_id": course_id }
+    return render(request, "base/components/course_topic_components/course_topic_list.html", context)
 
 
-@require_POST
+
 @login_required
 @allowed_roles(["teacher"])
+@require_POST
 def delete_course_topic(request, course_topic_id):
     course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
     unit = course_topic.unit
-
-    # ✅ Check that the unit belongs to a course taught by this teacher
-    if not CourseUnit.objects.filter(unit=unit, course__teacher=request.user).exists():
-        return HttpResponse("Unauthorized", status=403)
+    course_unit = CourseUnit.objects.get(unit=unit)
+    course_id = course_unit.course.id
 
     course_topic.delete()
 
     course_topics = CourseTopic.objects.filter(unit=unit).select_related("topic")
-    return render(request, "base/components/course_topic_components/course_topic_list.html", {"course_topics": course_topics, "unit": unit, })
+    context = {"course_topics": course_topics, "unit": unit, "course_id": course_id }
+    return render(request, "base/components/course_topic_components/course_topic_list.html", context)

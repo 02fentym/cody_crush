@@ -33,7 +33,7 @@
         <div class="collapse-content">
             <!-- Topic Cards -->
             <div id="topic-list-{{ unit.unit.id }}">
-                {% include "base/components/course_topic_components/course_topic_list.html" with unit=unit course_topics=unit.unit.course_topics %}
+                {% include "base/components/course_topic_components/course_topic_list.html" with unit=unit.unit course_topics=unit.unit.course_topics %}
             </div>
 
             {% if user.profile.role == "teacher" %}
@@ -97,27 +97,27 @@
 </script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const topicKey = "open-topics";
-    const topicToggles = document.querySelectorAll(".topic-toggle");
+    document.addEventListener("DOMContentLoaded", () => {
+        const topicKey = "open-topics";
+        const topicToggles = document.querySelectorAll(".topic-toggle");
 
-    // Restore saved open topic
-    const savedTopics = JSON.parse(localStorage.getItem(topicKey)) || [];
-    if (savedTopics.length) {
-      const toggle = document.getElementById(savedTopics[0]);
-      if (toggle) toggle.checked = true;
-    }
+        // Restore saved open topic
+        const savedTopics = JSON.parse(localStorage.getItem(topicKey)) || [];
+        if (savedTopics.length) {
+            const toggle = document.getElementById(savedTopics[0]);
+            if (toggle) toggle.checked = true;
+        }
 
-    // Ensure only one topic is open at a time
-    topicToggles.forEach(toggle => {
-      toggle.addEventListener("change", () => {
-        topicToggles.forEach(other => {
-          if (other !== toggle) other.checked = false;
+        // Ensure only one topic is open at a time
+        topicToggles.forEach(toggle => {
+            toggle.addEventListener("change", () => {
+                topicToggles.forEach(other => {
+                    if (other !== toggle) other.checked = false;
+                });
+
+                const open = toggle.checked ? [toggle.id] : [];
+                localStorage.setItem(topicKey, JSON.stringify(open));
+            });
         });
-
-        const open = toggle.checked ? [toggle.id] : [];
-        localStorage.setItem(topicKey, JSON.stringify(open));
-      });
     });
-  });
 </script>
