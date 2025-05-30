@@ -3,7 +3,6 @@
     <style>
         .unit-collapse .collapse-title::after {
             top: 50%;
-            /* Adjust this value to move the arrow lower */
         }
     </style>
 
@@ -33,7 +32,7 @@
         <div class="collapse-content">
             <!-- Topic Cards -->
             <div id="topic-list-{{ unit.unit.id }}">
-                {% include "base/components/course_topic_components/course_topic_list.html" with unit=unit.unit course_topics=unit.unit.course_topics %}
+                {% include "base/components/course_topic_components/course_topic_list.html" with unit=unit course_topics=unit.unit.course_topics %}
             </div>
 
             {% if user.profile.role == "teacher" %}

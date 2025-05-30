@@ -30,7 +30,7 @@ urlpatterns = [
     
     # deletion views
     path("course/<int:course_id>/delete/", views.delete_course, name="delete-course"),
-    path("activity/delete/<int:activity_id>/", views.delete_activity, name="delete-activity"),
+    path("activity/<int:activity_id>/delete/", views.delete_activity, name="delete-activity"),
 
     # quiz views
     path("topic/<int:topic_id>/create-quiz/", views.create_quiz, name="create-quiz"),
@@ -66,11 +66,14 @@ urlpatterns = [
     path("manage-units/", views.manage_units, name="manage-units"),
     path("get-unit-form/", views.get_unit_form, name="get-unit-form"),
     path("submit-unit-form-manage/", views.submit_unit_form_manage, name="submit-unit-form-manage"),
+    path("units/<int:unit_id>/delete/", views.delete_unit, name="delete-unit"),
+
 
     # Topics
     path("manage-topics/", views.manage_topics, name="manage-topics"),
     path("get-topic-form/", views.get_topic_form, name="get-topic-form"),
     path("submit-topic-form/", views.submit_topic_form, name="submit-topic-form"),
+    path("topics/<int:topic_id>/delete/", views.delete_topic, name="delete-topic"),
 
 
     ### URLS for dmoj_views.py

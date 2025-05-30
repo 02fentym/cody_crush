@@ -12,6 +12,13 @@
             <td class="font-semibold">{{ topic.title }}</td>
             <td>{{ topic.description|truncatechars:80 }}</td>
             <td>{{ topic.updated|date:"M d, Y" }}</td>
+            <td>
+                <form method="POST" action="{% url 'delete-topic' topic.id %}"
+                    onsubmit="return confirm('Are you sure?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-xs btn-error">Delete</button>
+                </form>
+            </td>
         </tr>
         {% empty %}
         <tr>

@@ -1,22 +1,33 @@
-<table class="table table-sm table-zebra w-full">
-    <thead class="sticky top-0 bg-base-200 z-10">
-        <tr>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Last Updated</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for unit in units %}
-        <tr>
-            <td class="font-semibold">{{ unit.title }}</td>
-            <td>{{ unit.description|truncatechars:80 }}</td>
-            <td>{{ unit.updated|date:"M d, Y" }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="3" class="text-center text-gray-400">No units found.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div id="unit-table-wrapper">
+    <table class="table table-sm table-zebra w-full">
+        <thead class="sticky top-0 bg-base-200 z-10">
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Last Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for unit in units %}
+            <tr>
+                <td class="font-semibold">{{ unit.title }}</td>
+                <td>{{ unit.description|truncatechars:80 }}</td>
+                <td>{{ unit.updated|date:"M d, Y" }}</td>
+                <td>
+                    <form method="POST" action="{% url 'delete-unit' unit.id %}"
+                        onsubmit="return confirm('Are you sure?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-xs btn-error">Delete</button>
+                    </form>
+
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center text-gray-400">No units found.</td>
+            </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

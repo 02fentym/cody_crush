@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 
@@ -39,6 +39,12 @@ def submit_unit_form_manage(request):
         return render(request, "base/components/unit_components/unit_form.html", {"form": form})
 
 
+def delete_unit(request, unit_id):
+    if request.method == "POST":
+        unit = get_object_or_404(Unit, id=unit_id)
+        unit.delete()
+        return redirect("manage-units")  # use your real course view name
+
 # Managing Topics
 @login_required
 @allowed_roles(["teacher"])
@@ -62,3 +68,10 @@ def submit_topic_form(request):
         form.save()
         return redirect("manage-topics")
     return render(request, "base/components/topic_components/topic_form.html", {"form": form})
+
+
+def delete_topic(request, topic_id):
+    if request.method == "POST":
+        topic = get_object_or_404(Topic, id=topic_id)
+        topic.delete()
+        return redirect("manage-topics")
