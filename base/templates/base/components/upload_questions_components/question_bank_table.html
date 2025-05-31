@@ -6,7 +6,10 @@
         hx-on="htmx:afterRequest: document.getElementById('{{ form_container_id }}').innerHTML = '';">
         {% csrf_token %}
         <div class="mb-4 flex gap-2">
-            {% include upload_button with hx_get_url=hx_get_url %}
+            <button class="btn btn-primary btn-sm" hx-get="{% url hx_get_url %}" hx-target="#modal-body" hx-swap="innerHTML"
+                onclick="document.getElementById('modal-wrapper').checked = true">
+                + Upload Questions
+            </button>
             <button type="submit" class="btn btn-error btn-sm" id="delete-selected-btn-{{ table_id }}" disabled>
                 Delete Selected
             </button>
