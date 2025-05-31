@@ -6,8 +6,8 @@
         hx-on="htmx:afterRequest: document.getElementById('{{ form_container_id }}').innerHTML = '';">
         {% csrf_token %}
         <div class="mb-4 flex gap-2">
-            <button class="btn btn-primary btn-sm" hx-get="{% url hx_get_url %}" hx-target="#modal-body" hx-swap="innerHTML"
-                onclick="document.getElementById('modal-wrapper').checked = true">
+            <button class="btn btn-primary btn-sm" hx-get="{% url hx_get_url %}" hx-target="#modal-body"
+                hx-swap="innerHTML" onclick="document.getElementById('modal-wrapper').checked = true">
                 + Upload Questions
             </button>
             <button type="submit" class="btn btn-error btn-sm" id="delete-selected-btn-{{ table_id }}" disabled>
@@ -21,10 +21,46 @@
                         <th class="w-12">
                             <input type="checkbox" id="select-all-{{ table_id }}" class="checkbox checkbox-sm" />
                         </th>
-                        <th>Unit</th>
-                        <th>Topic</th>
-                        <th>Prompt</th>
-                        <th>Created</th>
+                        <th>
+                            <a
+                                href="?sort_by=topic__unit__title&order={% if sort_by == 'topic__unit__title' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                                Unit
+                                {% if sort_by == 'topic__unit__title' %}
+                                {% if order == 'asc' %}↑{% else %}↓{% endif %}
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <th>
+                            <a
+                                href="?sort_by=topic__title&order={% if sort_by == 'topic__title' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                                Topic
+                                {% if sort_by == 'topic__title' %}
+                                {% if order == 'asc' %}↑{% else %}↓{% endif %}
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <th>
+                            <a
+                                href="?sort_by=prompt&order={% if sort_by == 'prompt' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                                Prompt
+                                {% if sort_by == 'prompt' %}
+                                {% if order == 'asc' %}↑{% else %}↓{% endif %}
+                                {% endif %}
+                            </a>
+                        </th>
+
+                        <th>
+                            <a
+                                href="?sort_by=created&order={% if sort_by == 'created' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                                Created
+                                {% if sort_by == 'created' %}
+                                {% if order == 'asc' %}↑{% else %}↓{% endif %}
+                                {% endif %}
+                            </a>
+                        </th>
+
                     </tr>
                 </thead>
                 <tbody>
