@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseServerError
 
 from base.decorators import allowed_roles
 from base.forms import MultipleChoiceQuestionForm, TracingQuestionForm
@@ -152,8 +153,6 @@ def upload_mc_questions(request):
         "table_id": "mc-table",
     })
 
-
-# views.py
 def edit_mc_question(request, question_id):
     question = get_object_or_404(MultipleChoiceQuestion, pk=question_id)
     sort_by = request.GET.get("sort_by", "created")
@@ -171,7 +170,10 @@ def edit_mc_question(request, question_id):
                 "form_container_id": "mc-edit-form-container",
                 "sort_by": sort_by,
                 "order": order,
-                "delete_url": "delete-selected-mc-questions",  # Added
+                "delete_url": "delete-selected-mc-questions",
+                "table_id": "mc-table",  # Added
+                "hx_get_url": "upload-mc-questions",  # Added
+                "upload_button": "base/components/upload_questions_components/upload_questions_button.html",  # Added
             })
             response["HX-Trigger"] = "question-updated"
             return response
@@ -187,11 +189,6 @@ def edit_mc_question(request, question_id):
     }
     return render(request, "base/components/upload_questions_components/edit_question_form.html", context)
 
-from django.contrib.auth.models import User
-from django.http import HttpResponseServerError
-
-from django.contrib.auth.models import User
-from django.http import HttpResponseServerError
 
 @allowed_roles(["teacher"])
 @login_required(login_url="login")
@@ -438,3 +435,4 @@ def delete_selected_tracing_questions(request):
     
     print("Non-POST request received")  # Debug
     return redirect("tracing-questions")
+
