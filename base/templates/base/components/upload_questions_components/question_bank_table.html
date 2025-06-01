@@ -98,8 +98,13 @@
             const container = document.getElementById('{{ form_container_id }}');
             if (container) {
                 container.innerHTML = '';
-                console.log('Form container cleared after delete');
+                console.log('Form container cleared after delete for {{ form_container_id }}');
             }
         });
+    </script>
+    <script>
+        htmx.logger = function (elt, event, data) {
+            console.log('HTMX Event:', event, 'Element:', elt, 'Data:', data);
+        };
     </script>
 </div>

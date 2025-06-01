@@ -171,9 +171,9 @@ def edit_mc_question(request, question_id):
                 "sort_by": sort_by,
                 "order": order,
                 "delete_url": "delete-selected-mc-questions",
-                "table_id": "mc-table",  # Added
-                "hx_get_url": "upload-mc-questions",  # Added
-                "upload_button": "base/components/upload_questions_components/upload_questions_button.html",  # Added
+                "table_id": "mc-table",  
+                "hx_get_url": "upload-mc-questions", 
+                "upload_button": "base/components/upload_questions_components/upload_questions_button.html", 
             })
             response["HX-Trigger"] = "question-updated"
             return response
@@ -194,9 +194,7 @@ def edit_mc_question(request, question_id):
 @login_required(login_url="login")
 def delete_selected_mc_questions(request):
     if request.method == "POST":
-        print("request.user:", request.user, type(request.user))  # Debug
         question_ids = request.POST.getlist("question_ids")
-        print("Received question_ids:", question_ids)  # Debug
         if question_ids:
             try:
                 question_ids = [int(qid) for qid in question_ids]
@@ -204,21 +202,15 @@ def delete_selected_mc_questions(request):
                     id__in=question_ids,
                     topic__coursetopic__unit__courseunit__course__teacher=request.user
                 ).delete()[0]
-                print(f"Deleted {deleted_count} questions")  # Debug
             except ValueError as e:
-                print(f"Error converting question_ids: {e}")  # Debug
                 return HttpResponseServerError("Invalid question IDs")
             except Exception as e:
-                print(f"Error deleting questions: {e}")  # Debug
                 return HttpResponseServerError(f"Error deleting questions: {str(e)}")
-        else:
-            print("No question_ids received")  # Debug
         
         sort_by = request.GET.get("sort_by", "created")
         order = request.GET.get("order", "desc")
         ordering = sort_by if order == "asc" else f"-{sort_by}"
         mc_questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by(ordering)
-        print("Rendering table with questions:", mc_questions.count())  # Debug
         
         response = render(request, "base/components/upload_questions_components/question_bank_table.html", {
             "questions": mc_questions,
@@ -232,10 +224,8 @@ def delete_selected_mc_questions(request):
             "upload_button": "base/components/upload_questions_components/upload_questions_button.html",  # Added
         })
         response["HX-Trigger"] = "question-deleted"
-        print("Response content length:", len(response.content))  # Debug
         return response
     
-    print("Non-POST request received")  # Debug
     return redirect("mc-questions")
 
 
@@ -275,7 +265,7 @@ def tracing_questions(request):
         "form_container_id": "tracing-edit-form-container",
         "sort_by": sort_by,
         "order": order,
-        "delete_url": "delete-selected-tracing-questions",  # Added
+        "delete_url": "delete-selected-tracing-questions",
     }
 
     return render(request, "base/main/question_bank_base.html", context)
@@ -392,9 +382,7 @@ def edit_tracing_question(request, question_id):
 @login_required(login_url="login")
 def delete_selected_tracing_questions(request):
     if request.method == "POST":
-        print("request.user:", request.user, type(request.user))  # Debug
         question_ids = request.POST.getlist("question_ids")
-        print("Received question_ids:", question_ids)  # Debug
         if question_ids:
             try:
                 question_ids = [int(qid) for qid in question_ids]
@@ -402,21 +390,15 @@ def delete_selected_tracing_questions(request):
                     id__in=question_ids,
                     topic__coursetopic__unit__courseunit__course__teacher=request.user
                 ).delete()[0]
-                print(f"Deleted {deleted_count} questions")  # Debug
             except ValueError as e:
-                print(f"Error converting question_ids: {e}")  # Debug
                 return HttpResponseServerError("Invalid question IDs")
             except Exception as e:
-                print(f"Error deleting questions: {e}")  # Debug
                 return HttpResponseServerError(f"Error deleting questions: {str(e)}")
-        else:
-            print("No question_ids received")  # Debug
         
         sort_by = request.GET.get("sort_by", "created")
         order = request.GET.get("order", "desc")
         ordering = sort_by if order == "asc" else f"-{sort_by}"
         tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by(ordering)
-        print("Rendering table with questions:", tracing_questions.count())  # Debug
         
         response = render(request, "base/components/upload_questions_components/question_bank_table.html", {
             "questions": tracing_questions,
@@ -430,9 +412,7 @@ def delete_selected_tracing_questions(request):
             "upload_button": "base/components/upload_questions_components/upload_questions_button.html",  # Added
         })
         response["HX-Trigger"] = "question-deleted"
-        print("Response content length:", len(response.content))  # Debug
         return response
     
-    print("Non-POST request received")  # Debug
     return redirect("tracing-questions")
 
