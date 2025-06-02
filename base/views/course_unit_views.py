@@ -2,6 +2,8 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.http import HttpResponse
+from django.template.loader import render_to_string
 
 from base.decorators import allowed_roles
 from base.models import Course, CourseUnit
@@ -59,3 +61,28 @@ def delete_course_unit(request, course_unit_id):
     course_units = CourseUnit.objects.filter(course=course).select_related("unit")
     return render(request, "base/components/course_unit_components/course_unit_list.html", {"course_units": course_units})
 
+
+def move_unit(course_id, unit_id, direction):
+    units = CourseUnit.objects.filter(course_id=course_id).order_by("order")
+    unit = get_object_or_404(units, id=unit_id)
+
+    index = list(units).index(unit)
+    target_index = index + (-1 if direction == "up" else 1)
+
+    if 0 <= target_index < len(units):
+        other = units[target_index]
+        unit.order, other.order = other.order, unit.order
+        unit.save()
+        other.save()
+
+    updated_units = CourseUnit.objects.filter(course_id=course_id).order_by("order")
+    html = render_to_string("base/components/course_unit_components/course_unit_list.html", {
+        "course_units": updated_units,
+    })
+    return HttpResponse(html)
+
+def move_unit_up(request, course_id, unit_id):
+    return move_unit(course_id, unit_id, "up")
+
+def move_unit_down(request, course_id, unit_id):
+    return move_unit(course_id, unit_id, "down")
