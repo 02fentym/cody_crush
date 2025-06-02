@@ -6,6 +6,15 @@
 
     <h1>{{ course.title }}</h1>
 
+    {% if user.profile.role == "teacher" %}
+    <div class="flex justify-start mb-4">
+        <button class="btn btn-secondary btn-sm" hx-get="{% url 'reorder-modal' course.id %}" hx-target="#modal-body"
+            hx-swap="innerHTML" onclick="document.getElementById('modal-wrapper').checked = true">
+            Reorder Content
+        </button>
+    </div>
+    {% endif %}
+
     <!-- Course Unit Cards -->
     <div id="unit-list">
         {% include "base/components/course_unit_components/course_unit_list.html" with course_units=course_units %}

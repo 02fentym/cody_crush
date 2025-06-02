@@ -16,10 +16,7 @@ urlpatterns = [
     path("course/<int:course_id>/get-course-unit-form/", views.get_course_unit_form, name="get-course-unit-form"),
     path("submit-course-unit-form/", views.submit_course_unit_form, name="submit-course-unit-form"),
     path("delete-course-unit/<int:course_unit_id>/", views.delete_course_unit, name="delete-course-unit"),
-    
-    # Up/Down Arrows
-    path("course/<int:course_id>/unit/<int:unit_id>/move-up/", views.move_unit_up, name="move-unit-up"),
-    path("course/<int:course_id>/unit/<int:unit_id>/move-down/", views.move_unit_down, name="move-unit-down"),
+    path("course/<int:course_id>/reorder/", views.reorder_modal, name="reorder-modal"),
 
 
 ### URLS for course_views.py
