@@ -60,14 +60,3 @@ def delete_course_unit(request, course_unit_id):
     # Refresh CourseUnit list
     course_units = CourseUnit.objects.filter(course=course).select_related("unit")
     return render(request, "base/components/course_unit_components/course_unit_list.html", {"course_units": course_units})
-
-
-@login_required
-@allowed_roles(["teacher"])
-def reorder_modal(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
-    course_units = CourseUnit.objects.filter(course=course).select_related("unit").order_by("order")
-    return render(request, "base/modals/reorder_modal.html", {
-        "course": course,
-        "course_units": course_units,
-    })
