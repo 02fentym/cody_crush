@@ -13,11 +13,16 @@
     </div>
 </div>
 
-
-
 {% for answer in answers %}
-{% include "base/components/quiz_components/mc_result_block.html" with answer=answer %}
+  {% if quiz_template.question_type == "multiple_choice" %}
+    {% include "base/components/quiz_components/mc_result_block.html" with answer=answer %}
+  {% elif quiz_template.question_type == "tracing" %}
+    {% include "base/components/quiz_components/tracing_result_block.html" with answer=answer %}
+  {% else %}
+    <div class="text-error">Unsupported question type.</div>
+  {% endif %}
 {% endfor %}
+
 
 <div style="margin-top: 24px;">
     <a href="{% url 'course' course_id %}" class="back-button">

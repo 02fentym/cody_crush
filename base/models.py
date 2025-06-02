@@ -50,7 +50,7 @@ class Unit(models.Model):
 class CourseUnit(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
-    order = models.PositiveIntegerField(default=0)
+    order = models.PositiveIntegerField(default=1)
 
     class Meta:
         unique_together = ("course", "unit")
@@ -77,7 +77,7 @@ class Topic(models.Model):
 class CourseTopic(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE) # universal unit
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)  # universal topic
-    order = models.PositiveIntegerField(default=0)
+    order = models.PositiveIntegerField(default=1)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -152,7 +152,7 @@ class Quiz(models.Model):
         return [qq.question for qq in self.quiz_questions.all()]
 
     def __str__(self):
-        return f"{self.topic.title} Quiz for {self.student.username}"
+        return f"{self.course_topic.topic.title} Quiz for {self.student.username}"
 
 
 class Answer(models.Model):
@@ -212,13 +212,17 @@ class QuizTemplate(models.Model):
 
 class Activity(models.Model):
     course_topic = models.ForeignKey("CourseTopic", on_delete=models.CASCADE, related_name="activities")
-    order = models.PositiveIntegerField(default=0)
+    order = models.PositiveIntegerField(default=1)
     created = models.DateTimeField(auto_now_add=True)
 
     # Generic relation
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
+
+    class Meta:
+        unique_together = [("course_topic", "order")]
+        ordering = ["order"]
 
     def clean(self):
         allowed_models = ["lesson", "quiztemplate", "dmojexercise"]

@@ -1,22 +1,122 @@
-<table class="table w-full">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Last Updated</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for topic in topics %}
-        <tr>
-            <td class="font-semibold">{{ topic.title }}</td>
-            <td>{{ topic.description|truncatechars:80 }}</td>
-            <td>{{ topic.updated|date:"M d, Y" }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="3" class="text-center text-gray-400">No topics found.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div id="topic-table-wrapper" class="relative">
+    <form method="POST" action="{% url 'delete-selected-topics' %}" id="bulk-delete-form"
+          onsubmit="return confirm('Are you sure you want to delete the selected topics?');">
+        {% csrf_token %}
+        <div class="mb-4 flex gap-2">
+            <button hx-get="{% url 'get-topic-form' %}" hx-target="#modal-body" hx-swap="innerHTML"
+                    onclick="document.getElementById('modal-wrapper').checked = true"
+                    class="btn btn-primary btn-sm">
+                + Add Topic
+            </button>
+            <button type="submit" class="btn btn-error btn-sm" id="delete-selected-btn" disabled>
+                Delete Selected
+            </button>
+        </div>
+        <table class="table table-sm table-zebra w-full">
+            <thead class="sticky top-0 bg-base-200 z-10">
+                <tr>
+                    <th class="w-12">
+                        <input type="checkbox" id="select-all" class="checkbox checkbox-sm" />
+                    </th>
+                    <th>
+                        <a href="{% url 'manage-topics' %}?sort_by=title&order={% if sort_by == 'title' and order == 'asc' %}desc{% else %}asc{% endif %}"
+                           class="flex items-center gap-2">
+                            Title
+                            {% if sort_by == 'title' %}
+                                {% if order == 'asc' %}
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                {% else %}
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                {% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{% url 'manage-topics' %}?sort_by=description&order={% if sort_by == 'description' and order == 'asc' %}desc{% else %}asc{% endif %}"
+                           class="flex items-center gap-2">
+                            Description
+                            {% if sort_by == 'description' %}
+                                {% if order == 'asc' %}
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                {% else %}
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                {% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{% url 'manage-topics' %}?sort_by=unit__title&order={% if sort_by == 'unit__title' and order == 'asc' %}desc{% else %}asc{% endif %}"
+                           class="flex items-center gap-2">
+                            Unit
+                            {% if sort_by == 'unit__title' %}
+                                {% if order == 'asc' %}
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                {% else %}
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                {% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{% url 'manage-topics' %}?sort_by=updated&order={% if sort_by == 'updated' and order == 'asc' %}desc{% else %}asc{% endif %}"
+                           class="flex items-center gap-2">
+                            Last Updated
+                            {% if sort_by == 'updated' %}
+                                {% if order == 'asc' %}
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                {% else %}
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                {% endif %}
+                            {% endif %}
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for topic in topics %}
+                <tr>
+                    <td class="w-12">
+                        <input type="checkbox" name="topic_ids" value="{{ topic.id }}"
+                               class="checkbox checkbox-sm topic-checkbox" />
+                    </td>
+                    <td class="font-semibold">{{ topic.title }}</td>
+                    <td>{{ topic.description|truncatechars:80 }}</td>
+                    <td>{{ topic.unit.title|default:"None" }}</td>
+                    <td>{{ topic.updated|date:"M d, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-gray-400">No topics found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+</div>
+
+<script>
+    // Enable/disable Delete Selected button based on checkbox selection
+    document.addEventListener('DOMContentLoaded', () => {
+        const deleteBtn = document.getElementById('delete-selected-btn');
+        const checkboxes = document.querySelectorAll('.topic-checkbox');
+        const selectAll = document.getElementById('select-all');
+
+        const updateDeleteButton = () => {
+            const anyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+            deleteBtn.disabled = !anyChecked;
+        };
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateDeleteButton);
+        });
+
+        selectAll.addEventListener('change', () => {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+            });
+            updateDeleteButton();
+        });
+
+        updateDeleteButton();
+    });
+</script>

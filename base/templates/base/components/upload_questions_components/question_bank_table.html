@@ -1,32 +1,110 @@
-<div class="overflow-x-auto shadow rounded-lg mb-10 max-h-[200px]">
-    <table class="table table-xs table-zebra w-full">
-        <thead class="sticky top-0 bg-base-200 z-10">
-            <tr>
-                <th>Unit</th>
-                <th>Topic</th>
-                <th>Prompt</th>
-                <th>Created</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for q in questions %}
-            <tr hx-get="{% url row_url_name q.id %}"
-                hx-target="#{{ form_container_id }}"
-                hx-swap="innerHTML"
-                class="cursor-pointer hover:bg-base-300 transition">
+<!-- base/components/upload_questions_components/question_bank_table.html -->
+<div id="{{ table_id }}-wrapper" class="relative">
+    <form method="POST" action="{% url delete_url %}" id="bulk-delete-form-{{ table_id }}"
+        onsubmit="return confirm('Are you sure you want to delete the selected questions?');"
+        hx-post="{% url delete_url %}" hx-target="#{{ table_id }}-wrapper" hx-swap="innerHTML">
+        {% csrf_token %}
+        <div class="mb-4 flex gap-2">
+            <button class="btn btn-primary btn-sm" hx-get="{% url hx_get_url %}" hx-target="#modal-body"
+                hx-swap="innerHTML" onclick="document.getElementById('modal-wrapper').checked = true">
+                + Upload Questions
+            </button>
+            <button type="submit" class="btn btn-error btn-sm" id="delete-selected-btn-{{ table_id }}" disabled>
+                Delete Selected
+            </button>
+        </div>
+        <div class="overflow-x-auto shadow rounded-lg mb-10 max-h-[200px]">
+            <table class="table table-xs table-zebra w-full">
+                <thead class="sticky top-0 bg-base-200 z-10">
+                    <tr>
+                        <th class="w-12">
+                            <input type="checkbox" id="select-all-{{ table_id }}" class="checkbox checkbox-sm" />
+                        </th>
+                        <th>
+                            <a
+                                href="?sort_by=topic__unit__title&order={% if sort_by == 'topic__unit__title' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                                Unit
+                                {% if sort_by == 'topic__unit__title' %}
+                                {% if order == 'asc' %}↑{% else %}↓{% endif %}
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a
+                                href="?sort_by=topic__title&order={% if sort_by == 'topic__title' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                                Topic
+                                {% if sort_by == 'topic__title' %}
+                                {% if order == 'asc' %}↑{% else %}↓{% endif %}
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a
+                                href="?sort_by=prompt&order={% if sort_by == 'prompt' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                                Prompt
+                                {% if sort_by == 'prompt' %}
+                                {% if order == 'asc' %}↑{% else %}↓{% endif %}
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a
+                                href="?sort_by=created&order={% if sort_by == 'created' and order == 'asc' %}desc{% else %}asc{% endif %}">
+                                Created
+                                {% if sort_by == 'created' %}
+                                {% if order == 'asc' %}↑{% else %}↓{% endif %}
+                                {% endif %}
+                            </a>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for q in questions %}
+                    <tr hx-get="{% url row_url_name q.id %}" hx-target="#{{ form_container_id }}" hx-swap="innerHTML"
+                        onclick="console.log('Row clicked for question {{ q.id }}'); if (this.dataset.clicked) return; this.dataset.clicked = true; setTimeout(() => delete this.dataset.clicked, 1000);"
+                        hx-on="htmx:beforeRequest: console.log('Sending request for question {{ q.id }}'); console.log('Target exists:', !!document.getElementById('{{ form_container_id }}'))"
+                        hx-on="htmx:afterRequest: console.log('Received response for question {{ q.id }}'); console.log('Response status:', event.detail.xhr.status)"
+                        hx-on="htmx:afterSwap: console.log('Swapped content into {{ form_container_id }}'); console.log('Target element after swap:', event.detail.target); console.log('Container content after swap:', document.getElementById('{{ form_container_id }}').innerHTML)"
+                        hx-on="htmx:responseError: console.log('Error for question {{ q.id }}:', event.detail.xhr.status, event.detail.xhr.statusText)"
+                        hx-on="htmx:abort: console.log('Request aborted for question {{ q.id }}')"
+                        class="cursor-pointer hover:bg-base-300 transition">
+                        <td class="w-12">
+                            <input type="checkbox" name="question_ids" value="{{ q.id }}"
+                                class="checkbox checkbox-sm question-checkbox-{{ table_id }}" />
+                        </td>
+                        <td>{{ q.topic.unit.title|truncatechars:30 }}</td>
+                        <td>{{ q.topic.title|truncatechars:30 }}</td>
+                        <td>{{ q.prompt|truncatechars:85 }}</td>
+                        <td>{{ q.created|date:"Y-m-d" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initDeleteCheckboxHandlers('{{ table_id }}');
+        });
 
-                <td>{{ q.topic.unit.title|truncatechars:30 }}</td>
-                <td>{{ q.topic.title|truncatechars:30 }}</td>
-                <td>{{ q.prompt|truncatechars:85 }}</td>
-                <td>{{ q.created|date:"Y-m-d" }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" class="text-center text-base-content/70">
-                    No questions yet.
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        document.body.addEventListener('htmx:afterSwap', function (e) {
+            if (e.detail.target.id === '{{ table_id }}-wrapper') {
+                initDeleteCheckboxHandlers('{{ table_id }}');
+            }
+        });
+
+        // Clear the form container when a question is deleted
+        document.body.addEventListener('question-deleted', function () {
+            const container = document.getElementById('{{ form_container_id }}');
+            if (container) {
+                container.innerHTML = '';
+                console.log('Form container cleared after delete for {{ form_container_id }}');
+            }
+        });
+    </script>
+    <script>
+        htmx.logger = function (elt, event, data) {
+            console.log('HTMX Event:', event, 'Element:', elt, 'Data:', data);
+        };
+    </script>
 </div>

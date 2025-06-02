@@ -1,7 +1,16 @@
-<div class="form-control">
+<div class="card bg-base-100 shadow p-4 space-y-2">
+  <p class="text-base font-medium text-base-content/80">
+    {{ forloop.counter }}. {{ question.prompt|safe }}
+  </p>
+
+  <div class="form-control">
     <label for="q{{ question.id }}" class="label">
-        <span class="label-text">What's the output?</span>
+      <span class="label-text">What’s the output?</span>
     </label>
-    <textarea name="q{{ question.id }}" id="q{{ question.id }}"
-              class="textarea textarea-bordered w-full" rows="4" required></textarea>
+    <textarea name="q{{ question.id }}"
+              id="q{{ question.id }}"
+              class="textarea textarea-bordered w-full resize-y"
+              rows="4"
+              required></textarea>
+  </div>
 </div>

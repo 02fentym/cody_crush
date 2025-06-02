@@ -3,6 +3,8 @@
     class="space-y-4">
 
     {% csrf_token %}
+    <input type="hidden" name="course_id" value="{{ course_id }}">
+
     <h3 class="font-bold text-lg">Create a Quiz</h3>
     <p class="text-sm text-base-content/60">Generate a quiz from the topic’s question pool.</p>
 

@@ -1,29 +1,36 @@
 <div class="flex flex-row gap-4 items-center justify-between">
-    <!-- Unit Card -->
-    <div class="collapse collapse-arrow bg-base-200 unit-collapse mb-2" id="unit-{{ unit.unit.id }}">
-        <input type="checkbox" class="unit-toggle" />
-        <div class="collapse-title font-medium flex justify-between items-center gap-4">
-            <div class="flex items-center gap-4">
+    <!-- Inline CSS to adjust the collapse arrow position -->
+    <style>
+        .unit-collapse .collapse-title::after {
+            top: 50%;
+        }
+    </style>
 
+    <!-- Unit Card -->
+    <div class="collapse collapse-arrow bg-base-100 unit-collapse mb-6" id="unit-{{ unit.unit.id }}">
+        <input type="checkbox" class="unit-toggle" id="unit-toggle-{{ unit.unit.id }}" />
+        <div class="collapse-title font-medium flex justify-between items-center gap-4 p-6">
+            <div class="flex items-center gap-4">
                 <!-- Circle icon for Unit number -->
-                <div class="flex items-center justify-center bg-primary text-primary-content font-bold text-sm"
-                    style="width: 2.5rem; height: 2.5rem; border-radius: 9999px;">
+                <div class="flex items-center justify-center bg-primary text-primary-content font-bold text-lg rounded-lg"
+                    style="width: 2.5rem; height: 2.5rem;">
                     {{ order }}
                 </div>
 
                 <!-- Unit title and description -->
                 <div class="flex flex-col">
-                    <span class="text-base font-semibold">{{ unit.unit.title }}</span>
+                    <h3>{{ unit.unit.title }}</h3>
+                    <span class="text-sm text-base-content/70">{{ unit.unit.description|truncatechars:200 }}</span>
                     {% if user.profile.role == "student" %}
-                    <span class="text-xs text-base-content/70">Progress: {{ unit.progress }}%</span>
+                    <span class="text-sm text-base-content/70">Progress: {{ unit.progress }}%</span>
                     {% endif %}
                 </div>
             </div>
+            
         </div>
 
         <!-- Topic Cards + Add Topic Button -->
         <div class="collapse-content">
-
             <!-- Topic Cards -->
             <div id="topic-list-{{ unit.unit.id }}">
                 {% include "base/components/course_topic_components/course_topic_list.html" with unit=unit course_topics=unit.unit.course_topics %}
@@ -32,9 +39,9 @@
             {% if user.profile.role == "teacher" %}
             <!-- Add Topic Button -->
             <div class="flex justify-center">
-                <button hx-get="{% url 'get-course-topic-form' unit.unit.id %}" hx-target="#modal-body" hx-swap="innerHTML"
-                    onclick="document.getElementById('modal-wrapper').checked = true"
-                    class="btn btn-primary rounded-full px-6 text-base">
+                <button hx-get="{% url 'get-course-topic-form' unit.unit.id %}" hx-target="#modal-body"
+                    hx-swap="innerHTML" onclick="document.getElementById('modal-wrapper').checked = true"
+                    class="btn btn-primary btn-md px-6">
                     + Topic
                 </button>
             </div>
@@ -59,3 +66,58 @@
     </div>
     {% endif %}
 </div>
+
+<!-- Script to save and restore open units -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const key = "open-units";
+        const allToggles = document.querySelectorAll(".unit-toggle");
+
+        // Restore saved open unit
+        const saved = JSON.parse(localStorage.getItem(key)) || [];
+        if (saved.length) {
+            const toggle = document.getElementById(saved[0]);
+            if (toggle) toggle.checked = true;
+        }
+
+        // Allow only one collapse open at a time
+        allToggles.forEach(toggle => {
+            toggle.addEventListener("change", () => {
+                // Close all other toggles
+                allToggles.forEach(other => {
+                    if (other !== toggle) other.checked = false;
+                });
+
+                // Save the currently open one
+                const open = toggle.checked ? [toggle.id] : [];
+                localStorage.setItem(key, JSON.stringify(open));
+            });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const topicKey = "open-topics";
+        const topicToggles = document.querySelectorAll(".topic-toggle");
+
+        // Restore saved open topic
+        const savedTopics = JSON.parse(localStorage.getItem(topicKey)) || [];
+        if (savedTopics.length) {
+            const toggle = document.getElementById(savedTopics[0]);
+            if (toggle) toggle.checked = true;
+        }
+
+        // Ensure only one topic is open at a time
+        topicToggles.forEach(toggle => {
+            toggle.addEventListener("change", () => {
+                topicToggles.forEach(other => {
+                    if (other !== toggle) other.checked = false;
+                });
+
+                const open = toggle.checked ? [toggle.id] : [];
+                localStorage.setItem(topicKey, JSON.stringify(open));
+            });
+        });
+    });
+</script>

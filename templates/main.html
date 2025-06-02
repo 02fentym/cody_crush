@@ -1,15 +1,18 @@
 {% load static %}
-<!DOCTYPE html>
+<!DOCTYPE html data-theme="light">
 <html lang="en"> <!-- Set DaisyUI theme here-->
 
 <head>
+    <script>
+        document.documentElement.setAttribute("data-theme", localStorage.getItem("theme") || "light");
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cody Crush</title>
 
     <!-- Highlight.js CSS (kept your theme) -->
     <link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
 
     <!-- Toast UI Editor CSS -->
     <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
@@ -21,11 +24,11 @@
 
 </head>
 
-<body>
+<body class="h-screen flex flex-col">
     <form style="display:none;">
         {% csrf_token %}
-      </form>
-    <div class="min-h-screen px-80">
+    </form>
+    <div class="flex-1 flex flex-col">
         {% include "navbar.html" %}
 
         {% if messages %}
@@ -36,10 +39,10 @@
         </div>
         {% endif %}
 
-        <div class="flex">
+        <div class="flex flex-1 bg-base-300">
             {% include "sidebar.html" %}
 
-            <main class="flex-1 p-6">
+            <main class="flex-1 p-6 max-w-5xl mx-auto">
                 {% block content %}
                 {% endblock %}
             </main>
@@ -74,8 +77,6 @@
             <!-- HTMX will inject forms here -->
         </div>
     </div>
-
-
 </body>
 
 </html>

@@ -1,12 +1,13 @@
 <form
     method="POST"
     hx-post="{% url 'upload-mc-questions' %}"
-    hx-target="#mc-table"
+    hx-target="#{{ table_id }}-wrapper"
     hx-swap="innerHTML"
     hx-on="htmx:afterRequest: document.getElementById('modal-wrapper').checked = false"
     enctype="multipart/form-data"
     class="space-y-4"
 >
+
     {% csrf_token %}
 
     <!-- Close trigger -->

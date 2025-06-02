@@ -89,3 +89,30 @@ document.body.addEventListener("htmx:afterSwap", function (e) {
         });
     }
 });
+
+// Bulk Question Delete --> question_bank_table.html
+function initDeleteCheckboxHandlers(tableId) {
+    const deleteBtn = document.getElementById(`delete-selected-btn-${tableId}`);
+    const checkboxes = document.querySelectorAll(`.question-checkbox-${tableId}`);
+    const selectAll = document.getElementById(`select-all-${tableId}`);
+
+    const updateDeleteButton = () => {
+        const anyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+        deleteBtn.disabled = !anyChecked;
+    };
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateDeleteButton);
+    });
+
+    if (selectAll) {
+        selectAll.addEventListener('change', () => {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+            });
+            updateDeleteButton();
+        });
+    }
+
+    updateDeleteButton();
+}

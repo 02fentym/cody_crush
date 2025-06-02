@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseServerError
 
 from base.decorators import allowed_roles
 from base.forms import MultipleChoiceQuestionForm, TracingQuestionForm
@@ -39,30 +40,49 @@ def question_data_validation(i, question_type, row):
 @allowed_roles(["teacher"])
 def mc_questions(request):
     courses = get_all_courses(request.user.profile.role, request.user)
-    questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by("-created")
+
+    sort_by = request.GET.get("sort_by", "created")
+    order = request.GET.get("order", "desc")
+
+    allowed_sorts = {
+        "topic__unit__title",
+        "topic__title",
+        "prompt",
+        "created",
+    }
+
+    if sort_by not in allowed_sorts:
+        sort_by = "created"
+
+    ordering = sort_by if order == "asc" else f"-{sort_by}"
+
+    questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by(ordering)
+
     context = {
         "courses": courses,
         "title": "Multiple Choice Questions",
-
-        # Upload button
         "upload_button": "base/components/upload_questions_components/upload_questions_button.html",
         "hx_get_url": "upload-mc-questions",
-
-        # Table
         "table_template": "base/components/upload_questions_components/question_bank_table.html",
         "table_id": "mc-table",
         "row_url_name": "edit-mc-question",
         "form_container_id": "mc-edit-form-container",
         "questions": questions,
+        "sort_by": sort_by,
+        "order": order,
+        "delete_url": "delete-selected-mc-questions",  # Added
     }
 
     return render(request, "base/main/question_bank_base.html", context)
 
 
+# views.py
 @allowed_roles(["teacher"])
 @login_required(login_url="login")
 def upload_mc_questions(request):
     errors = []
+    sort_by = request.GET.get("sort_by", "created")
+    order = request.GET.get("order", "desc")
 
     if request.method == "POST":
         file = request.FILES.get("file")
@@ -111,33 +131,50 @@ def upload_mc_questions(request):
                     errors.append(f"Failed to read CSV: {str(e)}")
 
         if not errors:
-            mc_questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by("-created")
+            ordering = sort_by if order == "asc" else f"-{sort_by}"
+            mc_questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by(ordering)
             return render(request, "base/components/upload_questions_components/question_bank_table.html", {
                 "questions": mc_questions,
                 "row_url_name": "edit-mc-question",
-                "form_container_id": "tracing-edit-form-container",
+                "form_container_id": "mc-edit-form-container",
+                "sort_by": sort_by,
+                "order": order,
+                "delete_url": "delete-selected-mc-questions",
+                "table_id": "mc-table",
+                "hx_get_url": "upload-mc-questions",  # ✅ REQUIRED for the upload button include
+                "upload_button": "base/components/upload_questions_components/upload_questions_button.html",  # ✅ ALSO REQUIRED
             })
+
 
     topics = Topic.objects.all()
     return render(request, "base/components/upload_questions_components/upload_mc_questions_form.html", {
         "topics": topics,
-        "errors": errors
+        "errors": errors,
+        "table_id": "mc-table",
     })
-
 
 def edit_mc_question(request, question_id):
     question = get_object_or_404(MultipleChoiceQuestion, pk=question_id)
+    sort_by = request.GET.get("sort_by", "created")
+    order = request.GET.get("order", "desc")
+
     if request.method == "POST":
         form = MultipleChoiceQuestionForm(request.POST, instance=question)
         if form.is_valid():
             form.save()
-            mc_questions = MultipleChoiceQuestion.objects.all()
+            ordering = sort_by if order == "asc" else f"-{sort_by}"
+            mc_questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by(ordering)
             response = render(request, "base/components/upload_questions_components/question_bank_table.html", {
                 "questions": mc_questions,
                 "row_url_name": "edit-mc-question",
                 "form_container_id": "mc-edit-form-container",
+                "sort_by": sort_by,
+                "order": order,
+                "delete_url": "delete-selected-mc-questions",
+                "table_id": "mc-table",  
+                "hx_get_url": "upload-mc-questions", 
+                "upload_button": "base/components/upload_questions_components/upload_questions_button.html", 
             })
-
             response["HX-Trigger"] = "question-updated"
             return response
     else:
@@ -153,6 +190,44 @@ def edit_mc_question(request, question_id):
     return render(request, "base/components/upload_questions_components/edit_question_form.html", context)
 
 
+@allowed_roles(["teacher"])
+@login_required(login_url="login")
+def delete_selected_mc_questions(request):
+    if request.method == "POST":
+        question_ids = request.POST.getlist("question_ids")
+        if question_ids:
+            try:
+                question_ids = [int(qid) for qid in question_ids]
+                deleted_count = MultipleChoiceQuestion.objects.filter(
+                    id__in=question_ids,
+                    topic__coursetopic__unit__courseunit__course__teacher=request.user
+                ).delete()[0]
+            except ValueError as e:
+                return HttpResponseServerError("Invalid question IDs")
+            except Exception as e:
+                return HttpResponseServerError(f"Error deleting questions: {str(e)}")
+        
+        sort_by = request.GET.get("sort_by", "created")
+        order = request.GET.get("order", "desc")
+        ordering = sort_by if order == "asc" else f"-{sort_by}"
+        mc_questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by(ordering)
+        
+        response = render(request, "base/components/upload_questions_components/question_bank_table.html", {
+            "questions": mc_questions,
+            "row_url_name": "edit-mc-question",
+            "form_container_id": "mc-edit-form-container",
+            "sort_by": sort_by,
+            "order": order,
+            "delete_url": "delete-selected-mc-questions",
+            "table_id": "mc-table",
+            "hx_get_url": "upload-mc-questions",
+            "upload_button": "base/components/upload_questions_components/upload_questions_button.html",  # Added
+        })
+        response["HX-Trigger"] = "question-deleted"
+        return response
+    
+    return redirect("mc-questions")
+
 
 ### TRACING QUESTIONS
 
@@ -160,26 +235,49 @@ def edit_mc_question(request, question_id):
 @allowed_roles(["teacher"])
 def tracing_questions(request):
     courses = get_all_courses(request.user.profile.role, request.user)
-    tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by("-created")
+
+    sort_by = request.GET.get("sort_by", "created")
+    order = request.GET.get("order", "desc")
+
+    allowed_sorts = {
+        "topic__unit__title",
+        "topic__title",
+        "prompt",
+        "created",
+    }
+
+    if sort_by not in allowed_sorts:
+        sort_by = "created"
+
+    ordering = sort_by if order == "asc" else f"-{sort_by}"
+
+    questions = TracingQuestion.objects.select_related("topic__unit").order_by(ordering)
+
     context = {
         "courses": courses,
         "title": "Tracing Questions",
-        "questions": tracing_questions,
+        "questions": questions,
         "upload_button": "base/components/upload_questions_components/upload_questions_button.html",
         "hx_get_url": "upload-tracing-questions",
         "table_template": "base/components/upload_questions_components/question_bank_table.html",
         "row_url_name": "edit-tracing-question",
         "table_id": "tracing-table",
         "form_container_id": "tracing-edit-form-container",
+        "sort_by": sort_by,
+        "order": order,
+        "delete_url": "delete-selected-tracing-questions",
     }
 
     return render(request, "base/main/question_bank_base.html", context)
+
 
 
 @allowed_roles(["teacher"])
 @login_required(login_url="login")
 def upload_tracing_questions(request):
     errors = []
+    sort_by = request.GET.get("sort_by", "created")
+    order = request.GET.get("order", "desc")
 
     if request.method == "POST":
         file = request.FILES.get("file")
@@ -224,9 +322,18 @@ def upload_tracing_questions(request):
                     errors.append(f"Failed to read CSV: {str(e)}")
 
         if not errors:
-            tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by("-created")
-            return render(request, "base/components/upload_questions_components/tracing_question_bank_table.html", {
-                "tracing_questions": tracing_questions,
+            ordering = sort_by if order == "asc" else f"-{sort_by}"
+            tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by(ordering)
+            return render(request, "base/components/upload_questions_components/question_bank_table.html", {
+                "questions": tracing_questions,
+                "row_url_name": "edit-tracing-question",
+                "form_container_id": "tracing-edit-form-container",
+                "sort_by": sort_by,
+                "order": order,
+                "delete_url": "delete-selected-tracing-questions",
+                "table_id": "tracing-table",  # ✅ Required
+                "hx_get_url": "upload-tracing-questions",  # ✅ Required
+                "upload_button": "base/components/upload_questions_components/upload_questions_button.html",  # ✅ Required
             })
 
     topics = Topic.objects.all()
@@ -236,17 +343,25 @@ def upload_tracing_questions(request):
     })
 
 
+
 def edit_tracing_question(request, question_id):
     question = get_object_or_404(TracingQuestion, pk=question_id)
+    sort_by = request.GET.get("sort_by", "created")
+    order = request.GET.get("order", "desc")
+
     if request.method == "POST":
         form = TracingQuestionForm(request.POST, instance=question)
         if form.is_valid():
             form.save()
-            tracing_questions = TracingQuestion.objects.all()
+            ordering = sort_by if order == "asc" else f"-{sort_by}"
+            tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by(ordering)
             response = render(request, "base/components/upload_questions_components/question_bank_table.html", {
                 "questions": tracing_questions,
                 "row_url_name": "edit-tracing-question",
                 "form_container_id": "tracing-edit-form-container",
+                "sort_by": sort_by,
+                "order": order,
+                "delete_url": "delete-selected-tracing-questions",  # Added
             })
             response["HX-Trigger"] = "question-updated"
             return response
@@ -261,3 +376,43 @@ def edit_tracing_question(request, question_id):
         "table_id": "tracing-table",
     }
     return render(request, "base/components/upload_questions_components/edit_question_form.html", context)
+
+
+@allowed_roles(["teacher"])
+@login_required(login_url="login")
+def delete_selected_tracing_questions(request):
+    if request.method == "POST":
+        question_ids = request.POST.getlist("question_ids")
+        if question_ids:
+            try:
+                question_ids = [int(qid) for qid in question_ids]
+                deleted_count = TracingQuestion.objects.filter(
+                    id__in=question_ids,
+                    topic__coursetopic__unit__courseunit__course__teacher=request.user
+                ).delete()[0]
+            except ValueError as e:
+                return HttpResponseServerError("Invalid question IDs")
+            except Exception as e:
+                return HttpResponseServerError(f"Error deleting questions: {str(e)}")
+        
+        sort_by = request.GET.get("sort_by", "created")
+        order = request.GET.get("order", "desc")
+        ordering = sort_by if order == "asc" else f"-{sort_by}"
+        tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by(ordering)
+        
+        response = render(request, "base/components/upload_questions_components/question_bank_table.html", {
+            "questions": tracing_questions,
+            "row_url_name": "edit-tracing-question",
+            "form_container_id": "tracing-edit-form-container",
+            "sort_by": sort_by,
+            "order": order,
+            "delete_url": "delete-selected-tracing-questions",
+            "table_id": "tracing-table",
+            "hx_get_url": "upload-tracing-questions",
+            "upload_button": "base/components/upload_questions_components/upload_questions_button.html",  # Added
+        })
+        response["HX-Trigger"] = "question-deleted"
+        return response
+    
+    return redirect("tracing-questions")
+

@@ -1,8 +1,8 @@
 <div class="flex flex-row gap-4 items-center justify-between">
     <!-- Topic Card (collapsible) -->
     <div class="flex-1">
-        <div class="collapse collapse-arrow bg-base-100">
-            <input type="checkbox" class="topic-toggle" />
+        <div class="collapse collapse-arrow bg-base-200">
+            <input type="checkbox" class="topic-toggle" id="topic-toggle-{{ topic.id }}" />
             <div class="collapse-title font-medium flex justify-between items-center gap-4">
                 <div class="flex flex-col">
                     <span class="text-base font-semibold">{{ topic.title }}</span>
@@ -11,10 +11,10 @@
 
             <!-- Activities -->
             <div class="collapse-content">
-                <div class="max-h-32 overflow-y-auto">
-                    <ul class="list bg-base-100 shadow-md max-h-32 overflow-y-auto">
+                <div class="">
+                    <ul class="list">
                         {% for activity in ct.activities.all %}
-                        {% include "base/components/activity_components/activity_block.html" with activity=activity %}
+                        {% include "base/components/activity_components/activity_block.html" with activity=activity course_id=course_id %}
                         {% endfor %}
                     </ul>
                     {% if ct.activities.count == 0 %}
@@ -28,14 +28,14 @@
                 <div class="flex justify-center gap-2 p-4">
 
                     <!-- DMOJ Exercise Creation -->
-                    <button class="btn btn-sm btn-outline" hx-get="{% url 'get-dmoj-form' ct.id %}"
+                    <button class="btn btn-sm bg-secondary text-secondary-content" hx-get="{% url 'get-dmoj-form' ct.id %}"
                         hx-target="#modal-body" hx-swap="innerHTML"
                         onclick="document.getElementById('modal-wrapper').checked = true">
                         + DMOJ
                     </button>
 
                     <!-- Quiz Creation -->
-                    <label for="modal-wrapper" class="btn btn-sm btn-outline"
+                    <label for="modal-wrapper" class="btn btn-sm bg-secondary text-secondary-content"
                         hx-get="{% url 'get-quiz-form' ct.id %}" hx-target="#modal-body" hx-swap="innerHTML">
                         + Quiz
                     </label>
@@ -47,20 +47,9 @@
         </div>
     </div>
 
-    <!-- Activity Deletion Button -->
+    <!-- Course Topic Deletion Button -->
     <div>
-        {% if user.profile.role == "teacher" %}
-        <form method="POST" hx-post="{% url 'delete-course-topic' ct.id %}"
-            hx-confirm="Are you sure you want to remove this topic from the unit?"
-            hx-target="#topic-list-{{ ct.unit.id }}" hx-swap="outerHTML">
-            <button type="submit" class="text-gray-400 hover:text-red-500" title="Remove Topic">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-4 h-4">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </form>
-        {% endif %}
+        {% include "base/components/course_topic_components/course_topic_delete_button.html" %}
     </div>
 
 </div>

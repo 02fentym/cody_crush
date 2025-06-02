@@ -8,7 +8,7 @@
         <label class="choice flex items-center gap-4 bg-base-200 px-4 py-3 rounded-lg cursor-pointer transition-colors">
             <input type="radio" name="q{{ question.id }}" value="a" class="hidden quiz-radio" required>
             <div
-                class="flex items-center justify-center w-8 h-8 rounded-full bg-neutral text-neutral-content text-sm font-bold">
+                class="flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-secondary-content text-sm font-bold">
                 A</div>
             <span class="text-sm">{{ question.choice_a|safe }}</span>
         </label>
@@ -17,7 +17,7 @@
         <label class="choice flex items-center gap-4 bg-base-200 px-4 py-3 rounded-lg cursor-pointer transition-colors">
             <input type="radio" name="q{{ question.id }}" value="b" class="hidden quiz-radio">
             <div
-                class="flex items-center justify-center w-8 h-8 rounded-full bg-neutral text-neutral-content text-sm font-bold">
+                class="flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-secondary-content text-sm font-bold">
                 B</div>
             <span class="text-sm">{{ question.choice_b|safe }}</span>
         </label>
@@ -26,7 +26,7 @@
         <label class="choice flex items-center gap-4 bg-base-200 px-4 py-3 rounded-lg cursor-pointer transition-colors">
             <input type="radio" name="q{{ question.id }}" value="c" class="hidden quiz-radio">
             <div
-                class="flex items-center justify-center w-8 h-8 rounded-full bg-neutral text-neutral-content text-sm font-bold">
+                class="flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-secondary-content text-sm font-bold">
                 C</div>
             <span class="text-sm">{{ question.choice_c|safe }}</span>
         </label>
@@ -35,7 +35,7 @@
         <label class="choice flex items-center gap-4 bg-base-200 px-4 py-3 rounded-lg cursor-pointer transition-colors">
             <input type="radio" name="q{{ question.id }}" value="d" class="hidden quiz-radio">
             <div
-                class="flex items-center justify-center w-8 h-8 rounded-full bg-neutral text-neutral-content text-sm font-bold">
+                class="flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-secondary-content text-sm font-bold">
                 D</div>
             <span class="text-sm">{{ question.choice_d|safe }}</span>
         </label>
@@ -49,13 +49,13 @@
                 const group = radio.closest(".space-y-2").querySelectorAll(".choice");
 
                 group.forEach((label) => {
-                    label.classList.remove("bg-primary", "text-primary-content");
+                    label.classList.remove("bg-secondary/70", "text-secondary-content");
                     label.classList.add("bg-base-200");
                 });
 
                 const selected = radio.closest(".choice");
                 selected.classList.remove("bg-base-200");
-                selected.classList.add("bg-primary", "text-primary-content");
+                selected.classList.add("bg-secondary/70", "text-secondary-content");
             });
         });
     });

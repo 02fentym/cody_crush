@@ -1,58 +1,57 @@
 {% if activity.content_type.model == "dmojexercise" %}
-
-<li>
-    <a class="list-row items-center gap-4 bg-base-200 rounded-lg px-4 py-3 hover:bg-base-300 transition" href="{{ activity.content_object.url }}" target="_blank">
+<li id="activity-{{ activity.id }}" class="flex items-center justify-between mb-4 bg-secondary/5 px-4 py-3 hover:bg-secondary/20 border border-secondary/20">
+  
+  <!-- Activity Content -->
+  <a class="flex items-center gap-4 flex-1" href="{{ activity.content_object.url }}" target="_blank">
     <!-- Icon -->
     <div>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="w-6 h-6 text-primary" fill="currentColor"
-            stroke="currentColor">
-            <path
-                d="M16 32.005c-0.634 0-1.231-0.246-1.68-0.693l-13.641-13.64c-0.923-0.927-0.923-2.436-0.002-3.361l4.997-4.996c0.308-0.309 0.782-0.382 1.17-0.179 0.386 0.202 0.598 0.632 0.522 1.062-0.051 0.286-0.074 0.515-0.074 0.723 0 2.188 1.78 4.005 3.969 4.005 2.191 0 3.79-1.817 3.79-4.005 0-2.191-1.599-3.971-3.79-3.971-0.205 0-0.433 0.024-0.719 0.074-0.434 0.080-0.86-0.135-1.062-0.521-0.202-0.388-0.129-0.862 0.179-1.17l4.659-4.66c0.902-0.898 2.463-0.896 3.361-0.002l3.411 3.413c0.712-2.213 2.79-3.82 5.235-3.82 3.032 0 5.499 2.468 5.499 5.501 0 2.446-1.605 4.523-3.82 5.234l3.314 3.312c0.925 0.928 0.925 2.436 0.001 3.363l-13.639 13.64c-0.451 0.45-1.047 0.696-1.681 0.696zM5.465 12.351l-3.372 3.371c-0.145 0.146-0.145 0.389 0.002 0.537l13.636 13.637c0.191 0.189 0.342 0.192 0.537-0.002l13.636-13.637c0.146-0.148 0.146-0.387-0.001-0.536l-4.809-4.806c-0.301-0.301-0.379-0.76-0.194-1.143s0.589-0.61 1.016-0.557l0.152 0.020c0.084 0.011 0.168 0.025 0.256 0.025 1.93 0 3.499-1.569 3.499-3.497 0-1.931-1.57-3.501-3.499-3.501s-3.498 1.571-3.498 3.501c0 0.080 0.012 0.158 0.023 0.236l0.021 0.178c0.045 0.422-0.18 0.826-0.563 1.009-0.38 0.181-0.838 0.104-1.137-0.196l-4.904-4.907c-0.192-0.19-0.342-0.192-0.537 0.002l-3.035 3.035c2.603 0.644 4.356 2.999 4.356 5.798 0 3.291-2.498 6.004-5.79 6.004-2.798-0-5.152-1.972-5.795-4.572z">
-            </path>
-        </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 1024 1024">
+        <path fill="currentColor" stroke="currentColor" stroke-width="0.5" class="text-base-content"
+              d="M512 1024.16c-20.288 0-39.378-7.87-53.746-22.19L21.742 565.474c-29.536-29.68-29.536-77.952-.065-107.568l159.904-159.872c9.873-9.872 25.025-12.224 37.44-5.743c12.369 6.464 19.12 20.223 16.69 33.967c-1.632 9.153-2.369 16.497-2.369 23.12c0 70 56.976 128.145 127.008 128.145c70.096 0 121.28-58.144 121.28-128.144c0-70.096-51.184-127.088-121.28-127.088c-6.56 0-13.87.751-23.023 2.368c-13.872 2.56-27.504-4.32-33.968-16.689c-6.464-12.4-4.128-27.568 5.744-37.44L458.191 21.41c28.88-28.752 78.816-28.688 107.567-.064L674.91 130.562C697.694 59.746 764.19 8.337 842.446 8.337c97.025 0 175.97 78.976 175.97 176.031c0 78.256-51.377 144.752-122.225 167.504l106.032 105.968c29.6 29.68 29.6 77.952.031 107.601l-436.448 436.464c-14.431 14.384-33.52 22.256-53.807 22.256zM174.895 395.218L66.99 503.09c-4.656 4.688-4.656 12.433.063 17.185l436.368 436.384c6.128 6.064 10.945 6.129 17.185-.064l436.352-436.384c4.689-4.72 4.689-12.4-.031-17.151L803.023 349.252c-9.632-9.632-12.128-24.32-6.193-36.56s18.848-19.505 32.528-17.84l4.88.623c2.688.369 5.377.817 8.193.817c61.744 0 111.968-50.193 111.968-111.904c0-61.777-50.224-112.032-111.968-112.032c-61.712 0-111.936 50.256-111.936 112.032c0 2.56.4 5.056.752 7.567l.688 5.712a32.003 32.003 0 0 1-18.03 32.288c-12.161 5.808-26.817 3.312-36.401-6.257L520.56 66.674c-6.128-6.064-10.944-6.129-17.185.064l-97.12 97.12c83.28 20.624 139.376 95.968 139.376 185.536c0 105.312-79.92 192.128-185.296 192.128c-89.536-.016-164.848-63.088-185.439-146.304z" />
+      </svg>
     </div>
 
     <!-- Title and Type -->
     <div>
-        <div class="text-xs uppercase font-semibold opacity-60">
-            DMOJ Exercise
-        </div>
-        <div class="font-semibold">
-                {{ activity.content_object.title|striptags }}
-        </div>
+      <div class="text-xs uppercase font-semibold opacity-60">DMOJ Exercise</div>
+      <div class="font-semibold">{{ activity.content_object.title|striptags }}</div>
     </div>
-    </a>
+  </a>
+
+  <!-- Delete Button -->
+  {% include "base/components/activity_components/delete_activity_form.html" %}
 </li>
 
 {% elif activity.content_type.model == "quiztemplate" %}
-
-<li>
-    <a href="{% url 'start-quiz' course.id activity.content_object.id %}" target="_blank" class="list-row items-center gap-4 bg-base-200 rounded-lg px-4 py-3 hover:bg-base-300 transition">
+{% with activity.content_object as quiz %}
+<li id="activity-{{ activity.id }}" class="flex items-center justify-between mb-4 bg-secondary/5 px-4 py-3 hover:bg-secondary/20 border border-secondary/20">
+  
+  <!-- Activity Content -->
+  <a class="flex items-center gap-4 flex-1" href="{% url 'start-quiz' course_id activity.id %}" target="_blank">
     <!-- Icon -->
     <div>
-        <svg viewBox="0 0 17 17" version="1.1" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary"
-            xmlns:xlink="http://www.w3.org/1999/xlink" stroke="currentColor">
-            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-            <g id="SVGRepo_iconCarrier">
-                <path
-                    d="M15.529 2.857l-1.403-1.404c-0.565-0.566-1.555-0.566-2.122 0l-9.057 9.058-1.722 5.288 5.248-1.765 9.055-9.056c0.586-0.584 0.586-1.536 0.001-2.121zM3.094 13.294l0.645-1.979 1.934 1.935-1.963 0.66-0.616-0.616zM4.355 10.518l5.493-5.493 2.111 2.11-5.494 5.494-2.11-2.111zM10.555 4.317l0.729-0.729 2.111 2.11-0.729 0.729-2.111-2.11zM14.822 4.271l-0.72 0.72-2.111-2.11 0.72-0.721c0.189-0.189 0.518-0.189 0.707 0l1.403 1.404c0.196 0.196 0.196 0.512 0.001 0.707z"
-                    fill="#000000"></path>
-            </g>
-        </svg>
-
+      <svg class="w-6 h-6 text-base-content" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+           width="24" height="24" fill="none" viewBox="0 0 24 24">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+              d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28" />
+      </svg>
     </div>
 
     <!-- Title and Type -->
     <div>
-        <div class="text-xs uppercase font-semibold opacity-60">
-            MC Quiz
-        </div>
-        <div class="font-semibold">
-            {{activity.content_object.question_count}} Questions
-        </div>
+      <div class="text-xs uppercase font-semibold opacity-60">
+        {% if quiz.question_type == "tracing" %}
+        Tracing Quiz
+        {% else %}
+        MC Quiz
+        {% endif %}
+      </div>
+      <div class="font-semibold">{{ quiz.question_count }} Questions</div>
     </div>
-    </a>
-</li>
+  </a>
 
+  <!-- Delete Button -->
+  {% include "base/components/activity_components/delete_activity_form.html" %}
+</li>
+{% endwith %}
 {% endif %}

@@ -1,27 +1,20 @@
-<!-- New Course Card -->
-<label for="add-course-modal" class="cursor-pointer block">
-  <div class="card card-sm card-border card-dash bg-base-100 w-96 shadow-sm hover:shadow-md">
-      <div class="card-body items-center text-center">
-          <div class="rounded-full bg-primary/20 p-1 inline-block mx-auto">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                  stroke="currentColor" class="w-8 h-8 text-primary">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-          </div>
-          <span class="card-title mt-2">Create New Course</span>
-      </div>
-  </div>
+<!-- Trigger Button -->
+<label for="add-course-modal" class="btn btn-primary">
+  <svg class="w-6 h-6 text-primary-content" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+    height="24" fill="none" viewBox="0 0 24 24">
+    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M5 12h14m-7 7V5" />
+  </svg>
+
+  Add Course
 </label>
 
-
-<!-- Modal for creating a new course -->
-<!-- This modal is triggered by the label above -->
-<!-- The modal is hidden by default and shown when the checkbox is checked -->
-<!-- The modal is closed when the checkbox is unchecked -->
+<!-- Modal Toggle -->
 <input type="checkbox" id="add-course-modal" class="modal-toggle" />
+
+<!-- Modal -->
 <dialog class="modal">
   <div class="modal-box">
-    <h3 class="font-bold text-lg mb-4">Create New Course</h3>
+    <h3 class="font-bold text-lg mb-4">New Course</h3>
 
     <form method="POST" class="space-y-4">
       {% csrf_token %}
@@ -31,7 +24,6 @@
       {{ course_form.language }}
       {{ course_form.enrollment_password }}
       {{ course_form.description }}
-
 
       <div class="modal-action">
         <button type="submit" class="btn btn-primary">Create</button>

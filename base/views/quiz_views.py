@@ -12,15 +12,26 @@ from base.models import (
     Answer, ActivityCompletion, CourseUnit, Course
 )
 
-
-# TEACHER VIEWS
+def get_all_courses(role, user):
+    if role == "student":
+        courses = user.enrolled_courses.all()
+    else:
+        courses = Course.objects.filter(teacher=user)
+    return courses
 
 # Quiz Addition
 @login_required
 @allowed_roles(["teacher"])
 def get_quiz_form(request, course_topic_id):
     course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
-    return render(request, "base/components/quiz_components/quiz_form.html", {"ct": course_topic})
+    course_unit = CourseUnit.objects.select_related("course").filter(unit=course_topic.unit).first()
+    course_id = course_unit.course.id if course_unit else None
+
+    return render(request, "base/components/quiz_components/quiz_form.html", {
+        "ct": course_topic,
+        "course_id": course_id
+    })
+
 
 @login_required
 @allowed_roles(["teacher"])
@@ -28,6 +39,8 @@ def submit_quiz_form(request, course_topic_id):
     course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
 
     if request.method == "POST":
+        course_id = request.POST.get("course_id")  # ⬅ move here
+
         question_count = int(request.POST.get("question_count"))
         question_type = request.POST.get("question_type")
 
@@ -37,7 +50,6 @@ def submit_quiz_form(request, course_topic_id):
             question_type=question_type,
         )
 
-        # Create the activity
         Activity.objects.create(
             course_topic=course_topic,
             order=course_topic.activities.count() + 1,
@@ -45,16 +57,16 @@ def submit_quiz_form(request, course_topic_id):
             object_id=quiz_template.id
         )
 
-        # Rerender the full topic list (with new activity) for that unit
         return render(request, "base/components/course_topic_components/course_topic_list.html", {
             "unit": course_topic.unit,
-            "course_topics": CourseTopic.objects.filter(unit=course_topic.unit)
+            "course_topics": CourseTopic.objects.filter(unit=course_topic.unit),
+            "course_id": course_id
         })
 
     return HttpResponse("<div class='text-error'>Failed to create quiz</div>")
 
 
-def create_quiz(request, course_topic_id):
+'''def create_quiz(request, course_topic_id):
     course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
     course_id = course_topic.unit.course.id
     
@@ -88,7 +100,7 @@ def create_quiz(request, course_topic_id):
 
     messages.success(request, "Quiz created successfully!")
 
-    return redirect("course", course_id=course_id)
+    return redirect("course", course_id=course_id)'''
 
 
 # STUDENT VIEWS
@@ -140,6 +152,7 @@ def take_quiz(request, quiz_id, activity_id):
     question_type = quiz.question_type
     course_topic = activity.course_topic
     quiz_questions = quiz.quiz_questions.all()  # this gives access to both question and bridge
+    courses = get_all_courses("student", request.user)
 
     if request.method == "POST":
         # Create the ActivityCompletion so we can link answers to it
@@ -197,7 +210,7 @@ def take_quiz(request, quiz_id, activity_id):
         return redirect("quiz-results", ac.id)
 
     # GET request → show the quiz
-    context = {"quiz": quiz, "questions": [qq.question for qq in quiz_questions], "ct": course_topic}
+    context = {"quiz": quiz, "questions": [qq.question for qq in quiz_questions], "ct": course_topic, "courses": courses}
     return render(request, "base/main/quiz.html", context)
 
 

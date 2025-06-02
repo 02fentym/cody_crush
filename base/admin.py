@@ -9,7 +9,7 @@ from .models import (
 
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
-    list_display = ('id',  'object_id','topic_title', 'activity_type', 'created')
+    list_display = ('id',  'object_id', 'order', 'topic_title', 'activity_type', 'created')
 
     def topic_title(self, obj):
         return obj.course_topic.topic.title
@@ -83,7 +83,7 @@ class ProfileAdmin(admin.ModelAdmin):
 
 @admin.register(QuizTemplate)
 class QuizTemplateAdmin(admin.ModelAdmin):
-    list_display = ('course_topic', 'question_type', 'question_count')
+    list_display = ('id', 'course_topic', 'question_type', 'question_count')
     search_fields = ('course_topic__title',)
     list_filter = ('question_type',)
 
