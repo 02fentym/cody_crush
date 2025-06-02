@@ -3,9 +3,14 @@
     <div class="flex-1">
         <div class="collapse collapse-arrow bg-base-200">
             <input type="checkbox" class="topic-toggle" id="topic-toggle-{{ topic.id }}" />
-            <div class="collapse-title font-medium flex justify-between items-center gap-4">
+
+            <div class="collapse-title flex justify-start items-center gap-4">
+                <div class="flex items-center justify-center bg-base-100 text-primary-content font-normal text-md rounded-md"
+                    style="width: 2.5rem; height: 2.5rem;">
+                    {{ ct.order }}
+                </div>
                 <div class="flex flex-col">
-                    <span class="text-base font-semibold">{{ topic.title }}</span>
+                    <span class="text-base font-normal">{{ topic.title }}</span>
                 </div>
             </div>
 
@@ -28,8 +33,8 @@
                 <div class="flex justify-center gap-2 p-4">
 
                     <!-- DMOJ Exercise Creation -->
-                    <button class="btn btn-sm bg-secondary text-secondary-content" hx-get="{% url 'get-dmoj-form' ct.id %}"
-                        hx-target="#modal-body" hx-swap="innerHTML"
+                    <button class="btn btn-sm bg-secondary text-secondary-content"
+                        hx-get="{% url 'get-dmoj-form' ct.id %}" hx-target="#modal-body" hx-swap="innerHTML"
                         onclick="document.getElementById('modal-wrapper').checked = true">
                         + DMOJ
                     </button>

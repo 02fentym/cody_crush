@@ -28,25 +28,24 @@
     <form style="display:none;">
         {% csrf_token %}
     </form>
-    <div class="flex-1 flex flex-col">
-        {% include "navbar.html" %}
+    
+    {% include "navbar.html" %}
 
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <div class="alert {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
+    <!-- Sidebar + Scrollable Main Content -->
+    <div class="flex flex-1 overflow-hidden bg-base-300">
+        {% include "sidebar.html" %}
 
-        <div class="flex flex-1 bg-base-300">
-            {% include "sidebar.html" %}
+        <main class="flex-1 overflow-y-auto p-6">
+            {% if messages %}
+            <div class="messages mb-4">
+                {% for message in messages %}
+                <div class="alert {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
 
-            <main class="flex-1 p-6 max-w-5xl mx-auto">
-                {% block content %}
-                {% endblock %}
-            </main>
-        </div>
+            {% block content %}{% endblock %}
+        </main>
     </div>
 
     <!-- 📚 Toast UI Scripts -->
