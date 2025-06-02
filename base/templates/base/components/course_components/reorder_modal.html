@@ -1,0 +1,78 @@
+<h2 class="text-xl font-bold mb-4">Reorder Content</h2>
+
+<ul class="space-y-1 font-mono text-sm" id="reorder-menu">
+  {% for cu in course_units %}
+    <li class="pl-0" data-type="unit" data-id="{{ cu.id }}">
+      ▪ Unit: {{ cu.unit.title }}
+    </li>
+
+    {% for ct in cu.unit.coursetopic_set.all|dictsort:"order" %}
+      <li class="pl-6" data-type="topic" data-id="{{ ct.id }}">
+        └─ Topic: {{ ct.topic.title }}
+      </li>
+
+      {% for activity in ct.activities.all|dictsort:"order" %}
+        <li class="pl-12" data-type="activity" data-id="{{ activity.id }}">
+          &nbsp;&nbsp;&nbsp;&nbsp;↳ {{ activity.content_object }}
+        </li>
+      {% endfor %}
+    {% endfor %}
+  {% endfor %}
+</ul>
+<p class="mt-4 text-sm text-base-content/70">Select an item and use ↑ ↓ keys to reorder it.</p>
+
+<div class="mt-6 text-right">
+  <label for="modal-wrapper" class="btn btn-sm btn-primary">Done</label>
+</div>
+
+<script>
+function initReorderModal() {
+  let selected = null;
+
+  document.querySelectorAll("#reorder-menu li").forEach(item => {
+    item.tabIndex = 0;
+    item.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (selected) selected.classList.remove("bg-primary", "text-primary-content");
+      selected = item;
+      selected.classList.add("bg-primary", "text-primary-content");
+    });
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (!selected) return;
+
+    const type = selected.dataset.type;
+    const id = selected.dataset.id;
+
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      const direction = e.key === "ArrowUp" ? "up" : "down";
+
+      fetch(`/reorder/${type}/${id}/${direction}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+        }
+      })
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("modal-body").innerHTML = html;
+        initReorderModal(); // re-attach handlers
+
+        // Optional: close modal after reorder
+        // document.getElementById("modal-wrapper").checked = false;
+      });
+    }
+  }, { once: true }); // prevent multiple keydown listeners
+}
+
+// Re-init JS after HTMX swap in modal
+document.body.addEventListener("htmx:afterSwap", (e) => {
+  if (e.detail.target.id === "modal-body") {
+    initReorderModal();
+  }
+});
+
+// First-time init
+initReorderModal();
+</script>

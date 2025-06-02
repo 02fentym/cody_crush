@@ -2,8 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponseBadRequest
 
-from base.models import Course, CourseUnit, CourseTopic
+from base.models import Course, CourseUnit, CourseTopic, Activity
 from base.forms import EnrollmentPasswordForm
 from base.decorators import allowed_roles
 
@@ -75,3 +77,83 @@ def enrol_in_course(request):
                 return render(request, "base/components/course_components/course_card.html", {"course": course})
             return HttpResponse("<div class='text-error'>Invalid course password.</div>")
     return HttpResponse("<div class='text-error'>Submission failed.</div>")
+
+@login_required
+@allowed_roles(["teacher"])
+def reorder_modal(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    course_units = CourseUnit.objects.filter(course=course).select_related("unit").order_by("order")
+    return render(request, "base/components/course_components/reorder_modal.html", {
+        "course": course,
+        "course_units": course_units,
+    })
+
+
+@login_required
+@allowed_roles(["teacher"])
+@csrf_exempt
+def reorder_item(request, type, id, direction):
+    if request.method != "POST":
+        return HttpResponseBadRequest("Invalid method")
+
+    model_map = {
+        "unit": CourseUnit,
+        "topic": CourseTopic,
+        "activity": Activity,
+    }
+
+    model = model_map.get(type)
+    if not model:
+        return HttpResponseBadRequest("Invalid type")
+
+    obj = get_object_or_404(model, id=id)
+
+    # Determine siblings (scope of order)
+    if type == "unit":
+        siblings = list(CourseUnit.objects.filter(course=obj.course).order_by("order", "id"))
+    elif type == "topic":
+        siblings = list(CourseTopic.objects.filter(unit=obj.unit).order_by("order", "id"))
+    else:  # activity
+        siblings = list(Activity.objects.filter(course_topic=obj.course_topic).order_by("order", "id"))
+
+    index = siblings.index(obj)
+    target_index = index + (-1 if direction == "up" else 1)
+
+    if 0 <= target_index < len(siblings):
+        other = siblings[target_index]
+
+        # Use large temp value to avoid unique collision
+        TEMP = 999999
+
+        original_order = obj.order
+        target_order = other.order
+
+        obj.order = TEMP
+        obj.save()
+
+        other.order = original_order
+        other.save()
+
+        obj.order = target_order
+        obj.save()
+
+    # Return updated modal
+    if type == "unit":
+        course_id = obj.course.id
+    elif type == "topic":
+        course_unit = CourseUnit.objects.get(unit=obj.unit)
+        course_id = course_unit.course.id
+    else:  # activity
+        unit = obj.course_topic.unit
+        course_unit = CourseUnit.objects.get(unit=unit)
+        course_id = course_unit.course.id
+
+
+    course = get_object_or_404(Course, id=course_id)
+    course_units = CourseUnit.objects.filter(course=course).select_related("unit").order_by("order")
+
+    return render(request, "base/components/course_components/reorder_modal.html", {
+        "course": course,
+        "course_units": course_units,
+    })
+

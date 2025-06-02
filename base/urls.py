@@ -16,7 +16,6 @@ urlpatterns = [
     path("course/<int:course_id>/get-course-unit-form/", views.get_course_unit_form, name="get-course-unit-form"),
     path("submit-course-unit-form/", views.submit_course_unit_form, name="submit-course-unit-form"),
     path("delete-course-unit/<int:course_unit_id>/", views.delete_course_unit, name="delete-course-unit"),
-    path("course/<int:course_id>/reorder/", views.reorder_modal, name="reorder-modal"),
 
 
 ### URLS for course_views.py
@@ -26,6 +25,8 @@ urlpatterns = [
 
     # Courses
     path("course/<int:course_id>/delete/", views.delete_course, name="delete-course"),
+    path("course/<int:course_id>/reorder/", views.reorder_modal, name="reorder-modal"),
+    path("reorder/<str:type>/<int:id>/<str:direction>/", views.reorder_item, name="reorder-item"),
 
 
 ### URLS for dmoj_views.py
