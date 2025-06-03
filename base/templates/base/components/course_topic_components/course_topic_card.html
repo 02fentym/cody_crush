@@ -5,8 +5,8 @@
             <input type="checkbox" class="topic-toggle" id="topic-toggle-{{ topic.id }}" />
 
             <div class="collapse-title flex justify-start items-center gap-4">
-                <div class="flex items-center justify-center bg-base-100 text-primary-content font-normal text-md rounded-md"
-                    style="width: 2.5rem; height: 2.5rem;">
+                <div class="flex items-center justify-center border border-b-info text-info font-normal text-md rounded-full"
+                    style="width: 2.0rem; height: 2.0rem;">
                     {{ ct.order }}
                 </div>
                 <div class="flex flex-col">
@@ -30,17 +30,17 @@
                 <!-- Add Activities -->
                 {% if user.profile.role == "teacher" %}
                 {% if topic.id %}
-                <div class="flex justify-center gap-2 p-4">
+                <div class="flex justify-center gap-2 p-2">
 
                     <!-- DMOJ Exercise Creation -->
-                    <button class="btn btn-sm bg-secondary text-secondary-content"
+                    <button class="btn btn-outline btn-secondary btn-secondary-text btn-sm"
                         hx-get="{% url 'get-dmoj-form' ct.id %}" hx-target="#modal-body" hx-swap="innerHTML"
                         onclick="document.getElementById('modal-wrapper').checked = true">
                         + DMOJ
                     </button>
 
                     <!-- Quiz Creation -->
-                    <label for="modal-wrapper" class="btn btn-sm bg-secondary text-secondary-content"
+                    <label for="modal-wrapper" class="btn btn-outline btn-secondary btn-secondary-text btn-sm"
                         hx-get="{% url 'get-quiz-form' ct.id %}" hx-target="#modal-body" hx-swap="innerHTML">
                         + Quiz
                     </label>

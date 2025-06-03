@@ -3,17 +3,20 @@
 {% block content %}
 
 <div class="max-w-5xl mx-auto px-2">
+    <div class="flex justify-between pr-8">
+        <h1 class="text-base-content">{{ course.title }}</h1>
 
-    <h1>{{ course.title }}</h1>
-
-    {% if user.profile.role == "teacher" %}
-    <div class="flex justify-start mb-4">
-        <button class="btn btn-secondary btn-sm" hx-get="{% url 'reorder-modal' course.id %}" hx-target="#modal-body"
-            hx-swap="innerHTML" onclick="document.getElementById('modal-wrapper').checked = true">
-            Reorder Content
-        </button>
+        <!-- Reorder Content Button -->
+        {% if user.profile.role == "teacher" %}
+        <div class="flex justify-start">
+            <button class="btn btn-secondary btn-soft btn-sm" hx-get="{% url 'reorder-modal' course.id %}"
+                hx-target="#modal-body" hx-swap="innerHTML"
+                onclick="document.getElementById('modal-wrapper').checked = true">
+                Reorder Content
+            </button>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
 
     <!-- Course Unit Cards -->
     <div id="unit-list">
@@ -24,7 +27,7 @@
     {% if user.profile.role == "teacher" %}
     <div class="flex justify-center">
         <button hx-get="{% url 'get-course-unit-form' course.id %}" hx-target="#modal-body" hx-swap="innerHTML"
-            onclick="document.getElementById('modal-wrapper').checked = true" class="btn btn-primary btn-lg px-6">
+            onclick="document.getElementById('modal-wrapper').checked = true" class="btn btn-outline btn-primary btn-primary-text btn-lg px-6">
             + Unit
         </button>
     </div>
