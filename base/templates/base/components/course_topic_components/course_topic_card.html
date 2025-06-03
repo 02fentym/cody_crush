@@ -33,17 +33,19 @@
                 <div class="flex justify-center gap-2 p-2">
 
                     <!-- DMOJ Exercise Creation -->
-                    <button class="btn btn-outline btn-secondary btn-secondary-text btn-sm"
-                        hx-get="{% url 'get-dmoj-form' ct.id %}" hx-target="#modal-body" hx-swap="innerHTML"
+                    <button class="btn btn-outline btn-secondary btn-sm" hx-get="{% url 'get-dmoj-form' ct.id %}"
+                        hx-target="#modal-body" hx-swap="innerHTML"
                         onclick="document.getElementById('modal-wrapper').checked = true">
                         + DMOJ
                     </button>
 
                     <!-- Quiz Creation -->
-                    <label for="modal-wrapper" class="btn btn-outline btn-secondary btn-secondary-text btn-sm"
-                        hx-get="{% url 'get-quiz-form' ct.id %}" hx-target="#modal-body" hx-swap="innerHTML">
+                    <button class="btn btn-outline btn-secondary btn-sm" hx-get="{% url 'get-quiz-form' ct.id %}"
+                        hx-target="#modal-body" hx-swap="innerHTML"
+                        onclick="document.getElementById('modal-wrapper').checked = true">
                         + Quiz
-                    </label>
+                    </button>
+
 
                 </div>
                 {% endif %}

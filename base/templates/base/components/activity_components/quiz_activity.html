@@ -2,22 +2,27 @@
 <li id="activity-{{ activity.id }}"
     class="flex items-center justify-between mb-4 px-4 py-3 bg-base-100 rounded-md hover:bg-info/5">
     <a class="flex items-center gap-4 flex-1" href="{% url 'start-quiz' course_id activity.id %}" target="_blank">
+
         {% if user.profile.role == "teacher" %}
-        <div class="flex items-center justify-center bg-secondary/50 text-secondary-content font-normal text-sm rounded-full"
+        <div class="flex items-center justify-center bg-accent text-accent-content font-normal text-sm rounded-full"
             style="width: 1.5rem; height: 1.5rem;">
             {{ activity.order }}
         </div>
         {% endif %}
-        <div class="badge badge-accent gap-2">
-            <svg class="size-[1em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                    d="M10.779 17.779...z" />
+
+        <!-- Badge -->
+        <div class="badge badge-accent flex items-center gap-1">
+            <svg class="w-5 h-5 text-accent-content" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165
+            3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28" />
             </svg>
             <span class="text-xs font-semibold uppercase">
                 {% if quiz.question_type == "tracing" %}Tracing Quiz{% else %}MC Quiz{% endif %}
             </span>
         </div>
-        <div>
+
+        <!-- Title -->
+        <div class="truncate">
             <div class="font-semibold">{{ quiz.question_count }} Questions</div>
         </div>
     </a>

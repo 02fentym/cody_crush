@@ -1,6 +1,4 @@
-<form method="POST" hx-post="{% url 'submit-dmoj-form' ct.id %}" hx-target="#topic-list-{{ ct.unit.id }}"
-    hx-swap="outerHTML" hx-on="htmx:afterRequest: document.getElementById('modal-wrapper').checked = false">
-
+<form method="POST" action="{% url 'submit-dmoj-form' ct.id %}">
     {% csrf_token %}
     <h3 class="font-bold text-lg mb-4">Add DMOJ Exercise</h3>
 
@@ -10,6 +8,7 @@
 
     <div class="modal-action">
         <button type="submit" class="btn btn-primary">Add</button>
+        <!-- Optional: Just closes the modal, or consider replacing with redirect logic if modal isn't used -->
         <label for="modal-wrapper" class="btn">Cancel</label>
     </div>
 </form>

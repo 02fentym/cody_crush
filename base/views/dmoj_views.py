@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
 
 from base.decorators import allowed_roles
-from base.models import CourseTopic, DmojExercise, Activity, ActivityCompletion
+from base.models import CourseTopic, DmojExercise, Activity, ActivityCompletion, CourseUnit
 from base.forms import DmojForm
 from base.utils import fetch_dmoj_metadata_from_url, fetch_dmoj_user_data
 
@@ -16,9 +16,14 @@ from base.utils import fetch_dmoj_metadata_from_url, fetch_dmoj_user_data
 
 # DMOJ Exercise Addition
 def get_dmoj_form(request, course_topic_id):
-    course_topic = CourseTopic.objects.get(id=course_topic_id)
+    course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
     form = DmojForm()
-    return render(request, "base/components/activity_components/dmoj_form.html", {"form": form, "ct": course_topic})
+    return render(request, "base/components/activity_components/dmoj_form.html", {
+        "form": form,
+        "ct": course_topic,
+        "course": CourseUnit.objects.get(unit=course_topic.unit).course  # for breadcrumbs or nav
+    })
+
 
 
 @login_required(login_url="login")
@@ -70,7 +75,9 @@ def submit_dmoj_form(request, course_topic_id):
         )
 
         messages.success(request, "DMOJ exercise created successfully!")
-        return render(request, "base/components/course_topic_components/course_topic_list.html", {"unit": course_topic.unit})
+        course_unit = CourseUnit.objects.get(unit=course_topic.unit)
+        return redirect("course", course_id=course_unit.course.id)
+
 
     # If form is invalid, re-render the modal with errors
     return render(request, "base/components/activity_components/dmoj_form.html", {"form": form, "ct": course_topic})
