@@ -1,20 +1,11 @@
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from django.contrib import messages
-from django.db.models import Max
-from django.contrib.contenttypes.models import ContentType
 
 from base.decorators import allowed_roles
 from base.models import (
-    Course, CourseUnit, Unit, Topic, Activity,
-    DmojExercise
+    Activity, CourseUnit
 )
-from base.forms import (
-    CourseUnitForm, TopicForm, DmojForm
-)
-from base.utils import fetch_dmoj_metadata_from_url
 
 
 # Activity Deletion
@@ -23,6 +14,20 @@ from base.utils import fetch_dmoj_metadata_from_url
 @require_POST
 def delete_activity(request, activity_id):
     activity = get_object_or_404(Activity, id=activity_id)
+    course_topic = activity.course_topic
     activity.delete()
-    return HttpResponse("")  # HTMX will just remove the element
+    reorder_activities(course_topic)
 
+    course = CourseUnit.objects.get(unit=course_topic.unit).course
+    course_id = course.id
+    return redirect("course", course_id=course_id)
+
+
+
+# Activity Reordering after deletion event
+def reorder_activities(course_topic):
+    activities = Activity.objects.filter(course_topic=course_topic).order_by("order", "id")
+    for i, activity in enumerate(activities, start=1):
+        if activity.order != i:
+            activity.order = i
+            activity.save()

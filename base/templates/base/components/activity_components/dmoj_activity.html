@@ -1,0 +1,22 @@
+<li id="activity-{{ activity.id }}"
+    class="flex items-center justify-between mb-4 px-4 py-3 bg-base-100 rounded-md hover:bg-info/5">
+    <a class="flex items-center gap-4 flex-1" href="{{ activity.content_object.url }}" target="_blank">
+        {% if user.profile.role == "teacher" %}
+        <div class="flex items-center justify-center bg-secondary/50 text-secondary-content font-normal text-sm rounded-full"
+            style="width: 1.5rem; height: 1.5rem;">
+            {{ activity.order }}
+        </div>
+        {% endif %}
+        <div class="badge badge-primary">
+            <svg class="size-[1em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+                <path fill="currentColor" stroke="currentColor" stroke-width="0.5" d="M512 1024.16c-20.288...z" />
+            </svg>
+            DMOJ Exercise
+        </div>
+        <div>
+            <div class="font-semibold">{{ activity.content_object.title|striptags }}</div>
+        </div>
+    </a>
+
+    {% include "base/components/activity_components/delete_activity_form.html" %}
+</li>

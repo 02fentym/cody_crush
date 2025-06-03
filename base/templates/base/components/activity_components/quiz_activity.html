@@ -1,0 +1,27 @@
+{% with quiz=activity.content_object %}
+<li id="activity-{{ activity.id }}"
+    class="flex items-center justify-between mb-4 px-4 py-3 bg-base-100 rounded-md hover:bg-info/5">
+    <a class="flex items-center gap-4 flex-1" href="{% url 'start-quiz' course_id activity.id %}" target="_blank">
+        {% if user.profile.role == "teacher" %}
+        <div class="flex items-center justify-center bg-secondary/50 text-secondary-content font-normal text-sm rounded-full"
+            style="width: 1.5rem; height: 1.5rem;">
+            {{ activity.order }}
+        </div>
+        {% endif %}
+        <div class="badge badge-accent gap-2">
+            <svg class="size-[1em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                    d="M10.779 17.779...z" />
+            </svg>
+            <span class="text-xs font-semibold uppercase">
+                {% if quiz.question_type == "tracing" %}Tracing Quiz{% else %}MC Quiz{% endif %}
+            </span>
+        </div>
+        <div>
+            <div class="font-semibold">{{ quiz.question_count }} Questions</div>
+        </div>
+    </a>
+
+    {% include "base/components/activity_components/delete_activity_form.html" %}
+</li>
+{% endwith %}

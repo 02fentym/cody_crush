@@ -16,10 +16,10 @@
 
             <!-- Activities -->
             <div class="collapse-content">
-                <div class="">
+                <div>
                     <ul class="list">
                         {% for activity in ct.activities.all %}
-                        {% include "base/components/activity_components/activity_block.html" with activity=activity course_id=course_id %}
+                        {% include "base/components/activity_components/activity_block.html" with activity=activity course_topic=ct course_id=course_id %}
                         {% endfor %}
                     </ul>
                     {% if ct.activities.count == 0 %}

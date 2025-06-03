@@ -2434,6 +2434,10 @@
     width: var(--size);
     height: var(--size);
   }
+  .size-4 {
+    width: calc(var(--spacing) * 4);
+    height: calc(var(--spacing) * 4);
+  }
   .size-\[1em\] {
     width: 1em;
     height: 1em;
