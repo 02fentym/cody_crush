@@ -97,16 +97,16 @@
 <script>
     const details = document.getElementById('question-bank-toggle');
 
-    // Set initial state from localStorage
-    const isOpen = localStorage.getItem('question-bank-open');
-    if (isOpen === 'true') {
-        details.setAttribute('open', '');
-    } else {
-        details.removeAttribute('open');
-    }
+    if (details) {
+        const isOpen = localStorage.getItem('question-bank-open');
+        if (isOpen === 'true') {
+            details.setAttribute('open', '');
+        } else {
+            details.removeAttribute('open');
+        }
 
-    // Store state on toggle
-    details.addEventListener('toggle', () => {
-        localStorage.setItem('question-bank-open', details.open);
-    });
+        details.addEventListener('toggle', () => {
+            localStorage.setItem('question-bank-open', details.open);
+        });
+    }
 </script>

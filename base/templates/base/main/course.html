@@ -41,11 +41,12 @@
     {% if user.profile.role == "teacher" %}
     <div class="flex justify-center">
         <button hx-get="{% url 'get-course-unit-form' course.id %}" hx-target="#modal-body" hx-swap="innerHTML"
-            onclick="document.getElementById('modal-wrapper').checked = true" class="btn btn-outline btn-info btn-info-text btn-lg px-6">
+            onclick="document.getElementById('modal-wrapper').checked = true"
+            class="btn btn-outline btn-info btn-info-text btn-lg px-6">
             + Unit
         </button>
     </div>
     {% endif %}
 
-    {% endblock %}
 </div>
+{% endblock %}
