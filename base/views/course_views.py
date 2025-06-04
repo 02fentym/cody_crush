@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponseBadRequest
 
-from base.models import Course, CourseUnit, CourseTopic, Activity
+from base.models import Course, CourseUnit, CourseTopic, Activity, ActivityCompletion
 from base.forms import EnrollmentPasswordForm
 from base.decorators import allowed_roles
 
@@ -39,8 +39,18 @@ def course(request, course_id):
                 password_form.save()
                 messages.success(request, "Enrollment password updated!")
                 return redirect("course", course_id=course_id)
+    
+    completed_activities = set()
+    if user.profile.role == "student":
+        completed_activities = set(ActivityCompletion.objects
+            .filter(student=user, completed=True)
+            .values_list("activity_id", flat=True))
 
-    context = {"courses": courses, "course": course, "course_units": course_units, "password_form": password_form, "course_id": course_id}
+        # 🔁 Convert to list of ints
+        completed_activities = list(map(int, completed_activities))
+    print(f"Completed IDs: {completed_activities}")
+
+    context = {"courses": courses, "course": course, "course_units": course_units, "password_form": password_form, "course_id": course_id, "completed_activities": completed_activities}
     return render(request, "base/main/course.html", context)
 
 # Helper function

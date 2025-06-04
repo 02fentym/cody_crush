@@ -3,10 +3,12 @@
 {% block content %}
 
 <div class="max-w-5xl mx-auto px-2">
-    <div class="flex justify-between pr-8">
+    <div class="flex justify-between">
+
+        <!-- Course Title -->
         <h1 class="text-base-content">{{ course.title }}</h1>
 
-        <!-- Reorder Content Button -->
+        <!-- Reorder Content Button (only for teachers)-->
         {% if user.profile.role == "teacher" %}
         <div class="flex justify-start">
             <button class="btn btn-secondary btn-soft btn-sm" hx-get="{% url 'reorder-modal' course.id %}"
@@ -16,6 +18,18 @@
             </button>
         </div>
         {% endif %}
+
+        <!-- Refresh DMOJ Progress Button (only for students) -->
+        {% if user.profile.role == "student" %}
+        <form method="POST" action="{% url 'refresh-dmoj-progress' course.id %}">
+            {% csrf_token %}
+            <button class="btn btn-accent btn-sm btn-outline ml-4">
+                Refresh DMOJ Progress
+            </button>
+        </form>
+        {% endif %}
+
+
     </div>
 
     <!-- Course Unit Cards -->

@@ -6,9 +6,10 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib.contenttypes.models import ContentType
+from django.utils.timezone import now
 
 from base.decorators import allowed_roles
-from base.models import CourseTopic, DmojExercise, Activity, ActivityCompletion, CourseUnit
+from base.models import CourseTopic, DmojExercise, Activity, ActivityCompletion, CourseUnit, Course
 from base.forms import DmojForm
 from base.utils import fetch_dmoj_metadata_from_url, fetch_dmoj_user_data
 
@@ -23,7 +24,6 @@ def get_dmoj_form(request, course_topic_id):
         "ct": course_topic,
         "course": CourseUnit.objects.get(unit=course_topic.unit).course  # for breadcrumbs or nav
     })
-
 
 
 @login_required(login_url="login")
@@ -83,41 +83,39 @@ def submit_dmoj_form(request, course_topic_id):
     return render(request, "base/components/activity_components/dmoj_form.html", {"form": form, "ct": course_topic})
 
 
-def update_dmoj_exercises(request, course_topic_id):
-    course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
-    profile = request.user.profile
-    now = timezone.now()
-    cooldown_minutes = 2
+@login_required
+@require_POST
+def refresh_dmoj_progress(request, course_id):
+    course = get_object_or_404(Course, id=course_id, students=request.user)
+    username = request.user.profile.dmoj_username  # assumes you store it here
 
-    # Check if cooldown period has passed
-    if now - profile.last_dmoj_update < timedelta(minutes=cooldown_minutes):
-        wait_time = cooldown_minutes - (now - profile.last_dmoj_update).seconds // 60
-        messages.error(request, f"Please wait {wait_time} more minutes before refreshing again.")
-        return redirect("topic", course_id=course_topic.unit.course.id, unit_id=course_topic.unit.id, topic_id=course_topic_id)
-    
+    solved_problems = fetch_dmoj_user_data(username)
+    if not solved_problems:
+        # optional: message user something went wrong
+        return redirect("course", course_id=course_id)
 
-    # Fetch DMOJ user solved problems (list of problem codes)
-    solved_problems = fetch_dmoj_user_data(request.user.profile.dmoj_username)
+    # 1. Get Unit IDs in this course
+    unit_ids = CourseUnit.objects.filter(course=course).values_list("unit_id", flat=True)
 
-    # Fetch ALL DMOJ exercise activities across the system
-    dmojexercise_type = ContentType.objects.get_for_model(DmojExercise)
-    activities = Activity.objects.filter(content_type=dmojexercise_type)
+    # 2. Get CourseTopics linked to those units
+    topic_ids = CourseTopic.objects.filter(unit_id__in=unit_ids).values_list("id", flat=True)
+
+    # 3. Get DMOJ Activities from those topics
+    activities = Activity.objects.filter(
+        course_topic_id__in=topic_ids,
+        content_type__model="dmojexercise"
+    ).select_related("course_topic", "content_type")
+
 
     for activity in activities:
-        dmoj_exercise = activity.content_object
-        if dmoj_exercise.problem_code in solved_problems:
+        if activity.content_object.problem_code in solved_problems:
+            ActivityCompletion.objects.update_or_create(
+                student=request.user,
+                activity=activity,
+                defaults={
+                    "completed": True,
+                    "date_completed": now(),
+                }
+            )
 
-            completion = ActivityCompletion.objects.filter(student=request.user, activity=activity, completed=True).first()
-
-            if not completion:
-                ActivityCompletion.objects.update_or_create(
-                    student=request.user,
-                    activity=activity,
-                    defaults={'completed': True, 'date_completed': now}
-                )
-
-    profile.last_dmoj_update = now
-    profile.save()
-
-    messages.success(request, "DMOJ exercises successfully refreshed!")
-    return redirect("topic", course_id=course_topic.unit.course.id, unit_id=course_topic.unit.id, topic_id=course_topic_id)
+    return redirect("course", course_id=course_id)

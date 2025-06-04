@@ -27,6 +27,10 @@
         </div>
     </a>
 
-    {% include "base/components/activity_components/delete_activity_form.html" %}
+    <!-- Delete Activity (teacher only)-->
+    {% if user.profile.role == "teacher" %}
+        {% include "base/components/activity_components/delete_activity_form.html" %}
+    {% endif %}
+    
 </li>
 {% endwith %}

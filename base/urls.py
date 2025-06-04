@@ -106,7 +106,6 @@ urlpatterns = [
     path("lessons/<lesson_id>/view/", views.view_lesson, name="view-lesson"),
 
     # dmoj exercise views
-    path("topic/<topic_id>/update_dmoj/", views.update_dmoj_exercises, name="update-dmoj-exercises"),
-
+    path("course/<int:course_id>/refresh_dmoj/", views.refresh_dmoj_progress, name="refresh-dmoj-progress"),
     
 ]
