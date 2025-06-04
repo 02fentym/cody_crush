@@ -23,10 +23,12 @@
         {% if user.profile.role == "student" %}
         <form method="POST" action="{% url 'refresh-dmoj-progress' course.id %}">
             {% csrf_token %}
-            <button class="btn btn-accent btn-sm btn-outline ml-4">
+            <span id="dmoj-cooldown-msg" class="text-xs text-warning ml-2"></span>
+            <button id="refresh-dmoj-btn" class="btn btn-accent btn-sm btn-outline ml-4">
                 Refresh DMOJ Progress
             </button>
         </form>
+
         {% endif %}
 
 

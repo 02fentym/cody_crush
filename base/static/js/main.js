@@ -1,3 +1,5 @@
+console.log("main.js is running");
+
 // This function toggles the display of a form and clears its inputs when hidden
 function toggleForm(id) {
     const formDiv = document.getElementById(id);
@@ -116,3 +118,51 @@ function initDeleteCheckboxHandlers(tableId) {
 
     updateDeleteButton();
 }
+
+
+// DMOJ Cooldown --> course.html
+
+function initDmojCooldown() {
+    console.log("initDmojCooldown running");
+
+    const btn = document.getElementById("refresh-dmoj-btn");
+    const msg = document.getElementById("dmoj-cooldown-msg");
+    const form = btn?.closest("form");
+    if (!btn || !msg || !form) {
+        console.log("DMOJ elements not found");
+        return;
+    }
+
+    const cooldownSeconds = 300;
+    const key = "dmoj-refresh-timestamp";
+
+    function updateCooldown() {
+        const lastClick = parseInt(localStorage.getItem(key)) || 0;
+        const now = Date.now();
+        const diff = Math.floor((now - lastClick) / 1000);
+        const remaining = cooldownSeconds - diff;
+
+        if (remaining > 0) {
+            const min = Math.floor(remaining / 60);
+            const sec = remaining % 60;
+            btn.disabled = true;
+            msg.textContent = `Try again in ${min}m ${sec}s`;
+        } else {
+            btn.disabled = false;
+            msg.textContent = "";
+        }
+    }
+
+    setInterval(updateCooldown, 1000);
+    updateCooldown();
+
+    // Save timestamp before form actually submits
+    form.addEventListener("submit", () => {
+        localStorage.setItem(key, Date.now().toString());
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    initDmojCooldown();
+});
+
