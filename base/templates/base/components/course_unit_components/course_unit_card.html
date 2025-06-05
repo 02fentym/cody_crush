@@ -27,12 +27,12 @@
 
             </div>
 
+            {% if user.profile.role == "student" %}
             <div class="flex flex-col">
-                {% if user.profile.role == "student" %}
                 <span class="text-3xl text-accent">{{ cu.percent_complete }}%</span>
                 <p class="text-xs text-accent/70 font-extralight">Completed</p>
-                {% endif %}
             </div>
+            {% endif %}
 
         </div>
 

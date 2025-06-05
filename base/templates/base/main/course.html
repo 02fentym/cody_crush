@@ -11,7 +11,7 @@
         <!-- Reorder Content Button (only for teachers)-->
         {% if user.profile.role == "teacher" %}
         <div class="flex justify-start">
-            <button class="btn btn-secondary btn-soft btn-sm" hx-get="{% url 'reorder-modal' course.id %}"
+            <button class="btn btn-secondary btn-outline btn-sm mr-8" hx-get="{% url 'reorder-modal' course.id %}"
                 hx-target="#modal-body" hx-swap="innerHTML"
                 onclick="document.getElementById('modal-wrapper').checked = true">
                 Reorder Content
