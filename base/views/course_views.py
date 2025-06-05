@@ -55,6 +55,12 @@ def course(request, course_id):
         for ct in cu.unit.course_topics:
             ct.progress = topic_progress.get(ct.id, (0, 0))
 
+    # Attach per-unit progress directly to each CourseUnit object
+    for cu in course_units:
+        completed, total = unit_progress.get(cu.id, (0, 0))
+        cu.percent_complete = round((completed / total) * 100) if total > 0 else 0
+
+
     context = {
         "courses": courses,
         "course": course,

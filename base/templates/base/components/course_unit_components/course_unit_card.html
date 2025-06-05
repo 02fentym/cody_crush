@@ -7,10 +7,11 @@
     </style>
 
     <!-- Unit Card -->
-    <div class="collapse collapse-arrow border border-base-100 bg-base-100 unit-collapse mb-6" id="unit-{{ unit.unit.id }}">
+    <div class="collapse collapse-arrow border border-base-100 bg-base-100 unit-collapse mb-6"
+        id="unit-{{ unit.unit.id }}">
         <input type="checkbox" class="unit-toggle" id="unit-toggle-{{ unit.unit.id }}" />
         <div class="collapse-title font-medium flex justify-between items-center gap-4 pt-6">
-            <div class="flex items-center gap-4">
+            <div class="flex flex-row justify-between items-center gap-4">
 
                 <!-- Circle icon for Unit number -->
                 <div class="flex items-center justify-center border border-info text-info font-bold text-lg rounded-lg"
@@ -21,14 +22,18 @@
                 <!-- Unit title and description -->
                 <div class="flex flex-col">
                     <h3>{{ unit.unit.title }}</h3>
-                    <span class="text-sm text-base-content/70">{{ unit.unit.description|truncatechars:200 }}</span>
-                    {% if user.profile.role == "student" %}
-                    <span class="text-sm text-base-content/70">Progress: {{ unit.progress }}%</span>
-                    {% endif %}
+                    <span class="text-sm text-base-content/70 font-extralight">{{ unit.unit.description|truncatechars:200 }}</span>
                 </div>
-                
+
             </div>
-            
+
+            <div class="flex flex-col">
+                {% if user.profile.role == "student" %}
+                <span class="text-3xl text-accent">{{ cu.percent_complete }}%</span>
+                <p class="text-xs text-accent/70 font-extralight">Completed</p>
+                {% endif %}
+            </div>
+
         </div>
 
         <!-- Topic Cards + Add Topic Button -->
