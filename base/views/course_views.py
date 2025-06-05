@@ -48,9 +48,23 @@ def course(request, course_id):
 
         # 🔁 Convert to list of ints
         completed_activities = list(map(int, completed_activities))
-    print(f"Completed IDs: {completed_activities}")
+    
+    topic_progress, unit_progress = get_progress_maps(user, course_units)
+    # Attach per-topic progress directly to each CourseTopic object
+    for cu in course_units:
+        for ct in cu.unit.course_topics:
+            ct.progress = topic_progress.get(ct.id, (0, 0))
 
-    context = {"courses": courses, "course": course, "course_units": course_units, "password_form": password_form, "course_id": course_id, "completed_activities": completed_activities}
+    context = {
+        "courses": courses,
+        "course": course,
+        "course_units": course_units,
+        "password_form": password_form,
+        "course_id": course_id,
+        "completed_activities": completed_activities,
+        "topic_progress": topic_progress,
+        "unit_progress": unit_progress
+    }
     return render(request, "base/main/course.html", context)
 
 # Helper function
@@ -167,3 +181,30 @@ def reorder_item(request, type, id, direction):
         "course_units": course_units,
     })
 
+
+# Helper function - get progress of each CourseUnit and CourseTopic
+def get_progress_maps(student, course_units):
+    completed_ids = set(ActivityCompletion.objects
+        .filter(student=student, completed=True)
+        .values_list("activity_id", flat=True))
+
+    topic_progress = {}
+    unit_progress = {}
+
+    for cu in course_units:
+        unit_total = 0
+        unit_completed = 0
+
+        for ct in cu.unit.course_topics:
+            activities = ct.activities.all()
+            total = activities.count()
+            completed = sum(1 for a in activities if a.id in completed_ids)
+
+            topic_progress[ct.id] = (completed, total)
+
+            unit_total += total
+            unit_completed += completed
+
+        unit_progress[cu.id] = (unit_completed, unit_total)
+
+    return topic_progress, unit_progress

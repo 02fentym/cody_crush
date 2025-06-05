@@ -142,6 +142,8 @@ class Quiz(models.Model):
     ]
 
     student = models.ForeignKey(User, on_delete=models.CASCADE)
+    activity = models.ForeignKey("Activity", on_delete=models.CASCADE)
+    activity_completion = models.OneToOneField("ActivityCompletion", on_delete=models.SET_NULL, null=True, blank=True)
     course_topic = models.ForeignKey(CourseTopic, on_delete=models.CASCADE)
     grade = models.FloatField(null=True, blank=True)
     question_type = models.CharField(max_length=30, choices=QUESTION_TYPE_CHOICES)

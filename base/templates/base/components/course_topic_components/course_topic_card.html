@@ -4,13 +4,27 @@
         <div class="collapse collapse-arrow bg-base-200">
             <input type="checkbox" class="topic-toggle" id="topic-toggle-{{ topic.id }}" />
 
-            <div class="collapse-title flex justify-start items-center gap-4">
-                <div class="flex items-center justify-center border border-b-info text-info font-normal text-md rounded-full"
-                    style="width: 2.0rem; height: 2.0rem;">
-                    {{ ct.order }}
+            <div class="collapse-title flex flex-row justify-between items-center">
+
+                <div class="flex justify-start items-center gap-4">
+                    <!-- Order -->
+                    <div class="flex items-center justify-center border border-b-info text-info font-normal text-md rounded-full"
+                        style="width: 2.0rem; height: 2.0rem;">
+                        {{ ct.order }}
+                    </div>
+
+                    <!-- Topic Title -->
+                    <div class="flex flex-row justify-evenly items-center">
+                        <span class="text-base font-normal">{{ topic.title }}</span>
+                    </div>
                 </div>
-                <div class="flex flex-col">
-                    <span class="text-base font-normal">{{ topic.title }}</span>
+
+                <!-- Progress -->
+                <div class="flex flex-col items-end gap-y-2">
+                    <progress class="progress progress-secondary h-2 w-48" value="{{ ct.progress.0 }}" max="{{ ct.progress.1 }}"></progress>
+                    <div class="text-xs text-base-content/60">
+                        {{ ct.progress.0 }} / {{ ct.progress.1 }} completed
+                    </div>
                 </div>
             </div>
 

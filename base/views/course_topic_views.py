@@ -9,6 +9,7 @@ from base.models import Unit, CourseTopic, CourseUnit
 from base.forms import CourseTopicForm
 
 
+
 @login_required
 @allowed_roles(["teacher"])
 def get_course_topic_form(request, unit_id):

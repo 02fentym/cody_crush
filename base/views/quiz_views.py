@@ -66,50 +66,24 @@ def submit_quiz_form(request, course_topic_id):
     return HttpResponse("<div class='text-error'>Failed to create quiz</div>")
 
 
-'''def create_quiz(request, course_topic_id):
-    course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
-    course_id = course_topic.unit.course.id
-    
-    question_count = int(request.POST.get("question_count", 5)) # Default to 5 if not provided
-    question_type = request.POST.get("question_type")
 
-    # Check if there are enough questions available for selected type
-    QUESTION_TYPE_MAP = {
-        "multiple_choice": MultipleChoiceQuestion,
-        "tracing": TracingQuestion,
-    }
-    question_model = QUESTION_TYPE_MAP.get(question_type)
-    available_count = question_model.objects.filter(topic=course_topic.topic).count()
-    if available_count < question_count:
-        messages.error(request, f"Only {available_count} questions available for this topic.")
-        return redirect("course", course_id=course_id)
-
-    
-    quiz_template = QuizTemplate.objects.create(
-        course_topic=course_topic,
-        question_count=question_count,
-        question_type=question_type
-    )
-
-    Activity.objects.create(
-        course_topic=course_topic,
-        order=course_topic.activities.count() + 1,
-        content_type=ContentType.objects.get_for_model(quiz_template),
-        object_id=quiz_template.id
-    )
-
-    messages.success(request, "Quiz created successfully!")
-
-    return redirect("course", course_id=course_id)'''
-
-
-# STUDENT VIEWS
 @allowed_roles(["student"])
 @login_required(login_url="login")
 def start_quiz(request, course_id, activity_id):
     activity = get_object_or_404(Activity, id=activity_id)
     course_topic = activity.course_topic
     template = activity.content_object
+
+    # Check if the student has already completed this quiz
+    existing_completion = ActivityCompletion.objects.filter(
+        student=request.user,
+        activity=activity,
+        completed=True
+    ).first()
+
+    if existing_completion:
+        return redirect("quiz-results", existing_completion.id)
+
 
     # Determine the question model
     if template.question_type == "multiple_choice":
@@ -129,6 +103,7 @@ def start_quiz(request, course_id, activity_id):
     # Create Quiz
     quiz = Quiz.objects.create(
         student=request.user,
+        activity=activity,
         course_topic=course_topic,
         question_type=template.question_type
     )
@@ -165,6 +140,8 @@ def take_quiz(request, quiz_id, activity_id):
             attempt_number=previous_attempts + 1,
             date_completed=timezone.now()
         )
+        quiz.activity_completion = ac
+        quiz.save()
 
         correct_count = 0
         total = quiz_questions.count()

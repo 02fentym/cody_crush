@@ -1,5 +1,5 @@
 {% if activity.content_type.model == "dmojexercise" %}
-  {% include "base/components/activity_components/dmoj_activity.html" with activity=activity course_topic=course_topic course_id=course_id completed_activities=completed_activities %}
+  {% include "base/components/activity_components/dmoj_activity.html" with activity=activity course_topic=course_topic course_id=course_id %}
 {% elif activity.content_type.model == "quiztemplate" %}
-  {% include "base/components/activity_components/quiz_activity.html" with activity=activity course_topic=course_topic course_id=course_id completed_activities=completed_activities %}
+  {% include "base/components/activity_components/quiz_activity.html" with activity=activity course_topic=course_topic course_id=course_id %}
 {% endif %}
