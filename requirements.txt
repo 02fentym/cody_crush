@@ -9,7 +9,7 @@ click==8.1.8
 cloup==3.0.7
 Cython==3.0.12
 decorator==5.2.1
-Django==4.2.20
+Django>=5.2.2
 django-markdownify==0.9.5
 future @ file:///AppleInternal/Library/BuildRoots/bcce998f-ff34-11ef-9d34-f2a857e00a32/Library/Caches/com.apple.xbs/Sources/python3/future-0.18.2-py3-none-any.whl
 glcontext==3.0.0
