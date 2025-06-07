@@ -1,24 +1,29 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en"> <!-- Set DaisyUI theme here-->
+<html lang="en">
 
 <head>
+    <!-- Set valid themes here -->
+    <script>
+        window.VALID_LIGHT_THEMES = ["light", "lofi", "wireframe", "cmyk"];
+        window.VALID_DARK_THEMES = ["dark", "halloween", "forest", "black", "dracula", "business"];
+    </script>
+
+
     <!-- Set DaisyUI theme here -->
     <script>
-        const validThemes = [
-            "light", "lofi", "wireframe", "cmyk",
-            "dark", "halloween", "forest", "black", "dracula", "business"
-        ];
+        const validThemes = [...window.VALID_LIGHT_THEMES, ...window.VALID_DARK_THEMES];
+        console.log("Valid themes:", validThemes);
 
         let theme = localStorage.getItem("theme");
 
         if (!theme || !validThemes.includes(theme)) {
             theme = "{{ request.user.profile.theme|default:'light' }}";
             if (validThemes.includes(theme)) {
-                localStorage.setItem("theme", theme);
+            localStorage.setItem("theme", theme);
             } else {
-                theme = "light";
-                localStorage.setItem("theme", "light");
+            theme = "light";
+            localStorage.setItem("theme", "light");
             }
         }
 
@@ -26,9 +31,11 @@
     </script>
 
 
+
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cody Crush</title>
+    <title>CodeX</title>
 
     <!-- Highlight.js CSS (kept your theme) -->
     <link rel="stylesheet"

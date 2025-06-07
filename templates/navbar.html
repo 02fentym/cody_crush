@@ -16,23 +16,8 @@
     <!-- Theme Selector Dropdown -->
     <select id="theme-select" class="select select-bordered select-sm w-40">
       <option disabled value="">Select Theme</option>
-
-      <optgroup label="Light Themes">
-        <option value="light">Light</option>
-        <option value="lofi">Lofi</option>
-        <option value="wireframe">Wireframe</option>
-        <option value="cmyk">CMYK</option>
-      </optgroup>
-
-      <optgroup label="Dark Themes">
-        <option value="dark">Dark</option>
-        <option value="halloween">Halloween</option>
-        <option value="forest">Forest</option>
-        <option value="black">Black</option>
-        <option value="dracula">Dracula</option>
-        <option value="business">Business</option>
-      </optgroup>
     </select>
+
 
 
 
@@ -66,6 +51,13 @@
   const html = document.documentElement;
   const select = document.getElementById("theme-select");
 
+  function isValidTheme(theme) {
+    return (
+      window.VALID_LIGHT_THEMES.includes(theme) ||
+      window.VALID_DARK_THEMES.includes(theme)
+    );
+  }
+
   function setTheme(theme) {
     if (!theme || theme === "auto") {
       theme = "light";
@@ -73,9 +65,11 @@
 
     html.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
-    if (select) select.value = theme;
 
-    // Save to server
+    if (select && theme && select.value !== theme) {
+      select.value = theme;
+    }
+
     fetch("/update-theme/", {
       method: "POST",
       headers: {
@@ -86,23 +80,37 @@
     });
   }
 
-  const validThemes = [
-    "light", "lofi", "wireframe", "cmyk",
-    "dark", "halloween", "forest", "black", "dracula", "business"
-  ];
-
-  const saved = localStorage.getItem("theme");
-  if (validThemes.includes(saved)) {
-    setTheme(saved);
-  } else if (!saved || saved === "") {
-    const fallback = "{{ request.user.profile.theme|default:'light' }}";
-    setTheme(fallback);
-  } else {
-    setTheme("light");
+  // Populate the dropdown
+  function addOptions(label, options) {
+    const group = document.createElement("optgroup");
+    group.label = label;
+    options.forEach(theme => {
+      const option = document.createElement("option");
+      option.value = theme;
+      option.textContent = capitalize(theme);
+      group.appendChild(option);
+    });
+    select.appendChild(group);
   }
 
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
 
   if (select) {
+    addOptions("Light Themes", window.VALID_LIGHT_THEMES);
+    addOptions("Dark Themes", window.VALID_DARK_THEMES);
+
+    const saved = localStorage.getItem("theme");
+    if (isValidTheme(saved)) {
+      setTheme(saved);
+    } else if (!saved || saved === "") {
+      const fallback = "{{ request.user.profile.theme|default:'light' }}";
+      setTheme(fallback);
+    } else {
+      setTheme("light");
+    }
+
     select.addEventListener("change", () => {
       setTheme(select.value);
     });
