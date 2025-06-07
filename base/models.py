@@ -9,6 +9,7 @@ from django.utils import timezone
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=10, choices=[('student', 'Student'), ('teacher', 'Teacher')])
+    theme = models.CharField(max_length=20, default="light")
     dmoj_username = models.CharField(max_length=100, blank=True, null=True)
     last_dmoj_update = models.DateTimeField(default=timezone.now)
 

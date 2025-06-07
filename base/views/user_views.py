@@ -3,6 +3,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from base.models import Profile
 from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+
 
 from base.forms import UserForm  # or wherever your form is
 
@@ -54,3 +58,15 @@ def register_user(request):
 def logout_user(request):
     logout(request)
     return redirect("login")
+
+
+@require_POST
+@login_required
+def update_theme(request):
+    new_theme = request.POST.get("theme")
+    if new_theme:
+        profile = request.user.profile
+        profile.theme = new_theme
+        profile.save()
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "error", "message": "No theme provided"}, status=400)

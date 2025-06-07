@@ -14,6 +14,9 @@ from base.models import (
 @require_POST
 def delete_activity(request, activity_id):
     activity = get_object_or_404(Activity, id=activity_id)
+    content_object = activity.content_object
+    if content_object:
+        content_object.delete()
     course_topic = activity.course_topic
     activity.delete()
     reorder_activities(course_topic)
@@ -21,6 +24,7 @@ def delete_activity(request, activity_id):
     course = CourseUnit.objects.get(unit=course_topic.unit).course
     course_id = course.id
     return redirect("course", course_id=course_id)
+
 
 
 

@@ -1,11 +1,31 @@
 {% load static %}
-<!DOCTYPE html data-theme="light">
+<!DOCTYPE html>
 <html lang="en"> <!-- Set DaisyUI theme here-->
 
 <head>
+    <!-- Set DaisyUI theme here -->
     <script>
-        document.documentElement.setAttribute("data-theme", localStorage.getItem("theme") || "light");
+        const validThemes = [
+            "light", "lofi", "wireframe", "cmyk",
+            "dark", "halloween", "forest", "black", "dracula", "business"
+        ];
+
+        let theme = localStorage.getItem("theme");
+
+        if (!theme || !validThemes.includes(theme)) {
+            theme = "{{ request.user.profile.theme|default:'light' }}";
+            if (validThemes.includes(theme)) {
+                localStorage.setItem("theme", theme);
+            } else {
+                theme = "light";
+                localStorage.setItem("theme", "light");
+            }
+        }
+
+        document.documentElement.setAttribute("data-theme", theme);
     </script>
+
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cody Crush</title>
