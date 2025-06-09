@@ -179,9 +179,9 @@ def take_quiz(request, quiz_id, activity_id):
         quiz.grade = round(grade, 2)
         quiz.save()
 
-        # Update the activity_completion to mark it complete + save the score
+        weighted_score = (grade / 100) * activity.weight  # ← scale to weight
         ac.completed = True
-        ac.score = quiz.grade
+        ac.score = round(weighted_score, 2)
         ac.save()
 
         return redirect("quiz-results", ac.id)

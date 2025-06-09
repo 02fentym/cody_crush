@@ -106,14 +106,19 @@ def refresh_dmoj_progress(request, course_id):
         content_type__model="dmojexercise"
     ).select_related("course_topic", "content_type")
 
-
     for activity in activities:
-        if activity.content_object.problem_code in solved_problems:
+        exercise = activity.content_object
+        if exercise is None:
+            print(f"[WARN] Activity {activity.id} has no content_object")
+            continue
+
+        if exercise.problem_code in solved_problems:
             ActivityCompletion.objects.update_or_create(
                 student=request.user,
                 activity=activity,
                 defaults={
                     "completed": True,
+                    "score": 10,
                     "date_completed": now(),
                 }
             )

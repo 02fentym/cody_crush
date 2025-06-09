@@ -9,7 +9,7 @@ from .models import (
 
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
-    list_display = ('id',  'object_id', 'order', 'topic_title', 'activity_type', 'created')
+    list_display = ('id',  'object_id', 'order', 'topic_title', 'activity_type', 'weight', 'created')
 
     def topic_title(self, obj):
         return obj.course_topic.topic.title
@@ -22,7 +22,7 @@ class ActivityAdmin(admin.ModelAdmin):
 
 @admin.register(ActivityCompletion)
 class ActivityCompletionAdmin(admin.ModelAdmin):
-    list_display = ('student', 'activity', 'activity_type', 'completed', 'date_completed')
+    list_display = ('student', 'activity', 'activity_type', 'activity__weight', 'score','completed', 'date_completed')
     list_filter = ('completed', 'date_completed')
     search_fields = ('student__username', 'activity__id')
 

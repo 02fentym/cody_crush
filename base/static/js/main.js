@@ -121,10 +121,7 @@ function initDeleteCheckboxHandlers(tableId) {
 
 
 // DMOJ Cooldown --> course.html
-
 function initDmojCooldown() {
-    console.log("initDmojCooldown running");
-
     const btn = document.getElementById("refresh-dmoj-btn");
     const msg = document.getElementById("dmoj-cooldown-msg");
     const form = btn?.closest("form");
@@ -133,7 +130,7 @@ function initDmojCooldown() {
         return;
     }
 
-    const cooldownSeconds = 300;
+    const cooldownSeconds = 30;
     const key = "dmoj-refresh-timestamp";
 
     function updateCooldown() {

@@ -41,6 +41,11 @@ urlpatterns = [
 ### URLS for lesson_views.py
 
 
+### URLS for progress_views.py
+    path("course/<int:course_id>/progress/", views.progress, name="progress"),
+
+
+
 ### URLS for quiz_views.py
     # Creation
     path("topic/<int:course_topic_id>/quiz-form/", views.get_quiz_form, name="get-quiz-form"),

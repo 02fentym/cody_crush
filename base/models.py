@@ -215,6 +215,7 @@ class QuizTemplate(models.Model):
 
 class Activity(models.Model):
     course_topic = models.ForeignKey("CourseTopic", on_delete=models.CASCADE, related_name="activities")
+    weight = models.PositiveIntegerField(null=True, blank=True)
     order = models.PositiveIntegerField(default=1)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -231,6 +232,25 @@ class Activity(models.Model):
         allowed_models = ["lesson", "quiztemplate", "dmojexercise"]
         if self.content_type.model not in allowed_models:
             raise ValidationError("Unknown activity type.")
+    
+    def save(self, *args, **kwargs):
+        if self.weight is None:
+            model = self.content_type.model
+
+            if model == "quiztemplate":
+                template = self.content_object
+                if template.question_type == "multiple_choice":
+                    self.weight = 50
+                elif template.question_type == "tracing":
+                    self.weight = 100
+
+            elif model == "dmojexercise":
+                self.weight = 5
+
+            else:
+                self.weight = 10  # Fallback default
+        super().save(*args, **kwargs)
+
 
     def __str__(self):
         return f"{self.course_topic.topic.title} - {self.content_object.__class__.__name__}"
@@ -256,3 +276,16 @@ class DmojExercise(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.problem_code})"
+    
+
+class StudentCourseEnrollment(models.Model):
+    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    overall_grade = models.FloatField(null=True, blank=True)
+    date_enrolled = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("student", "course")
+
+    def __str__(self):
+        return f"{self.student.username} enrolled in {self.course}"
