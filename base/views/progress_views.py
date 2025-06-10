@@ -41,6 +41,7 @@ def progress(request, course_id):
             "score": ac.score if ac else None,
             "date_completed": localtime(ac.date_completed).strftime("%Y-%m-%d %H:%M") if ac and ac.date_completed else None,
         })
+        print(f"Activity: {activity}")
 
     context = {
         "courses": courses,
@@ -73,11 +74,6 @@ def get_course_progress(student, course):
             earned_val = ac.score  # DMOJ, raw marks out of activity.weight
 
         earned += min(earned_val, ac.activity.weight)
-
-        print(
-            f"Activity: {ac.activity}, Type: {model}, "
-            f"Weight: {ac.activity.weight}, Score: {ac.score}, Value: {earned_val}"
-        )
 
     total = sum(a.weight for a in all_activities)
     percent = round((earned / total) * 100, 1) if total > 0 else 0
