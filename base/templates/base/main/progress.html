@@ -1,14 +1,56 @@
 {% extends "main.html" %}
-
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">{{ course.title }} Progress</h1>
 
-<div class="p-4 bg-base-200 rounded-md">
-    <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold">Overall Grade</h2>
-        <span class="text-sm text-base-content/60">{{ percent }}%</span>
-    </div>
-    <progress class="progress progress-accent w-full h-3 mt-2" value="{{ percent }}" max="100"></progress>
+<div class="p-6 space-y-6">
+  <!-- Course Title and Progress -->
+  <div>
+    <h1 class="text-3xl font-bold">{{ course.title }} Progress</h1>
+    <p class="text-4xl font-semibold text-primary mt-2">{{ percent }}%</p>
+  </div>
+
+  <!-- Activity Completion Table -->
+  <div class="overflow-x-auto">
+    <table class="table table-zebra w-full">
+      <thead>
+        <tr>
+          <th>Activity</th>
+          <th>Unit</th>
+          <th>Topic</th>
+          <th>Type</th>
+          <th>Weight</th>
+          <th>Status</th>
+          <th>Score</th>
+          <th>Date Completed</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in activity_rows %}
+        <tr>
+          <td>{{ row.activity }}</td>
+          <td>{{ row.course_unit.unit.title }}</td>
+          <td>{{ row.course_topic }}</td>
+          <td>{{ row.type|title }}</td>
+          <td>{{ row.weight }}</td>
+          <td>
+            {% if row.completed %}
+              <span class="text-success">✓</span>
+            {% else %}
+              <span class="text-error">✗</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if row.score != None %}
+              {{ row.score|floatformat:1 }}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td>{{ row.date_completed|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 
 {% endblock %}

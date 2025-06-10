@@ -1,8 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 from base.decorators import allowed_roles
-from base.models import Activity, ActivityCompletion
+from base.models import Activity, ActivityCompletion, CourseUnit
+from django.utils.timezone import localtime
 
+
+@login_required
+@allowed_roles(["student"])
 @login_required
 @allowed_roles(["student"])
 def progress(request, course_id):
@@ -12,13 +16,41 @@ def progress(request, course_id):
 
     percent = get_course_progress(student, course)
 
+    activities = (
+        Activity.objects
+        .filter(course_topic__unit__courseunit__course=course)
+        .select_related("course_topic__unit", "course_topic__topic", "content_type")
+        .order_by("course_topic__order", "order")
+    )
+
+    completions = {
+        ac.activity_id: ac
+        for ac in ActivityCompletion.objects.filter(student=student, activity__in=activities)
+    }
+
+    activity_rows = []
+    for activity in activities:
+        ac = completions.get(activity.id)
+        activity_rows.append({
+            "activity": activity,
+            "course_unit": activity.course_topic.unit.title,
+            "course_topic": activity.course_topic.topic.title,
+            "type": activity.content_type.model,
+            "weight": activity.weight,
+            "completed": ac.completed if ac else False,
+            "score": ac.score if ac else None,
+            "date_completed": localtime(ac.date_completed).strftime("%Y-%m-%d %H:%M") if ac and ac.date_completed else None,
+        })
+
     context = {
         "courses": courses,
         "course": course,
-        "percent": percent
+        "percent": percent,
+        "activity_rows": activity_rows,
     }
 
     return render(request, "base/main/progress.html", context)
+
 
 def get_course_progress(student, course):
     all_activities = Activity.objects.filter(
