@@ -32,8 +32,12 @@ urlpatterns = [
 ### URLS for dmoj_views.py
     path("get-dmoj-form/<int:course_topic_id>/", views.get_dmoj_form, name="get-dmoj-form"),
     path("submit-dmoj-form/<int:course_topic_id>/", views.submit_dmoj_form, name="submit-dmoj-form"),
+    path("activity/<int:activity_id>/edit-dmoj/", views.edit_dmoj_form, name="edit-dmoj-form"),
+    path("exercise/<int:exercise_id>/update/", views.update_dmoj, name="update-dmoj"),
 
-    ### URLS for home_views.py
+
+
+### URLS for home_views.py
     path("", views.home, name="home"),
     path("course/<int:course_id>/", views.course, name="course"),
 

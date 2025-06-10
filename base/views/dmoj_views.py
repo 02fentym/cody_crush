@@ -84,6 +84,53 @@ def submit_dmoj_form(request, course_topic_id):
 
 
 @login_required
+@allowed_roles(["teacher"])
+def edit_dmoj_form(request, activity_id):
+    activity = get_object_or_404(Activity, id=activity_id)
+    exercise = activity.content_object
+    course_topic = activity.course_topic
+
+    form = DmojForm(initial={"url": exercise.url})
+
+    return render(request, "base/components/activity_components/dmoj_form.html", {
+        "form": form,
+        "ct": course_topic,
+        "exercise_id": exercise.id,
+        "edit_mode": True
+    })
+
+@login_required
+@allowed_roles(["teacher"])
+@require_POST
+def update_dmoj(request, exercise_id):
+    exercise = get_object_or_404(DmojExercise, id=exercise_id)
+    form = DmojForm(request.POST)
+
+    if form.is_valid():
+        new_url = form.cleaned_data["url"]
+        metadata = fetch_dmoj_metadata_from_url(new_url)
+        if not metadata:
+            messages.error(request, "Invalid URL or failed to fetch metadata.")
+        else:
+            exercise.url = new_url
+            exercise.title = metadata["title"]
+            exercise.problem_code = metadata["problem_code"]
+            exercise.points = metadata["points"]
+            exercise.save()
+            messages.success(request, "DMOJ exercise updated.")
+
+    activity = Activity.objects.get(
+        content_type=ContentType.objects.get_for_model(DmojExercise),
+        object_id=exercise.id
+    )
+    course_unit = CourseUnit.objects.get(unit=activity.course_topic.unit)
+    course = course_unit.course
+
+    return redirect("course", course_id=course.id)
+
+
+
+@login_required
 @require_POST
 def refresh_dmoj_progress(request, course_id):
     course = get_object_or_404(Course, id=course_id, students=request.user)

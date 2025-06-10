@@ -1,51 +1,59 @@
 <li id="activity-{{ activity.id }}"
     class="flex items-center justify-between mb-4 px-4 py-3 bg-base-100 rounded-md hover:bg-info/5">
+
+    {% if user.profile.role == "student" %}
     <a class="flex items-center gap-4 flex-1" href="{{ activity.content_object.url }}" target="_blank">
-        {% if user.profile.role == "teacher" %}
-        <div class="flex items-center justify-center bg-primary text-primary-content font-normal text-sm rounded-full"
-            style="width: 1.5rem; height: 1.5rem;">
-            {{ activity.order }}
-        </div>
-        {% endif %}
+        {% else %}
+        <button class="flex items-center gap-4 flex-1 text-left" hx-get="{% url 'edit-dmoj-form' activity.id %}"
+            hx-target="#modal-body" hx-swap="innerHTML"
+            onclick="document.getElementById('modal-wrapper').checked = true">
+            {% endif %}
 
-        <!-- Badge -->
-        <div class="badge badge-primary">
-            <svg class="w-6 h-6 text-primary-content" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                aria-hidden="true">
-                <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1">
-                    <path
-                        d="M7.4 7H4.6a.6.6 0 0 0-.6.6v8.8a.6.6 0 0 0 .6.6h2.8a.6.6 0 0 0 .6-.6V7.6a.6.6 0 0 0-.6-.6Zm12 0h-2.8a.6.6 0 0 0-.6.6v8.8a.6.6 0 0 0 .6.6h2.8a.6.6 0 0 0 .6-.6V7.6a.6.6 0 0 0-.6-.6Z" />
-                    <path
-                        d="M1 14.4V9.6a.6.6 0 0 1 .6-.6h1.8a.6.6 0 0 1 .6.6v4.8a.6.6 0 0 1-.6.6H1.6a.6.6 0 0 1-.6-.6Zm22 0V9.6a.6.6 0 0 0-.6-.6h-1.8a.6.6 0 0 0-.6.6v4.8a.6.6 0 0 0 .6.6h1.8a.6.6 0 0 0 .6-.6ZM8 12h8" />
-                </g>
-            </svg>
-            DMOJ Exercise
-        </div>
+            {% if user.profile.role == "teacher" %}
+            <div class="flex items-center justify-center bg-primary text-primary-content font-normal text-sm rounded-full"
+                style="width: 1.5rem; height: 1.5rem;">
+                {{ activity.order }}
+            </div>
+            {% endif %}
 
-        <!-- Title -->
-        <div>
-            <div class="font-semibold">{{ activity.content_object.title|striptags }}</div>
-        </div>
+            <!-- Badge -->
+            <div class="badge badge-primary">
+                <svg class="w-6 h-6 text-primary-content" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24" aria-hidden="true">
+                    <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1">
+                        <path
+                            d="M7.4 7H4.6a.6.6 0 0 0-.6.6v8.8a.6.6 0 0 0 .6.6h2.8a.6.6 0 0 0 .6-.6V7.6a.6.6 0 0 0-.6-.6Zm12 0h-2.8a.6.6 0 0 0-.6.6v8.8a.6.6 0 0 0 .6.6h2.8a.6.6 0 0 0 .6-.6V7.6a.6.6 0 0 0-.6-.6Z" />
+                        <path
+                            d="M1 14.4V9.6a.6.6 0 0 1 .6-.6h1.8a.6.6 0 0 1 .6.6v4.8a.6.6 0 0 1-.6.6H1.6a.6.6 0 0 1-.6-.6Zm22 0V9.6a.6.6 0 0 0-.6-.6h-1.8a.6.6 0 0 0-.6.6v4.8a.6.6 0 0 0 .6.6h1.8a.6.6 0 0 0 .6-.6ZM8 12h8" />
+                    </g>
+                </svg>
+                DMOJ Exercise
+            </div>
+
+            <!-- Title -->
+            <div>
+                <div class="font-semibold">{{ activity.content_object.title|striptags }}</div>
+            </div>
 
     </a>
 
     <!-- Completed -->
     {% if activity.id in completed_activities %}
-        {% if user.profile.role == "student" %}
-        <div>
-            <svg class="w-5 h-5 text-success" xmlns="http://www.w3.org/2000/svg" fill="none"
-                viewBox="0 0 24 24" aria-hidden="true">
-                <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1">
-                    <rect width="18" height="18" x="3" y="3" rx="4"/>
-                    <path d="m9 12l2.25 2L15 10"/>
-                </g>
-            </svg>
-        </div>
-        {% endif %}
+    {% if user.profile.role == "student" %}
+    <div>
+        <svg class="w-5 h-5 text-success" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            aria-hidden="true">
+            <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1">
+                <rect width="18" height="18" x="3" y="3" rx="4" />
+                <path d="m9 12l2.25 2L15 10" />
+            </g>
+        </svg>
+    </div>
+    {% endif %}
     {% endif %}
 
     <!-- Delete Activity (teacher only)-->
     {% if user.profile.role == "teacher" %}
-        {% include "base/components/activity_components/delete_activity_form.html" %}
+    {% include "base/components/activity_components/delete_activity_form.html" %}
     {% endif %}
 </li>
