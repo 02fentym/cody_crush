@@ -36,18 +36,19 @@ urlpatterns = [
     path("exercise/<int:exercise_id>/update/", views.update_dmoj, name="update-dmoj"),
 
 
-
 ### URLS for home_views.py
     path("", views.home, name="home"),
     path("course/<int:course_id>/", views.course, name="course"),
 
 
 ### URLS for lesson_views.py
+    path("topic/<course_topic_id>/lesson/create/", views.create_lesson, name="create-lesson"),
+    path("topic/<int:course_topic_id>/lesson/<int:lesson_id>/edit/", views.edit_lesson, name="edit-lesson"),
+    path("lessons/<lesson_id>/view/", views.view_lesson, name="view-lesson"),
 
 
 ### URLS for progress_views.py
     path("course/<int:course_id>/progress/", views.progress, name="progress"),
-
 
 
 ### URLS for quiz_views.py
@@ -107,12 +108,7 @@ urlpatterns = [
     
 
     # quiz views
-    #path("topic/<int:topic_id>/create-quiz/", views.create_quiz, name="create-quiz"),
-
-    # lesson views
-    path("topic/<topic_id>/lesson/create/", views.create_lesson, name="create-lesson"),
-    path("topic/<topic_id>/lesson/<int:lesson_id>/edit/", views.edit_lesson, name="edit-lesson"),
-    path("lessons/<lesson_id>/view/", views.view_lesson, name="view-lesson"),
+    #path("topic/<int:topic_id>/create-quiz/", views.create_quiz, name="create-quiz"),    
 
     # dmoj exercise views
     path("course/<int:course_id>/refresh_dmoj/", views.refresh_dmoj_progress, name="refresh-dmoj-progress"),

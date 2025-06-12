@@ -48,3 +48,57 @@ progress {
   width: 100%;
   height: 1rem;
 }
+
+
+
+/* TOAST UI Editor Light Theme Styles (always applied) */
+.toastui-editor-defaultUI {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    border: 1px solid #e0e0e0 !important;
+}
+
+.toastui-editor-toolbar {
+    background-color: #f5f5f5 !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+}
+
+.toastui-editor-main {
+    background-color: #ffffff !important;
+}
+
+/* Editable area background and text */
+.toastui-editor-main .ProseMirror,
+.toastui-editor-main .CodeMirror {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+}
+
+/* Preview pane background and text */
+.toastui-editor-contents,
+.toastui-editor-contents p,
+.toastui-editor-contents h1,
+.toastui-editor-contents h2,
+.toastui-editor-contents h3,
+.toastui-editor-contents h4,
+.toastui-editor-contents h5,
+.toastui-editor-contents h6,
+.toastui-editor-contents li,
+.toastui-editor-contents pre {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+}
+
+/* Inline code */
+.toastui-editor-contents code:not(.hljs) {
+    color: #333333 !important;
+    background-color: #f5f5f5 !important;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+/* Code blocks */
+.toastui-editor-contents .hljs {
+    color: #333333 !important;
+    background-color: #f5f5f5 !important;
+}

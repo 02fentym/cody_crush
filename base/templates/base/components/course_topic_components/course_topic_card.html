@@ -48,6 +48,11 @@
                 {% if topic.id %}
                 <div class="flex justify-center gap-2 p-2">
 
+                    <!-- Lesson Creation -->
+                    <a href="{% url 'create-lesson' ct.id %}" class="btn btn-outline btn-secondary btn-sm">
+                        + Lesson
+                    </a>
+
                     <!-- DMOJ Exercise Creation -->
                     <button class="btn btn-outline btn-secondary btn-sm" hx-get="{% url 'get-dmoj-form' ct.id %}"
                         hx-target="#modal-body" hx-swap="innerHTML"

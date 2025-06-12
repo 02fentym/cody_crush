@@ -245,10 +245,13 @@ class Activity(models.Model):
                     self.weight = 100
 
             elif model == "dmojexercise":
+                self.weight = 10
+
+            elif model == "lesson":
                 self.weight = 5
 
             else:
-                self.weight = 10  # Fallback default
+                self.weight = 1  # Fallback default
         super().save(*args, **kwargs)
 
 

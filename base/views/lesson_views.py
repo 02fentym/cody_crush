@@ -9,14 +9,14 @@ from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
 
 from base.decorators import allowed_roles
-from base.models import Topic, Lesson, Activity, ActivityCompletion
+from base.models import Topic, Lesson, Activity, ActivityCompletion, CourseTopic, CourseUnit
 from base.forms import LessonForm
 
 
-
-# TEACHER VIEWS
-def create_lesson(request, topic_id):
-    topic = get_object_or_404(Topic, id=topic_id)
+@login_required
+@allowed_roles(["teacher"])
+def create_lesson(request, course_topic_id):
+    course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
     form = LessonForm()
 
     if request.method == "POST":
@@ -26,24 +26,26 @@ def create_lesson(request, topic_id):
             lesson.save()
 
             Activity.objects.create(
-                topic=topic,
-                order=topic.activity_set.count() + 1,
+                course_topic=course_topic,
+                order=course_topic.activities.count() + 1,
                 content_type=ContentType.objects.get_for_model(lesson),
                 object_id=lesson.id
             )
 
-            return redirect("course", topic.unit.course.id)
+            course_unit = CourseUnit.objects.filter(unit=course_topic.unit).first()
+            return redirect("course", course_unit.course.id)
         else:
             messages.error(request, "Please fix the errors below.")
 
         
-    context = {"topic": topic, "form": form, "is_edit": False}
+    context = {"topic": course_topic, "form": form, "is_edit": False}
     return render(request, "base/main/create_edit_lesson.html", context)
 
-
-def edit_lesson(request, topic_id, lesson_id):
+@login_required
+@allowed_roles(["teacher"])
+def edit_lesson(request, course_topic_id, lesson_id):
     lesson = Lesson.objects.get(id=lesson_id)
-    topic = Topic.objects.get(id=topic_id)
+    course_topic = CourseTopic.objects.get(id=course_topic_id)
     form = LessonForm(instance=lesson)
 
     if request.method == "POST":
@@ -51,15 +53,14 @@ def edit_lesson(request, topic_id, lesson_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Lesson updated successfully!")
-            return redirect("course", topic.unit.course.id)
+            course_unit = CourseUnit.objects.filter(unit=course_topic.unit).first()
+            return redirect("course", course_unit.course.id)
 
     context = {"form": form, "is_edit": True}
     return render(request, "base/main/create_edit_lesson.html", context)
 
-
-# STUDENT VIEWS
+@login_required
 @allowed_roles(["student"])
-@login_required(login_url="login")
 def view_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id)
     activity = Activity.objects.get(content_type__model="lesson", object_id=lesson.id)

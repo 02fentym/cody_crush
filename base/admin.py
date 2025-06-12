@@ -68,8 +68,16 @@ class LanguageAdmin(admin.ModelAdmin):
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ('title',)
-    search_fields = ('title',)
+    list_display = ('title', 'get_course_topic')
+    search_fields = ('title','get_course_topic')
+
+    def get_course_topic(self, obj):
+        from django.contrib.contenttypes.models import ContentType
+        ct = ContentType.objects.get_for_model(Lesson)
+        activity = Activity.objects.filter(content_type=ct, object_id=obj.id).first()
+        return activity.course_topic.topic.title if activity else None
+
+    get_course_topic.short_description = 'Course Topic'
 
 
 @admin.register(MultipleChoiceQuestion)
