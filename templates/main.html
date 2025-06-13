@@ -34,11 +34,14 @@
     <title>CodeX</title>
 
     <!-- Highlight.js CSS -->
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
 
-    <!-- Toast UI Editor CSS -->
-    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Editor.md CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/editor.md/css/editormd.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/editor.md/languages/en.js"></script>
 
     <link rel="stylesheet" href="{% static 'dist/styles.css' %}">
 
@@ -50,7 +53,7 @@
     <form style="display:none;">
         {% csrf_token %}
     </form>
-    
+
     {% include "navbar.html" %}
 
     <!-- Sidebar + Scrollable Main Content -->
@@ -66,16 +69,12 @@
             </div>
             {% endif %}
 
-            {% block content %}
-
-            {% endblock %}
+            {% block content %}{% endblock %}
         </main>
     </div>
 
-    <!-- Toast UI Scripts -->
-    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
-    <script
-        src="https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight-all.min.js"></script>
+    <!-- Editor.md Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/editor.md/editormd.min.js"></script>
 
     <!-- Syntax Highlighting -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>

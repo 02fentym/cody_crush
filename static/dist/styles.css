@@ -1954,6 +1954,13 @@
       background-image: none;
     }
   }
+  .navbar {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    padding: 0.5rem;
+    min-height: 4rem;
+  }
   .card-body {
     display: flex;
     flex: auto;
@@ -2089,6 +2096,9 @@
   .hidden {
     display: none;
   }
+  .inline {
+    display: inline;
+  }
   .table {
     display: table;
   }
@@ -2137,6 +2147,9 @@
   .max-h-\[200px\] {
     max-height: 200px;
   }
+  .min-h-0 {
+    min-height: calc(var(--spacing) * 0);
+  }
   .min-h-screen {
     min-height: 100vh;
   }
@@ -2179,6 +2192,9 @@
   .max-w-5xl {
     max-width: var(--container-5xl);
   }
+  .max-w-none {
+    max-width: none;
+  }
   .flex-1 {
     flex: 1;
   }
@@ -2203,6 +2219,9 @@
   }
   .cursor-pointer {
     cursor: pointer;
+  }
+  .resize {
+    resize: both;
   }
   .resize-y {
     resize: vertical;
@@ -2472,6 +2491,9 @@
   .py-4 {
     padding-block: calc(var(--spacing) * 4);
   }
+  .pt-2 {
+    padding-top: calc(var(--spacing) * 2);
+  }
   .pt-4 {
     padding-top: calc(var(--spacing) * 4);
   }
@@ -2667,6 +2689,9 @@
     @supports (color: color-mix(in lab, red, red)) {
       color: color-mix(in oklab, var(--color-white) 40%, transparent);
     }
+  }
+  .lowercase {
+    text-transform: lowercase;
   }
   .normal-case {
     text-transform: none;

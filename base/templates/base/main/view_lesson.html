@@ -3,23 +3,28 @@
 {% block content %}
 
 {% if lesson %}
-<div class="lesson">
-    <h1>{{ lesson.title|safe }}</h1>
+<div class="lesson space-y-6">
 
-    <div style="margin: 20px 0;">
+    <h1 class="text-3xl font-bold">{{ lesson.title|safe }}</h1>
+
+    <div>
         <form method="POST">
             {% csrf_token %}
-            <label>
-                <input type="checkbox" name="mark_as_complete" onchange="this.form.submit()"
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="mark_as_complete" onchange="this.form.submit()" class="checkbox"
                     {% if completed %}checked{% endif %}>
-                Mark as completed
+                <span class="label-text">Mark as completed</span>
             </label>
         </form>
     </div>
 
-    <div>
-        {{ lesson_html|safe }}
-    </div>
+    <div id="lesson-markdown" class="prose max-w-none dark:prose-invert"></div>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        const rawMarkdown = `{{ lesson.content|escapejs }}`;
+        document.getElementById("lesson-markdown").innerHTML = marked.parse(rawMarkdown);
+    </script>
+
 {% else %}
 <p>No lesson found.</p>
 {% endif %}

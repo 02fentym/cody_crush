@@ -58,14 +58,20 @@ def edit_lesson(request, course_topic_id, lesson_id):
 
     context = {"form": form, "is_edit": True}
     return render(request, "base/main/create_edit_lesson.html", context)
-
 @login_required
 @allowed_roles(["student"])
 def view_lesson(request, lesson_id):
     lesson = get_object_or_404(Lesson, id=lesson_id)
-    activity = Activity.objects.get(content_type__model="lesson", object_id=lesson.id)
-    course_language = activity.topic.unit.course.language.lower()  # like "python", "java"
+    activity = get_object_or_404(Activity, content_type__model="lesson", object_id=lesson.id)
 
+    # Attempt to get language name from the course
+    try:
+        course = CourseUnit.objects.filter(unit=activity.course_topic.unit).first().course
+        course_language = course.language.name.lower() if course.language else "plaintext"
+    except Exception:
+        course_language = "plaintext"
+
+    # Handle completion POST
     if request.method == "POST":
         if 'mark_as_complete' in request.POST:
             ActivityCompletion.objects.update_or_create(
@@ -74,26 +80,28 @@ def view_lesson(request, lesson_id):
                 defaults={'completed': True, 'date_completed': timezone.now()}
             )
         else:
-            completion = ActivityCompletion.objects.filter(student=request.user, activity=activity).first()
-            if completion:
-                completion.completed = False
-                date_completed = None
-                completion.save()
+            ActivityCompletion.objects.filter(
+                student=request.user,
+                activity=activity
+            ).update(completed=False, date_completed=None)
 
         return redirect('view-lesson', lesson_id=lesson.id)
 
-    # Step 1: Parse the Markdown (handle fenced code blocks)
+    # Parse markdown content
     lesson_html = markdown.markdown(
         lesson.content,
         extensions=[FencedCodeExtension()]
     )
 
-    # Step 2: Post-process to add language class
+    # Inject language class for syntax highlighting
     lesson_html = re.sub(r'<pre><code>', f'<pre><code class="language-{course_language}">', lesson_html)
     lesson_html = re.sub(r'(?<!<pre>)<code>', f'<code class="language-{course_language}">', lesson_html)
 
-    # Step 3: Get completion status
-    completion = ActivityCompletion.objects.filter(student=request.user, activity=activity).first()
+    # Check completion
+    completion = ActivityCompletion.objects.filter(
+        student=request.user,
+        activity=activity
+    ).first()
     completed = completion.completed if completion else False
 
     context = {
