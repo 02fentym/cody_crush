@@ -1,6 +1,6 @@
 <form method="POST" action="{% if edit_mode %}{% url 'update-dmoj' exercise_id %}{% else %}{% url 'submit-dmoj-form' ct.id %}{% endif %}">
     {% csrf_token %}
-    <h3 class="font-bold text-lg mb-4">Add DMOJ Exercise</h3>
+    <h3 class="text-xl font-semibold mb-2">Add DMOJ Exercise</h3>
 
     <div class="form-control mb-4">
         {{ form.url }}

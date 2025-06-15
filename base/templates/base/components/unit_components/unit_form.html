@@ -1,6 +1,6 @@
 <form method="POST" action="{% url 'submit-unit-form-manage' %}">
     {% csrf_token %}
-    <h3 class="font-bold text-lg mb-4">Add Unit</h3>
+    <h3 class="text-xl font-semibold mb-2">Add Unit</h3>
 
     <div class="form-control mb-4">
         {{ form.title }}

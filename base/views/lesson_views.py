@@ -1,6 +1,7 @@
 import re
 import markdown
 from markdown.extensions.fenced_code import FencedCodeExtension
+from markdown.extensions.codehilite import CodeHiliteExtension
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -90,8 +91,13 @@ def view_lesson(request, lesson_id):
     # Parse markdown content
     lesson_html = markdown.markdown(
         lesson.content,
-        extensions=[FencedCodeExtension()]
+        extensions=[
+            FencedCodeExtension(),
+            CodeHiliteExtension(linenums=False, guess_lang=False)
+        ],
+        output_format="html5"
     )
+
 
     # Inject language class for syntax highlighting
     lesson_html = re.sub(r'<pre><code>', f'<pre><code class="language-{course_language}">', lesson_html)

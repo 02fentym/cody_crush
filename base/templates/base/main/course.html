@@ -6,7 +6,7 @@
     <div class="flex justify-between">
 
         <!-- Course Title -->
-        <h1 class="text-base-content">{{ course.title }}</h1>
+        <h1 class="text-3xl font-bold mb-4 text-base-content">{{ course.title }}</h1>
 
         <!-- Reorder Content Button (only for teachers)-->
         {% if user.profile.role == "teacher" %}

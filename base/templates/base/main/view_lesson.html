@@ -1,32 +1,32 @@
 {% extends "main.html" %}
 
 {% block content %}
-
+{% load static %}
 {% if lesson %}
-<div class="lesson space-y-6">
+<div class="space-y-1.5 h-full flex flex-col justify-between p-2">
 
-    <h1 class="text-3xl font-bold">{{ lesson.title|safe }}</h1>
+    <!-- Lesson title -->
+    <h1 class="text-3xl font-bold mb-2">{{ lesson.title|safe }}</h1>
 
-    <div>
-        <form method="POST">
-            {% csrf_token %}
-            <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" name="mark_as_complete" onchange="this.form.submit()" class="checkbox"
-                    {% if completed %}checked{% endif %}>
-                <span class="label-text">Mark as completed</span>
-            </label>
-        </form>
+    <!-- Mark as completed -->
+    <form method="POST" class="flex items-center gap-2">
+        {% csrf_token %}
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="mark_as_complete" onchange="this.form.submit()"
+                class="checkbox h-5 w-5 rounded"
+                {% if completed %}checked{% endif %}>
+            <span class="text-base-content">Mark as completed</span>
+        </label>
+    </form>
+
+    <!-- Lesson content -->
+    <div class="markdown-body">
+        {{ lesson_html|safe }}
     </div>
 
-    <div id="lesson-markdown" class="prose max-w-none dark:prose-invert"></div>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script>
-        const rawMarkdown = `{{ lesson.content|escapejs }}`;
-        document.getElementById("lesson-markdown").innerHTML = marked.parse(rawMarkdown);
-    </script>
 
+</div>
 {% else %}
-<p>No lesson found.</p>
+<p class="text-white dark:text-gray-200">No lesson found.</p>
 {% endif %}
-
 {% endblock %}

@@ -6,7 +6,7 @@
   <!-- Fixed Top Summary -->
   <div class="shrink-0 bg-base-300 z-10 sticky top-0 py-4">
     <div class="flex items-center justify-start gap-4 px-4">
-      <h2>{{ quiz_template.course_topic.topic.title }} Quiz</h2>
+      <h2 class="text-2xl font-semibold mb-3">{{ quiz_template.course_topic.topic.title }} Quiz</h2>
       <div class="radial-progress text-secondary"
           style="--value: {{ quiz.grade|floatformat:0 }}; --size:4rem; --thickness:6px;">
           {{ quiz.grade|floatformat:0 }}%
