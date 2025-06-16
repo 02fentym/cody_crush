@@ -2,6 +2,7 @@ import re
 import markdown
 from markdown.extensions.fenced_code import FencedCodeExtension
 from markdown.extensions.codehilite import CodeHiliteExtension
+from markdown.extensions.tables import TableExtension
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -93,7 +94,9 @@ def view_lesson(request, lesson_id):
         lesson.content,
         extensions=[
             FencedCodeExtension(),
-            CodeHiliteExtension(linenums=False, guess_lang=False)
+            CodeHiliteExtension(linenums=False, guess_lang=False),
+            TableExtension(),
+            'pymdownx.tasklist',
         ],
         output_format="html5"
     )

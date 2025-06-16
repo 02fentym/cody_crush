@@ -25,7 +25,7 @@ progress {
 }
 
 
-/* Markdown styles */
+/* Markdown styles --> For view_lesson.html */
 @layer components {
     .markdown-body {
         @apply p-4 leading-relaxed bg-base-300;
@@ -56,14 +56,22 @@ progress {
         @apply my-3;
     }
 
-    .markdown-body ul,
-    .markdown-body ol {
+    .markdown-body ul {
         @apply pl-6 my-4 list-disc;
+    }
+
+    .markdown-body ol {
+        @apply pl-6 my-4 list-decimal;
     }
 
     .markdown-body li {
         @apply my-1;
     }
+
+    .markdown-body ul>li:has(input[type="checkbox"]) {
+        @apply list-none pl-0;
+    }
+ 
 
     .markdown-body blockquote {
         @apply border-l-4 pl-4 italic my-4;
@@ -78,8 +86,8 @@ progress {
     /* Inline code styles (unchanged) */
     .markdown-body code {
         @apply px-1 py-0.5 rounded text-sm;
-        background-color: hsl(219, 14%, 28%);
-        color: hsl(var(--bc));
+        background-color: var(--color-info);
+        color: var(--color-info-content);
     }
 
     /* Code block styles (updated to bg-base-200) */
@@ -102,4 +110,23 @@ progress {
         background-color: hsl(var(--b3));
         color: hsl(var(--bc)) !important;
     }
+
+    .markdown-body table {
+        @apply table-auto border border-base-content/10 my-4 text-sm;
+        border-collapse: collapse;
+    }
+
+    .markdown-body th,
+    .markdown-body td {
+        @apply border border-base-content/10 px-4 py-2;
+    }
+
+    .markdown-body th {
+        @apply bg-base-200 font-semibold text-left;
+    }
+
+    .markdown-body tr:nth-child(even) {
+        @apply bg-base-100;
+    }
+
 }
