@@ -33,18 +33,19 @@
             {% endif %}
         </div>
 
-        <!-- Markdown Editor using Editor.md -->
+        <!-- Markdown Editor using Toast UI -->
         <div class="form-control min-h-0">
+            <!-- Mount point for Toast UI -->
+            <div id="toast-editor"></div>
 
-            <!-- Editor.md mount -->
-            <div id="editor-container" class="h-full">
-                <textarea id="id_content" name="content">{{ form.content.value|default_if_none:"" }}</textarea>
-            </div>
+            <!-- Hidden textarea to store markdown for form submission -->
+            <textarea id="id_content" name="content" hidden>{{ form.content.value|default_if_none:"" }}</textarea>
 
             {% if form.content.errors %}
             <p class="text-error text-sm">{{ form.content.errors }}</p>
             {% endif %}
         </div>
+
 
         <!-- Buttons -->
         <div class="flex gap-4 justify-end pt-2">
@@ -58,167 +59,51 @@
     </form>
 </div>
 
+<script>
+    const editor = new toastui.Editor({
+        el: document.querySelector('#toast-editor'),
+        height: '600px',
+        initialEditType: 'markdown',
+        previewStyle: 'vertical',
+        initialValue: document.querySelector('#id_content').value,
+        plugins: [toastui.Editor.plugin.codeSyntaxHighlight],
+    });
+
+    // Sync back to hidden textarea before submitting
+    editor.on('change', () => {
+        document.querySelector('#id_content').value = editor.getMarkdown();
+    });
+</script>
+
 <style>
-    /* Ensure Editor.md fills the available height */
-    #editor-container .editormd {
-        height: 100% !important;
+    /* Keep layout intact — just override colors */
+    .toastui-editor-defaultUI,
+    .toastui-editor-contents {
+        background-color: #ffffff;
+        color: #1f2937;
+        /* slate-800 */
     }
-    #editor-container .editormd-html-preview,
-    #editor-container .editormd-preview-container {
-        height: 100% !important;
+
+    .toastui-editor-contents pre,
+    .toastui-editor-contents code {
+        background-color: #f3f4f6;
+        /* gray-100 */
+        color: #111827;
+        /* gray-900 */
     }
-    #editor-container .markdown-body {
-        height: 100% !important;
+
+    /* Optional: force borders and icons to look normal */
+    .toastui-editor-defaultUI .toastui-editor-toolbar {
+        border-bottom: 1px solid #e5e7eb;
+        /* gray-200 */
+    }
+
+    .toastui-editor-toolbar-icons button {
+        filter: none !important;
     }
 </style>
 
-<script>
-    $(function () {
-        // Define the English language pack inline
-        (function(){
-            var factory = function (exports) {
-                var lang = {
-                    name : "en",
-                    description : "Open source online Markdown editor.",
-                    tocTitle    : "Table of Contents",
-                    toolbar : {
-                        undo             : "Undo(Ctrl+Z)",
-                        redo             : "Redo(Ctrl+Y)",
-                        bold             : "Bold",
-                        del              : "Strikethrough",
-                        italic           : "Italic",
-                        quote            : "Block quote",
-                        ucwords          : "Words first letter convert to uppercase",
-                        uppercase        : "Selection text convert to uppercase",
-                        lowercase        : "Selection text convert to lowercase",
-                        h1               : "Heading 1",
-                        h2               : "Heading 2",
-                        h3               : "Heading 3",
-                        h4               : "Heading 4",
-                        h5               : "Heading 5",
-                        h6               : "Heading 6",
-                        "list-ul"        : "Unordered list",
-                        "list-ol"        : "Ordered list",
-                        hr               : "Horizontal rule",
-                        link             : "Link",
-                        "reference-link" : "Reference link",
-                        image            : "Image",
-                        code             : "Code inline",
-                        "preformatted-text" : "Preformatted text / Code block (Tab indent)",
-                        "code-block"     : "Code block (Multi-languages)",
-                        table            : "Tables",
-                        datetime         : "Datetime",
-                        emoji            : "Emoji",
-                        "html-entities"  : "HTML Entities",
-                        pagebreak        : "Page break",
-                        watch            : "Unwatch",
-                        unwatch          : "Watch",
-                        preview          : "HTML Preview (Press Shift + ESC exit)",
-                        fullscreen       : "Fullscreen (Press ESC exit)",
-                        clear            : "Clear",
-                        search           : "Search",
-                        help             : "Help",
-                        info             : "About " + exports.title
-                    },
-                    buttons : {
-                        enter  : "Enter",
-                        cancel : "Cancel",
-                        close  : "Close"
-                    },
-                    dialog : {
-                        link : {
-                            title    : "Link",
-                            url      : "Address",
-                            urlTitle : "Title",
-                            urlEmpty : "Error: Please fill in the link address."
-                        },
-                        referenceLink : {
-                            title    : "Reference link",
-                            name     : "Name",
-                            url      : "Address",
-                            urlId    : "ID",
-                            urlTitle : "Title",
-                            nameEmpty: "Error: Reference name can't be empty.",
-                            idEmpty  : "Error: Please fill in reference link id.",
-                            urlEmpty : "Error: Please fill in reference link url address."
-                        },
-                        image : {
-                            title    : "Image",
-                            url      : "Address",
-                            link     : "Link",
-                            alt      : "Title",
-                            uploadButton     : "Upload",
-                            imageURLEmpty    : "Error: picture url address can't be empty.",
-                            uploadFileEmpty  : "Error: upload pictures cannot be empty!",
-                            formatNotAllowed : "Error: only allows to upload pictures file, upload allowed image file format:"
-                        },
-                        preformattedText : {
-                            title             : "Preformatted text / Codes", 
-                            emptyAlert        : "Error: Please fill in the Preformatted text or content of the codes.",
-                            placeholder       : "coding now...."
-                        },
-                        codeBlock : {
-                            title             : "Code block",         
-                            selectLabel       : "Languages: ",
-                            selectDefaultText : "select a code language...",
-                            otherLanguage     : "Other languages",
-                            unselectedLanguageAlert : "Error: Please select the code language.",
-                            codeEmptyAlert    : "Error: Please fill in the code content.",
-                            placeholder       : "coding now...."
-                        },
-                        htmlEntities : {
-                            title : "HTML Entities"
-                        },
-                        help : {
-                            title : "Help"
-                        }
-                    }
-                };
-                
-                exports.defaults.lang = lang;
-            };
-            
-            // Execute the factory function
-            factory(window.editormd);
-        })();
 
-        // Function to calculate and set editor height
-        function setEditorHeight() {
-            const editorContainer = $("#editor-container");
-            const form = editorContainer.closest("form.lesson-form");
-            const main = form.closest("main");
-            const windowHeight = $(window).height();
-            const navbarHeight = $("body > form + div").height() || 64; // Approximate navbar height
-            const titleFieldHeight = form.find(".form-control").first().outerHeight(true);
-            const buttonsHeight = form.find(".flex.gap-4").outerHeight(true);
-            const paddingAndMargins = 48; // Account for p-2, space-y-4, and other margins/padding
 
-            // Calculate available height: window height - navbar - title field - buttons - padding/margins
-            const availableHeight = (windowHeight - navbarHeight - titleFieldHeight - buttonsHeight - paddingAndMargins)*0.85;
-
-            // Set Editor.md height dynamically
-            editormd("editor-container", {
-                width: "100%",
-                height: availableHeight,
-                path: "https://cdn.jsdelivr.net/npm/editor.md@1.5.0/lib/",
-                saveHTMLToTextarea: true,
-                emoji: true,
-                taskList: true,
-                tex: true,
-                flowChart: true,
-                sequenceDiagram: true,
-                toolbarIcons: editormd.toolbar_languages ? editormd.toolbar_languages.en : editormd.toolbar
-            });
-        }
-
-        // Initial height calculation
-        setEditorHeight();
-
-        // Recalculate height on window resize
-        $(window).on("resize", function() {
-            setEditorHeight();
-        });
-    });
-</script>
 
 {% endblock %}
