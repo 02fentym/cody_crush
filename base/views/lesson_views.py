@@ -11,14 +11,23 @@ from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
 
 from base.decorators import allowed_roles
-from base.models import Topic, Lesson, Activity, ActivityCompletion, CourseTopic, CourseUnit
+from base.models import Course, Lesson, Activity, ActivityCompletion, CourseTopic, CourseUnit
 from base.forms import LessonForm
+
+
+def get_all_courses(role, user):
+    if role == "student":
+        courses = user.enrolled_courses.all()
+    else:
+        courses = Course.objects.filter(teacher=user)
+    return courses
 
 
 @login_required
 @allowed_roles(["teacher"])
 def create_lesson(request, course_topic_id):
     course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
+    courses = get_all_courses("teacher", request.user)
     form = LessonForm()
 
     if request.method == "POST":
@@ -40,12 +49,14 @@ def create_lesson(request, course_topic_id):
             messages.error(request, "Please fix the errors below.")
 
         
-    context = {"topic": course_topic, "form": form, "is_edit": False}
+    context = {"courses": courses, "topic": course_topic, "form": form, "is_edit": False}
     return render(request, "base/main/create_edit_lesson.html", context)
+
 
 @login_required
 @allowed_roles(["teacher"])
 def edit_lesson(request, course_topic_id, lesson_id):
+    courses = get_all_courses("teacher", request.user)
     lesson = Lesson.objects.get(id=lesson_id)
     course_topic = CourseTopic.objects.get(id=course_topic_id)
     form = LessonForm(instance=lesson)
@@ -58,11 +69,14 @@ def edit_lesson(request, course_topic_id, lesson_id):
             course_unit = CourseUnit.objects.filter(unit=course_topic.unit).first()
             return redirect("course", course_unit.course.id)
 
-    context = {"form": form, "is_edit": True}
+    context = {"courses": courses, "form": form, "is_edit": True}
     return render(request, "base/main/create_edit_lesson.html", context)
+
+
 @login_required
 @allowed_roles(["student"])
 def view_lesson(request, lesson_id):
+    courses = get_all_courses("student", request.user)
     lesson = get_object_or_404(Lesson, id=lesson_id)
     activity = get_object_or_404(Activity, content_type__model="lesson", object_id=lesson.id)
 
@@ -114,6 +128,7 @@ def view_lesson(request, lesson_id):
     completed = completion.completed if completion else False
 
     context = {
+        "courses": courses,
         "lesson": lesson,
         "lesson_html": lesson_html,
         "activity": activity,
