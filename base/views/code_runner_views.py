@@ -17,6 +17,9 @@ def submit_code(request):
     language = request.POST.get("language", "python")
     question_id = request.POST.get("question_id")
 
+    print("RECEIVED CODE:", code)
+    print("RECEIVED QUESTION ID:", question_id)
+
     if not code or not question_id:
         return JsonResponse({"error": "Missing required fields"}, status=400)
 

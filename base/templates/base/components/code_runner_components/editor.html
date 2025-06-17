@@ -1,6 +1,7 @@
 <form method="post" action="/submit-code/">
   {% csrf_token %}
-  <textarea name="code" rows="10" cols="50">print(sum(map(int, [input(), input()])))</textarea>
+  <div id="monaco-editor" style="height: 400px; border: 1px solid gray;"></div>
+  <input type="hidden" name="code" id="code-input">
   <input type="hidden" name="question_id" value="123">
   <input type="hidden" name="language" value="python">
   <button type="submit">Run Code</button>
