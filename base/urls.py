@@ -6,6 +6,10 @@ urlpatterns = [
     path("activity/<int:activity_id>/delete/", views.delete_activity, name="delete-activity"),
 
 
+### URLS for code_runner_views.py
+    path("submit-code/", views.submit_code, name="submit_code"),
+    path("dev/code-editor-test/", views.test_code_component),
+
 ### URLS for course_topic_views.py
     path("get-course-topic-form/<int:unit_id>/", views.get_course_topic_form, name="get-course-topic-form"),
     path("submit-course-topic-form/", views.submit_course_topic_form, name="submit-course-topic-form"),

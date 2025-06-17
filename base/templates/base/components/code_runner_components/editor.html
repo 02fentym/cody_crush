@@ -1,0 +1,7 @@
+<form method="post" action="/submit-code/">
+  {% csrf_token %}
+  <textarea name="code" rows="10" cols="50">print(sum(map(int, [input(), input()])))</textarea>
+  <input type="hidden" name="question_id" value="123">
+  <input type="hidden" name="language" value="python">
+  <button type="submit">Run Code</button>
+</form>
