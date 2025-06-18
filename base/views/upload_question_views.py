@@ -1,9 +1,8 @@
 import csv
 import io
 
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseServerError
 from django.views.decorators.http import require_POST
@@ -18,57 +17,24 @@ QUESTION_TYPE_CONFIG = {
     "multiple_choice": {
         "model": MultipleChoiceQuestion,
         "form": MultipleChoiceQuestionForm,
-        "template": "base/components/upload_questions_components/mc_question_form.html",
-        "edit_url_name": "edit-question",
-        "new_form_url_name": "new-question-form",
-        "submit_url_name": "submit-mc-question",
-        "delete_url_name": "delete-selected-questions",
         "hx_get_url": "upload-mc-questions",
         "table_id": "mc-table",
         "title": "Multiple Choice Questions",
-        "new_question_url": "new-question-form",
     },
     "tracing": {
         "model": TracingQuestion,
         "form": TracingQuestionForm,
-        "template": "base/components/upload_questions_components/tracing_question_form.html",
-        "edit_url_name": "edit-question",
-        "new_form_url_name": "new-question-form",
-        "submit_url_name": "submit-tracing-question",
-        "delete_url_name": "delete-selected-questions",
         "hx_get_url": "upload-tracing-questions",
         "table_id": "tracing-table",
         "title": "Tracing Questions",
-        "new_question_url": "new-question-form",
     },
 }
 
 
-
 def get_all_courses(role, user):
-    if role == "student":
-        courses = user.enrolled_courses.all()
-    else:
-        courses = Course.objects.filter(teacher=user)
-    return courses
+    return user.enrolled_courses.all() if role == "student" else Course.objects.filter(teacher=user)
 
 
-# Helper function to validate question data
-def question_data_validation(i, question_type, row):
-    # Validate required fields based on question type
-    if question_type == "multiple_choice":
-        required_fields = ["prompt", "choice_a", "choice_b", "choice_c", "choice_d", "correct_choice", "explanation", "language"]
-    elif question_type == "tracing":
-        required_fields = ["prompt", "expected_output", "explanation", "language"]
-
-    # Validate required fields for the given type
-    for field in required_fields:
-        if not row.get(field):
-            return f"Row {i}: Missing value for '{field}' ({question_type} question)."
-
-    return ""  # If all is well
-
-# Generic view for question bank
 @allowed_roles(["teacher"])
 @login_required(login_url="login")
 def question_bank_view(request, question_type):
@@ -80,61 +46,26 @@ def question_bank_view(request, question_type):
     sort_by = request.GET.get("sort_by", "created")
     order = request.GET.get("order", "desc")
     allowed_sorts = {"topic__unit__title", "topic__title", "prompt", "created"}
-
-    if sort_by not in allowed_sorts:
-        sort_by = "created"
-
-    ordering = sort_by if order == "asc" else f"-{sort_by}"
-    questions = model.objects.select_related("topic__unit").order_by(ordering)
-    courses = get_all_courses(request.user.profile.role, request.user)
+    ordering = sort_by if sort_by in allowed_sorts else "created"
+    ordering = ordering if order == "asc" else f"-{ordering}"
 
     context = {
-        "courses": courses,
+        "courses": get_all_courses(request.user.profile.role, request.user),
         "title": config["title"],
-        "questions": questions,
+        "questions": model.objects.select_related("topic__unit").order_by(ordering),
         "upload_button": "base/components/upload_questions_components/upload_questions_button.html",
         "hx_get_url": config["hx_get_url"],
         "table_template": "base/components/upload_questions_components/question_bank_table.html",
-        "row_url_name": config["edit_url_name"],
+        "row_url_name": "edit-question",
         "table_id": config["table_id"],
         "form_container_id": f"{question_type}-edit-form-container",
         "sort_by": sort_by,
         "order": order,
-        "delete_url": config["delete_url_name"],
-        "new_question_url": config["new_form_url_name"],
+        "delete_url": "delete-selected-questions",
+        "new_question_url": "new-question-form",
         "question_type": question_type,
-        
     }
-
     return render(request, "base/main/question_bank_base.html", context)
-
-@allowed_roles(["teacher"])
-@login_required(login_url="login")
-def submit_question_view(request):
-    try:
-        print("DEBUG: submit_question_view reached")
-        question_type = request.POST.get("question_type")
-        print(f"DEBUG: question_type = {question_type}")
-        config = QUESTION_TYPE_CONFIG.get(question_type)
-        if not config:
-            return HttpResponseServerError("Invalid question type.")
-
-        form_class = config["form"]
-        form = form_class(request.POST)
-        topic_id = request.POST.get("topic_id")
-
-        if form.is_valid() and topic_id:
-            question = form.save(commit=False)
-            question.topic = get_object_or_404(Topic, id=topic_id)
-            question.save()
-            return redirect("question-bank", question_type=question_type)
-
-        print("DEBUG: form not valid or missing topic", form.errors, topic_id)
-        return JsonResponse({"error": "Invalid form or missing topic."}, status=400)
-    
-    except Exception as e:
-        print("ERROR in submit_question_view:", str(e))
-        return HttpResponseServerError("Internal server error.")
 
 
 @allowed_roles(["teacher"])
@@ -143,16 +74,32 @@ def new_question_form(request, question_type):
     config = QUESTION_TYPE_CONFIG.get(question_type)
     if not config:
         return HttpResponseServerError("Invalid question type.")
-
-    topics = Topic.objects.all()
-    form_class = config["form"]
     return render(request, "base/components/upload_questions_components/generic_question_form.html", {
-        "form": form_class(),
-        "topics": topics,
+        "form": config["form"](),
+        "topics": Topic.objects.all(),
         "submit_url_name": "submit-question",
         "question_type": question_type,
         "title": config["title"],
     })
+
+
+@allowed_roles(["teacher"])
+@login_required(login_url="login")
+def submit_question_view(request):
+    question_type = request.POST.get("question_type")
+    config = QUESTION_TYPE_CONFIG.get(question_type)
+    if not config:
+        return HttpResponseServerError("Invalid question type.")
+
+    form = config["form"](request.POST)
+    topic_id = request.POST.get("topic_id")
+    if form.is_valid() and topic_id:
+        question = form.save(commit=False)
+        question.topic = get_object_or_404(Topic, id=topic_id)
+        question.save()
+        return redirect("question-bank", question_type=question_type)
+
+    return JsonResponse({"error": "Invalid form or missing topic."}, status=400)
 
 
 @allowed_roles(["teacher"])
@@ -163,12 +110,10 @@ def delete_selected_questions(request, question_type):
     if not config:
         return HttpResponseServerError("Invalid question type.")
 
-    model = config["model"]
-    question_ids = request.POST.getlist("question_ids")
-
-    if question_ids:
+    ids = request.POST.getlist("question_ids")
+    if ids:
         try:
-            model.objects.filter(id__in=question_ids).delete()
+            config["model"].objects.filter(id__in=ids).delete()
         except Exception as e:
             return HttpResponseServerError(f"Error deleting questions: {str(e)}")
 
@@ -183,8 +128,8 @@ def edit_question_view(request, question_type, question_id):
         return HttpResponseServerError("Invalid question type.")
 
     model = config["model"]
-    form_class = config["form"]
     question = get_object_or_404(model, pk=question_id)
+    form_class = config["form"]
 
     if request.method == "POST":
         form = form_class(request.POST, instance=question)
@@ -219,8 +164,6 @@ def edit_question_view(request, question_type, question_id):
 
 
 
-
-# views.py
 @allowed_roles(["teacher"])
 @login_required(login_url="login")
 def upload_mc_questions(request):
