@@ -17,9 +17,6 @@ def submit_code(request):
     language = request.POST.get("language", "python")
     question_id = request.POST.get("question_id")
 
-    print("RECEIVED CODE:", code)
-    print("RECEIVED QUESTION ID:", question_id)
-
     if not code or not question_id:
         return JsonResponse({"error": "Missing required fields"}, status=400)
 
@@ -47,6 +44,9 @@ def submit_code(request):
     # Run Docker
     docker_cmd = [
         "docker", "run", "--rm",
+        "--memory=256m",           # 💾 RAM limit
+        "--cpus=0.5",              # 🧠 CPU limit
+        "--pids-limit=64",         # 🔒 process count limit
         "-v", os.path.abspath(student_path) + ":/app/student",
         "-v", os.path.abspath(tests_path) + ":/app/tests",
         "code-runner-python"
@@ -60,13 +60,6 @@ def submit_code(request):
             timeout=10
         )
         output = result.stdout.decode().strip()
-
-        print("Docker exited with return code:", result.returncode)
-        print("stdout:")
-        print(result.stdout.decode())
-        print("stderr:")
-        print(result.stderr.decode())
-
 
         data = json.loads(output)
         return JsonResponse(data)

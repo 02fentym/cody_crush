@@ -1,4 +1,3 @@
-console.log("main.js is running");
 
 // This function toggles the display of a form and clears its inputs when hidden
 function toggleForm(id) {
@@ -166,8 +165,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Monaco Editor
 function initMonacoEditor() {
-  console.log("🧪 initMonacoEditor called");
-
   const editorMount = document.getElementById("monaco-editor");
   if (!editorMount) {
     console.log("❌ #monaco-editor not found");
@@ -179,8 +176,6 @@ function initMonacoEditor() {
   });
 
   require(['vs/editor/editor.main'], function () {
-    console.log("✅ Monaco module loaded");
-
     const editor = monaco.editor.create(editorMount, {
       value: 'print(sum(map(int, [input(), input()])))',
       language: 'python',
@@ -196,7 +191,6 @@ function initMonacoEditor() {
       return;
     }
 
-    console.log("📝 Form submit handler attached");
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
