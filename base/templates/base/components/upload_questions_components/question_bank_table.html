@@ -1,13 +1,12 @@
-<!-- base/components/upload_questions_components/question_bank_table.html -->
 <div id="{{ table_id }}-wrapper" class="relative">
-    <form method="POST" action="{% url delete_url %}" id="bulk-delete-form-{{ table_id }}"
+    <form method="POST" action="{% url delete_url question_type %}" id="bulk-delete-form-{{ table_id }}"
         onsubmit="return confirm('Are you sure you want to delete the selected questions?');">
         {% csrf_token %}
 
         <div class="mb-4 flex gap-2">
 
             <!-- New Question Button -->
-            <button class="btn btn-primary btn-sm btn-outline" hx-get="{% url new_question_url %}"
+            <button class="btn btn-primary btn-sm btn-outline" hx-get="{% url new_question_url question_type %}"
                 hx-target="#modal-body" hx-swap="innerHTML"
                 onclick="document.getElementById('modal-wrapper').checked = true">
                 + Add Question
@@ -73,7 +72,7 @@
                 </thead>
                 <tbody>
                     {% for q in questions %}
-                    <tr hx-get="{% url row_url_name q.id %}" hx-target="#{{ form_container_id }}" hx-swap="innerHTML"
+                    <tr hx-get="{% url row_url_name question_type q.id %}" hx-target="#{{ form_container_id }}" hx-swap="innerHTML"
                         onclick="console.log('Row clicked for question {{ q.id }}'); if (this.dataset.clicked) return; this.dataset.clicked = true; setTimeout(() => delete this.dataset.clicked, 1000);"
                         hx-on="htmx:beforeRequest: console.log('Sending request for question {{ q.id }}'); console.log('Target exists:', !!document.getElementById('{{ form_container_id }}'))"
                         hx-on="htmx:afterRequest: console.log('Received response for question {{ q.id }}'); console.log('Response status:', event.detail.xhr.status)"

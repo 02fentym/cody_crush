@@ -1,5 +1,7 @@
-<form method="POST" action="{% url 'submit-mc-question' %}" class="space-y-4">
+<form method="POST" action="{% url 'submit-question' %}" class="space-y-4">
     {% csrf_token %}
+
+    <input type="hidden" name="question_type" value="multiple_choice">
 
     <h3 class="text-xl font-semibold">Add Multiple Choice Question</h3>
 

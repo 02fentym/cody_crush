@@ -83,21 +83,22 @@ urlpatterns = [
 
 
 ### URLS for upload_questions_views.py
+    # generic question bank
+    path("questions/submit/", views.submit_question_view, name="submit-question"),
+    path("questions/<str:question_type>/", views.question_bank_view, name="question-bank"),
+    path("questions/<str:question_type>/delete-selected/", views.delete_selected_questions, name="delete-selected-questions"),
+    path("questions/<str:question_type>/new/", views.new_question_form, name="new-question-form"),
+    path("questions/<str:question_type>/<int:question_id>/edit/", views.edit_question_view, name="edit-question"),
+
+
+
     # multiple choice questions
-    path("questions/multiple-choice/", views.mc_questions, name="mc-questions"),
+    #path("questions/multiple-choice/", views.mc_questions, name="mc-questions"),
     path("questions/multiple-choice/upload/", views.upload_mc_questions, name="upload-mc-questions"),
-    path("mc-question/<int:question_id>/edit/", views.edit_mc_question, name="edit-mc-question"),
-    path("questions/multiple-choice/delete-selected/", views.delete_selected_mc_questions, name="delete-selected-mc-questions"),
-    path("questions/mc/new/", views.new_mc_question_form, name="new-mc-question-form"),
-    path("questions/mc/submit/", views.submit_mc_question, name="submit-mc-question"),
 
     # tracing questions
-    path("questions/tracing/", views.tracing_questions, name="tracing-questions"),
+    #path("questions/tracing/", views.tracing_questions, name="tracing-questions"),
     path("questions/tracing/upload/", views.upload_tracing_questions, name="upload-tracing-questions"),
-    path("tracing-question/<int:question_id>/edit/", views.edit_tracing_question, name="edit-tracing-question"),
-    path("questions/tracing-choice/delete-selected/", views.delete_selected_tracing_questions, name="delete-selected-tracing-questions"),
-    path("questions/tracing/new/", views.new_tracing_question_form, name="new-tracing-question-form"),
-    path("questions/tracing/submit/", views.submit_tracing_question, name="submit-tracing-question"),
 
 
 ### URLS for user_views.py

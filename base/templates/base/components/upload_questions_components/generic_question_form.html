@@ -1,14 +1,17 @@
 <form method="POST" action="{% url 'submit-question' %}" class="space-y-4">
     {% csrf_token %}
 
-    <h3 class="text-xl font-semibold">Add Tracing Question</h3>
+    {% if question_type %}
+        <input type="hidden" name="question_type" value="{{ question_type }}">
+    {% endif %}
 
-    <!-- Topic Dropdown -->
+    <h3 class="text-xl font-semibold">Add {{ title }}</h3>
+
     <div class="form-control">
         <label class="label" for="topic_id">Select Topic</label>
         <select name="topic_id" id="topic_id" class="select select-bordered w-full" required>
             {% for topic in topics %}
-            <option value="{{ topic.id }}">{{ topic.unit.title }} → {{ topic.title }}</option>
+                <option value="{{ topic.id }}">{{ topic.unit.title }} → {{ topic.title }}</option>
             {% endfor %}
         </select>
     </div>
