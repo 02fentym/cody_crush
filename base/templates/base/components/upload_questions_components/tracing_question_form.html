@@ -1,0 +1,22 @@
+<form method="POST" action="{% url 'submit-tracing-question' %}" class="space-y-4">
+    {% csrf_token %}
+
+    <h3 class="text-xl font-semibold">Add Tracing Question</h3>
+
+    <!-- Topic Dropdown -->
+    <div class="form-control">
+        <label class="label" for="topic_id">Select Topic</label>
+        <select name="topic_id" id="topic_id" class="select select-bordered w-full" required>
+            {% for topic in topics %}
+            <option value="{{ topic.id }}">{{ topic.unit.title }} → {{ topic.title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    {{ form.as_p }}
+
+    <div class="modal-action">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <label for="modal-wrapper" class="btn">Cancel</label>
+    </div>
+</form>

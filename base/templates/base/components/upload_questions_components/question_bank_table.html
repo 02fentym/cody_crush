@@ -1,17 +1,30 @@
 <!-- base/components/upload_questions_components/question_bank_table.html -->
 <div id="{{ table_id }}-wrapper" class="relative">
     <form method="POST" action="{% url delete_url %}" id="bulk-delete-form-{{ table_id }}"
-        onsubmit="return confirm('Are you sure you want to delete the selected questions?');"
-        hx-post="{% url delete_url %}" hx-target="#{{ table_id }}-wrapper" hx-swap="innerHTML">
+        onsubmit="return confirm('Are you sure you want to delete the selected questions?');">
         {% csrf_token %}
+
         <div class="mb-4 flex gap-2">
-            <button class="btn btn-primary btn-sm" hx-get="{% url hx_get_url %}" hx-target="#modal-body"
+
+            <!-- New Question Button -->
+            <button class="btn btn-primary btn-sm btn-outline" hx-get="{% url new_question_url %}"
+                hx-target="#modal-body" hx-swap="innerHTML"
+                onclick="document.getElementById('modal-wrapper').checked = true">
+                + Add Question
+            </button>
+
+            <!-- Upload Questions Button -->
+            <button class="btn btn-secondary btn-sm btn-outline" hx-get="{% url hx_get_url %}" hx-target="#modal-body"
                 hx-swap="innerHTML" onclick="document.getElementById('modal-wrapper').checked = true">
                 + Upload Questions
             </button>
-            <button type="submit" class="btn btn-error btn-sm" id="delete-selected-btn-{{ table_id }}" disabled>
+
+            <!-- Delete Selected Button -->
+            <button type="submit" class="btn btn-error btn-sm btn-outline" id="delete-selected-btn-{{ table_id }}"
+                disabled>
                 Delete Selected
             </button>
+
         </div>
         <div class="overflow-x-auto shadow rounded-lg mb-10 max-h-[200px]">
             <table class="table table-xs table-zebra w-full">

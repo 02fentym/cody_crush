@@ -1,7 +1,7 @@
 import csv
 import io
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -71,6 +71,7 @@ def mc_questions(request):
         "sort_by": sort_by,
         "order": order,
         "delete_url": "delete-selected-mc-questions",  # Added
+        "new_question_url": "new-mc-question-form",
     }
 
     return render(request, "base/main/question_bank_base.html", context)
@@ -198,35 +199,37 @@ def delete_selected_mc_questions(request):
         if question_ids:
             try:
                 question_ids = [int(qid) for qid in question_ids]
-                deleted_count = MultipleChoiceQuestion.objects.filter(
-                    id__in=question_ids,
-                    topic__coursetopic__unit__courseunit__course__teacher=request.user
-                ).delete()[0]
-            except ValueError as e:
-                return HttpResponseServerError("Invalid question IDs")
+                MultipleChoiceQuestion.objects.filter(id__in=question_ids).delete()
             except Exception as e:
                 return HttpResponseServerError(f"Error deleting questions: {str(e)}")
-        
-        sort_by = request.GET.get("sort_by", "created")
-        order = request.GET.get("order", "desc")
-        ordering = sort_by if order == "asc" else f"-{sort_by}"
-        mc_questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by(ordering)
-        
-        response = render(request, "base/components/upload_questions_components/question_bank_table.html", {
-            "questions": mc_questions,
-            "row_url_name": "edit-mc-question",
-            "form_container_id": "mc-edit-form-container",
-            "sort_by": sort_by,
-            "order": order,
-            "delete_url": "delete-selected-mc-questions",
-            "table_id": "mc-table",
-            "hx_get_url": "upload-mc-questions",
-            "upload_button": "base/components/upload_questions_components/upload_questions_button.html",  # Added
-        })
-        response["HX-Trigger"] = "question-deleted"
-        return response
-    
-    return redirect("mc-questions")
+
+    return redirect("mc-questions")  # ✅ This ensures full reload
+
+
+
+
+def new_mc_question_form(request):
+    topics = Topic.objects.all()
+    return render(request, "base/components/upload_questions_components/mc_question_form.html", {
+        "form": MultipleChoiceQuestionForm(),
+        "topics": topics,
+    })
+
+
+@allowed_roles(["teacher"])
+@login_required(login_url="login")
+def submit_mc_question(request):
+    if request.method == "POST":
+        form = MultipleChoiceQuestionForm(request.POST)
+        topic_id = request.POST.get("topic_id")
+
+        if form.is_valid() and topic_id:
+            question = form.save(commit=False)
+            question.topic = get_object_or_404(Topic, id=topic_id)
+            question.save()
+            return redirect("mc-questions")  # 👈 Full page reload here
+
+    return JsonResponse({"error": "Invalid form or missing topic."}, status=400)
 
 
 ### TRACING QUESTIONS
@@ -266,6 +269,7 @@ def tracing_questions(request):
         "sort_by": sort_by,
         "order": order,
         "delete_url": "delete-selected-tracing-questions",
+        "new_question_url": "new-tracing-question-form",
     }
 
     return render(request, "base/main/question_bank_base.html", context)
@@ -386,33 +390,36 @@ def delete_selected_tracing_questions(request):
         if question_ids:
             try:
                 question_ids = [int(qid) for qid in question_ids]
-                deleted_count = TracingQuestion.objects.filter(
-                    id__in=question_ids,
-                    topic__coursetopic__unit__courseunit__course__teacher=request.user
-                ).delete()[0]
-            except ValueError as e:
-                return HttpResponseServerError("Invalid question IDs")
-            except Exception as e:
-                return HttpResponseServerError(f"Error deleting questions: {str(e)}")
-        
-        sort_by = request.GET.get("sort_by", "created")
-        order = request.GET.get("order", "desc")
-        ordering = sort_by if order == "asc" else f"-{sort_by}"
-        tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by(ordering)
-        
-        response = render(request, "base/components/upload_questions_components/question_bank_table.html", {
-            "questions": tracing_questions,
-            "row_url_name": "edit-tracing-question",
-            "form_container_id": "tracing-edit-form-container",
-            "sort_by": sort_by,
-            "order": order,
-            "delete_url": "delete-selected-tracing-questions",
-            "table_id": "tracing-table",
-            "hx_get_url": "upload-tracing-questions",
-            "upload_button": "base/components/upload_questions_components/upload_questions_button.html",  # Added
-        })
-        response["HX-Trigger"] = "question-deleted"
-        return response
-    
+                TracingQuestion.objects.filter(id__in=question_ids).delete()
+            except Exception:
+                return HttpResponseServerError("Error deleting questions.")
+
+        return redirect("tracing-questions")  # 🔁 Full page reload
+
     return redirect("tracing-questions")
+
+
+
+def new_tracing_question_form(request):
+    topics = Topic.objects.all()
+    return render(request, "base/components/upload_questions_components/tracing_question_form.html", {
+        "form": TracingQuestionForm(),
+        "topics": topics,
+    })
+
+
+@allowed_roles(["teacher"])
+@login_required(login_url="login")
+def submit_tracing_question(request):
+    if request.method == "POST":
+        form = TracingQuestionForm(request.POST)
+        topic_id = request.POST.get("topic_id")
+
+        if form.is_valid() and topic_id:
+            question = form.save(commit=False)
+            question.topic = get_object_or_404(Topic, id=topic_id)
+            question.save()
+            return redirect("tracing-questions")  # 🔁 Full page reload
+
+    return JsonResponse({"error": "Invalid form or missing topic."}, status=400)
 
