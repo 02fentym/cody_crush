@@ -116,15 +116,6 @@
                 initDeleteCheckboxHandlers('{{ table_id }}');
             }
         });
-
-        // Clear the form container when a question is deleted
-        document.body.addEventListener('question-deleted', function () {
-            const container = document.getElementById('{{ form_container_id }}');
-            if (container) {
-                container.innerHTML = '';
-                console.log('Form container cleared after delete for {{ form_container_id }}');
-            }
-        });
     </script>
 
     <!-- Log HTMX events -->

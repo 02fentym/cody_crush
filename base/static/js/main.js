@@ -205,3 +205,16 @@ function initMonacoEditor() {
 }
 
 window.addEventListener("load", initMonacoEditor);
+
+
+// Close Modal on Escape
+document.addEventListener('keydown', function (event) {
+  if (event.key === 'Escape') {
+    const modal = document.getElementById('modal-wrapper');
+    if (modal && modal.checked) {
+      modal.checked = false;
+      console.log('Modal closed via Escape key');
+    }
+  }
+});
+

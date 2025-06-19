@@ -209,7 +209,7 @@ class TracingQuestionForm(forms.ModelForm):
             "language", "prompt", "expected_output", "explanation",
         ]
         widgets = {
-            "language": forms.Select(attrs={"class": "select select-sm select-bordered text-sm"}),
+            "language": forms.Select(attrs={"class": "select select-sm select-bordered text-sm auto-resize block"}),
             "prompt": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
             "expected_output": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
             "explanation": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),

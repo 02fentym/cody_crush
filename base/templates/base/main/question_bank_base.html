@@ -4,13 +4,9 @@
 {% block content %}
 <h1 class="text-3xl font-bold mb-2">{{ title }}</h1>
 
-<div class="flex flex-col h-screen">
+<div class="flex flex-col">
   <div id="{{ table_id }}-wrapper">
-    {% include table_template with questions=questions row_url_name=row_url_name form_container_id=form_container_id delete_url=delete_url sort_by=sort_by order=order hx_get_url=hx_get_url new_question_url=new_question_url %}
-  </div>
-
-  <div id="{{ form_container_id }}" class="mt-2 w-full h-[40vh]">
-    {# Form is injected using HTMX #}
+    {% include table_template with questions=questions row_url_name=row_url_name delete_url=delete_url sort_by=sort_by order=order hx_get_url=hx_get_url new_question_url=new_question_url %}
   </div>
 </div>
 {% endblock %}
