@@ -75,14 +75,18 @@
                 </thead>
                 <tbody>
                     {% for q in questions %}
-                    <tr hx-get="{% url row_url_name question_type q.id %}" hx-target="#{{ form_container_id }}" hx-swap="innerHTML"
-                        onclick="console.log('Row clicked for question {{ q.id }}'); if (this.dataset.clicked) return; this.dataset.clicked = true; setTimeout(() => delete this.dataset.clicked, 1000);"
-                        hx-on="htmx:beforeRequest: console.log('Sending request for question {{ q.id }}'); console.log('Target exists:', !!document.getElementById('{{ form_container_id }}'))"
+                    <tr 
+                        hx-get="{% url new_question_url question_type q.id %}" 
+                        hx-target="#modal-body" 
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('modal-wrapper').checked = true; console.log('Row clicked for question {{ q.id }}'); if (this.dataset.clicked) return; this.dataset.clicked = true; setTimeout(() => delete this.dataset.clicked, 1000);"
+                        hx-on="htmx:beforeRequest: console.log('Sending request for question {{ q.id }}');"
                         hx-on="htmx:afterRequest: console.log('Received response for question {{ q.id }}'); console.log('Response status:', event.detail.xhr.status)"
-                        hx-on="htmx:afterSwap: console.log('Swapped content into {{ form_container_id }}'); console.log('Target element after swap:', event.detail.target); console.log('Container content after swap:', document.getElementById('{{ form_container_id }}').innerHTML)"
+                        hx-on="htmx:afterSwap: console.log('Swapped content into modal-body'); console.log('Target element after swap:', event.detail.target); console.log('Modal content after swap:', document.getElementById('modal-body').innerHTML)"
                         hx-on="htmx:responseError: console.log('Error for question {{ q.id }}:', event.detail.xhr.status, event.detail.xhr.statusText)"
                         hx-on="htmx:abort: console.log('Request aborted for question {{ q.id }}')"
-                        class="cursor-pointer hover:bg-base-300 transition">
+                        class="cursor-pointer hover:bg-base-300 transition"
+                    >
                         <td class="w-12">
                             <input type="checkbox" name="question_ids" value="{{ q.id }}"
                                 class="checkbox checkbox-sm question-checkbox-{{ table_id }}" />
@@ -92,6 +96,7 @@
                         <td>{{ q.prompt|truncatechars:85 }}</td>
                         <td>{{ q.created|date:"Y-m-d" }}</td>
                     </tr>
+
                     {% endfor %}
                 </tbody>
             </table>

@@ -73,17 +73,29 @@ def question_bank_view(request, question_type):
 # Adds single question
 @allowed_roles(["teacher"])
 @login_required(login_url="login")
-def new_question_form(request, question_type):
+def new_question_form(request, question_type, question_id=None):
     config = QUESTION_TYPE_CONFIG.get(question_type)
     if not config:
         return HttpResponseServerError("Invalid question type.")
+
+    model = config["model"]
+    form_class = config["form"]
+    instance = None
+
+    if question_id:
+        instance = get_object_or_404(model, pk=question_id)
+
+    form = form_class(instance=instance)
+
     return render(request, "base/components/upload_questions_components/generic_question_form.html", {
-        "form": config["form"](),
+        "form": form,
         "topics": Topic.objects.all(),
         "submit_url_name": "submit-question",
         "question_type": question_type,
         "title": config["title"],
+        "question_id": question_id,
     })
+
 
 
 @allowed_roles(["teacher"])
@@ -94,15 +106,25 @@ def submit_question_view(request):
     if not config:
         return HttpResponseServerError("Invalid question type.")
 
-    form = config["form"](request.POST)
+    model = config["model"]
+    form_class = config["form"]
+
+    question_id = request.POST.get("question_id")
     topic_id = request.POST.get("topic_id")
-    if form.is_valid() and topic_id:
+    topic = get_object_or_404(Topic, id=topic_id) if topic_id else None
+
+    instance = get_object_or_404(model, pk=question_id) if question_id else None
+    form = form_class(request.POST, instance=instance)
+
+    if form.is_valid() and topic:
         question = form.save(commit=False)
-        question.topic = get_object_or_404(Topic, id=topic_id)
+        question.topic = topic
         question.save()
         return redirect("question-bank", question_type=question_type)
 
     return JsonResponse({"error": "Invalid form or missing topic."}, status=400)
+
+
 
 
 @allowed_roles(["teacher"])
