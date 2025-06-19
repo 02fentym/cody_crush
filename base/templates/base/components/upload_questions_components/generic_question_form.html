@@ -13,7 +13,7 @@
 
     <div class="form-control">
         <label class="label" for="topic_id">Select Topic</label>
-        <select name="topic_id" id="topic_id" class="select select-bordered w-full" required>
+        <select name="topic_id" id="topic_id" class="select select-bordered w-auto block" required>
             {% for topic in topics %}
                 <option value="{{ topic.id }}">{{ topic.unit.title }} → {{ topic.title }}</option>
             {% endfor %}
@@ -27,3 +27,12 @@
         <label for="modal-wrapper" class="btn">Cancel</label>
     </div>
 </form>
+<script>
+  requestAnimationFrame(() => {
+    const box = document.querySelector('.modal-box');
+    if (box) {
+      box.classList.add('max-w-5xl');
+      box.classList.remove('max-w-lg');
+    }
+  });
+</script>

@@ -191,13 +191,13 @@ class MultipleChoiceQuestionForm(forms.ModelForm):
             "correct_choice", "explanation"
         ]
         widgets = {
-            "language": forms.Select(attrs={"class": "select select-sm select-bordered text-sm"}),
-            "prompt": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
+            "language": forms.Select(attrs={"class": "select select-sm select-bordered text-sm w-auto block"}),
+            "prompt": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm", "rows": 1, "style": "overflow:hidden;", }),
             "choice_a": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
             "choice_b": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
             "choice_c": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
             "choice_d": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
-            "correct_choice": forms.Select(attrs={"class": "select select-sm select-bordered text-sm"}),
+            "correct_choice": forms.Select(attrs={"class": "select select-sm select-bordered text-sm w-auto block"}),
             "explanation": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
         }
 
