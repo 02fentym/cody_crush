@@ -79,6 +79,7 @@
                         hx-get="{% url new_question_url question_type q.id %}" 
                         hx-target="#modal-body" 
                         hx-swap="innerHTML"
+                        hx-trigger="click"
                         onclick="document.getElementById('modal-wrapper').checked = true; console.log('Row clicked for question {{ q.id }}'); if (this.dataset.clicked) return; this.dataset.clicked = true; setTimeout(() => delete this.dataset.clicked, 1000);"
                         hx-on="htmx:beforeRequest: console.log('Sending request for question {{ q.id }}');"
                         hx-on="htmx:afterRequest: console.log('Received response for question {{ q.id }}'); console.log('Response status:', event.detail.xhr.status)"
@@ -89,7 +90,7 @@
                     >
                         <td class="w-12">
                             <input type="checkbox" name="question_ids" value="{{ q.id }}"
-                                class="checkbox checkbox-sm question-checkbox-{{ table_id }}" />
+                                class="checkbox checkbox-sm question-checkbox-{{ table_id }}" onclick="event.stopPropagation()" />
                         </td>
                         <td>{{ q.topic.unit.title|truncatechars:30 }}</td>
                         <td>{{ q.topic.title|truncatechars:30 }}</td>
