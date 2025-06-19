@@ -13,8 +13,11 @@
             </button>
 
             <!-- Upload Questions Button -->
-            <button class="btn btn-secondary btn-sm btn-outline" hx-get="{% url hx_get_url %}" hx-target="#modal-body"
-                hx-swap="innerHTML" onclick="document.getElementById('modal-wrapper').checked = true">
+            <button class="btn btn-secondary btn-sm btn-outline"
+                hx-get="{% url 'upload-questions' question_type %}" 
+                hx-target="#modal-body"
+                hx-swap="innerHTML"
+                onclick="document.getElementById('modal-wrapper').checked = true">
                 + Upload Questions
             </button>
 

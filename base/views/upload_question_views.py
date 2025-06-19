@@ -1,7 +1,7 @@
 import csv
 import io
 
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseServerError
@@ -17,16 +17,18 @@ QUESTION_TYPE_CONFIG = {
     "multiple_choice": {
         "model": MultipleChoiceQuestion,
         "form": MultipleChoiceQuestionForm,
-        "hx_get_url": "upload-mc-questions",
+        "hx_get_url": "upload-questions",
         "table_id": "mc-table",
         "title": "Multiple Choice Questions",
+        "fields": ["prompt", "choice_a", "choice_b", "choice_c", "choice_d", "correct_choice", "explanation", "language"]
     },
     "tracing": {
         "model": TracingQuestion,
         "form": TracingQuestionForm,
-        "hx_get_url": "upload-tracing-questions",
+        "hx_get_url": "upload-questions",
         "table_id": "tracing-table",
         "title": "Tracing Questions",
+        "fields": ["prompt", "expected_output", "explanation", "language"]
     },
 }
 
@@ -68,6 +70,7 @@ def question_bank_view(request, question_type):
     return render(request, "base/main/question_bank_base.html", context)
 
 
+# Adds single question
 @allowed_roles(["teacher"])
 @login_required(login_url="login")
 def new_question_form(request, question_type):
@@ -149,27 +152,18 @@ def edit_question_view(request, question_type, question_id):
     })
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Bulk question upload
 @allowed_roles(["teacher"])
 @login_required(login_url="login")
-def upload_mc_questions(request):
+def upload_questions(request, question_type):
+    config = QUESTION_TYPE_CONFIG.get(question_type)
+    if not config:
+        return HttpResponseServerError("Invalid question type.")
+
     errors = []
-    sort_by = request.GET.get("sort_by", "created")
-    order = request.GET.get("order", "desc")
+    form_class = config["form"]
+    model = config["model"]
+    fields = config["fields"]
 
     if request.method == "POST":
         file = request.FILES.get("file")
@@ -180,139 +174,37 @@ def upload_mc_questions(request):
         else:
             try:
                 topic = Topic.objects.get(id=topic_id)
-            except Topic.DoesNotExist:
-                errors.append("Invalid topic selected.")
-                topic = None
+                data = file.read().decode("utf-8")
+                reader = csv.DictReader(io.StringIO(data))
 
-            if topic:
-                try:
-                    data = file.read().decode("utf-8")
-                    csv_file = io.StringIO(data)
-                    reader = csv.DictReader(csv_file)
+                for i, row in enumerate(reader, start=2):
+                    if any(not row.get(f) for f in fields):
+                        errors.append(f"Row {i}: Missing fields.")
+                        continue
 
-                    for i, row in enumerate(reader, start=2):
-                        result = question_data_validation(i, "multiple_choice", row)
-                        if result:
-                            errors.append(result)
-                            continue
+                    instance_data = {
+                        field: row[field].lower() if field == "correct_choice" else row[field]
+                        for field in fields if field != "language"
+                    }
+                    instance_data["language"] = Language.objects.filter(name__iexact=row.get("language", "").strip()).first()
+                    instance_data["topic"] = topic
 
-                        try:
-                            language_name = row.get("language", "").strip()
-                            language = Language.objects.filter(name__iexact=language_name).first()
+                    try:
+                        model.objects.create(**instance_data)
+                    except Exception as e:
+                        errors.append(f"Row {i}: Error: {e}")
 
-                            MultipleChoiceQuestion.objects.create(
-                                topic=topic,
-                                prompt=row["prompt"],
-                                choice_a=row["choice_a"],
-                                choice_b=row["choice_b"],
-                                choice_c=row["choice_c"],
-                                choice_d=row["choice_d"],
-                                correct_choice=row["correct_choice"].lower(),
-                                explanation=row["explanation"],
-                                language=language
-                            )
-                        except Exception as e:
-                            errors.append(f"Row {i}: Failed to create question. Error: {str(e)}")
-
-                except Exception as e:
-                    errors.append(f"Failed to read CSV: {str(e)}")
+            except Exception as e:
+                errors.append(str(e))
 
         if not errors:
-            ordering = sort_by if order == "asc" else f"-{sort_by}"
-            mc_questions = MultipleChoiceQuestion.objects.select_related("topic__unit").order_by(ordering)
-            return render(request, "base/components/upload_questions_components/question_bank_table.html", {
-                "questions": mc_questions,
-                "row_url_name": "edit-mc-question",
-                "form_container_id": "mc-edit-form-container",
-                "sort_by": sort_by,
-                "order": order,
-                "delete_url": "delete-selected-mc-questions",
-                "table_id": "mc-table",
-                "hx_get_url": "upload-mc-questions",  # ✅ REQUIRED for the upload button include
-                "upload_button": "base/components/upload_questions_components/upload_questions_button.html",  # ✅ ALSO REQUIRED
-            })
-
+            return redirect("question-bank", question_type=question_type)
 
     topics = Topic.objects.all()
-    return render(request, "base/components/upload_questions_components/upload_mc_questions_form.html", {
+    return render(request, "base/components/upload_questions_components/upload_questions_form.html", {
         "topics": topics,
         "errors": errors,
-        "table_id": "mc-table",
-    })
-
-
-
-### TRACING QUESTIONS
-
-
-
-
-@allowed_roles(["teacher"])
-@login_required(login_url="login")
-def upload_tracing_questions(request):
-    errors = []
-    sort_by = request.GET.get("sort_by", "created")
-    order = request.GET.get("order", "desc")
-
-    if request.method == "POST":
-        file = request.FILES.get("file")
-        topic_id = request.POST.get("topic_id")
-
-        if not file or not topic_id:
-            errors.append("All fields are required.")
-        else:
-            try:
-                topic = Topic.objects.get(id=topic_id)
-            except Topic.DoesNotExist:
-                errors.append("Invalid topic selected.")
-                topic = None
-
-            if topic:
-                try:
-                    data = file.read().decode("utf-8")
-                    csv_file = io.StringIO(data)
-                    reader = csv.DictReader(csv_file)
-
-                    for i, row in enumerate(reader, start=2):
-                        result = question_data_validation(i, "tracing", row)
-                        if result:
-                            errors.append(result)
-                            continue
-
-                        try:
-                            language_name = row.get("language", "").strip()
-                            language = Language.objects.filter(name__iexact=language_name).first()
-
-                            TracingQuestion.objects.create(
-                                topic=topic,
-                                prompt=row["prompt"],
-                                expected_output=row["expected_output"],
-                                explanation=row["explanation"],
-                                language=language
-                            )
-                        except Exception as e:
-                            errors.append(f"Row {i}: Failed to create question. Error: {str(e)}")
-
-                except Exception as e:
-                    errors.append(f"Failed to read CSV: {str(e)}")
-
-        if not errors:
-            ordering = sort_by if order == "asc" else f"-{sort_by}"
-            tracing_questions = TracingQuestion.objects.select_related("topic__unit").order_by(ordering)
-            return render(request, "base/components/upload_questions_components/question_bank_table.html", {
-                "questions": tracing_questions,
-                "row_url_name": "edit-tracing-question",
-                "form_container_id": "tracing-edit-form-container",
-                "sort_by": sort_by,
-                "order": order,
-                "delete_url": "delete-selected-tracing-questions",
-                "table_id": "tracing-table",  # ✅ Required
-                "hx_get_url": "upload-tracing-questions",  # ✅ Required
-                "upload_button": "base/components/upload_questions_components/upload_questions_button.html",  # ✅ Required
-            })
-
-    topics = Topic.objects.all()
-    return render(request, "base/components/upload_questions_components/upload_tracing_questions_form.html", {
-        "topics": topics,
-        "errors": errors
+        "table_id": config["table_id"],
+        "title": f"Upload {config['title']} (CSV)",
+        "question_type": question_type,  # ✅ Required for form action
     })
