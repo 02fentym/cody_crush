@@ -1,4 +1,3 @@
-console.log("main.js is running");
 
 // This function toggles the display of a form and clears its inputs when hidden
 function toggleForm(id) {
@@ -164,3 +163,45 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+// Monaco Editor
+function initMonacoEditor() {
+  const editorMount = document.getElementById("monaco-editor");
+  if (!editorMount) {
+    console.log("❌ #monaco-editor not found");
+    return;
+  }
+
+  require.config({
+    paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs' }
+  });
+
+  require(['vs/editor/editor.main'], function () {
+    const editor = monaco.editor.create(editorMount, {
+      value: 'print(sum(map(int, [input(), input()])))',
+      language: 'python',
+      theme: 'vs-dark',
+      fontSize: 14,
+    });
+
+    const form = document.querySelector("form[action='/submit-code/']");
+    const codeInput = document.getElementById("code-input");
+
+    if (!form || !codeInput) {
+      console.log("❌ form or code input not found");
+      return;
+    }
+
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const code = editor.getValue();
+      console.log("🔥 FINAL SUBMIT VALUE:", code);
+      codeInput.value = code;
+
+      setTimeout(() => form.submit(), 50);
+    });
+  });
+}
+
+window.addEventListener("load", initMonacoEditor);

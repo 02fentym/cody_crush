@@ -292,3 +292,45 @@ class StudentCourseEnrollment(models.Model):
 
     def __str__(self):
         return f"{self.student.username} enrolled in {self.course}"
+    
+
+class CodeQuestion(models.Model):
+    title = models.CharField(max_length=200)
+    prompt = models.TextField()
+    starter_code = models.TextField(blank=True, help_text="Code pre-filled for the student")
+    language = models.ForeignKey(Language, on_delete=models.CASCADE)
+    explanation = models.TextField(blank=True)
+
+    QUESTION_TYPE_CHOICES = [
+        ("stdin", "Standard Input"),
+        ("exec", "Python Exec Block"),  # for function/class-based testing
+    ]
+    question_type = models.CharField(
+        max_length=20,
+        choices=QUESTION_TYPE_CHOICES,
+        default="stdin",
+    )
+
+    def __str__(self):
+        return self.title
+
+
+class CodeTestCase(models.Model):
+    question = models.ForeignKey(CodeQuestion, on_delete=models.CASCADE, related_name="test_cases")
+    input_data = models.TextField(help_text="Raw stdin or Python test script (e.g., print(func(...)))")
+    expected_output = models.TextField()
+    is_hidden = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+
+    TEST_STYLE_CHOICES = [
+        ("stdin", "Standard Input"),
+        ("exec", "Python Exec Block"),
+    ]
+    test_style = models.CharField(
+        max_length=20,
+        choices=TEST_STYLE_CHOICES,
+        default="stdin"
+    )
+
+    def __str__(self):
+        return f"Test {self.order} for {self.question.title}"

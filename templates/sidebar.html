@@ -74,14 +74,14 @@
                 </summary>
                 <ul class="ml-4">
                     <li>
-                        <a href="{% url 'mc-questions' %}"
+                        <a href="{% url 'question-bank' 'multiple_choice' %}"
                             class="{% if request.resolver_match.url_name == 'mc-questions' %}bg-base-300 font-semibold{% endif %}">
                             Multiple Choice
                         </a>
 
                     </li>
                     <li class="">
-                        <a href="{% url 'tracing-questions' %}"
+                        <a href="{% url 'question-bank' 'tracing' %}"
                             class="{% if request.resolver_match.url_name == 'tracing-questions' %}bg-base-300 font-semibold{% endif %}">
                             Tracing
                         </a>

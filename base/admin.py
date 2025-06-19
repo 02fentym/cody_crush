@@ -2,7 +2,8 @@ from django.contrib import admin
 from .models import (
     Unit, Topic, Quiz, Answer, Profile, Course, Activity,
     QuizTemplate, Lesson, MultipleChoiceQuestion, TracingQuestion,
-    DmojExercise, ActivityCompletion, Language, CourseUnit, CourseTopic
+    DmojExercise, ActivityCompletion, Language, CourseUnit, CourseTopic,
+    CodeQuestion, CodeTestCase
 )
 
 # --- Customized Admin Classes ---
@@ -30,6 +31,20 @@ class ActivityCompletionAdmin(admin.ModelAdmin):
         return obj.activity.content_type.model
 
     activity_type.short_description = "Type"
+
+
+@admin.register(CodeQuestion)
+class CodeQuestionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'language')
+    search_fields = ('title', 'language')
+    list_filter = ('language',)
+
+
+@admin.register(CodeTestCase)
+class CodeTestCaseAdmin(admin.ModelAdmin):
+    list_display = ('id', 'question', 'input_data', 'expected_output', 'test_style')
+    search_fields = ('question__title', 'input_data', 'expected_output')
+    list_filter = ('question__language',)
 
 
 @admin.register(Course)

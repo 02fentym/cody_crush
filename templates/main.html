@@ -12,7 +12,6 @@
     <!-- Set DaisyUI theme here -->
     <script>
         const validThemes = [...window.VALID_LIGHT_THEMES, ...window.VALID_DARK_THEMES];
-        console.log("Valid themes:", validThemes);
 
         let theme = localStorage.getItem("theme");
 
@@ -91,6 +90,8 @@
         });
     </script>
 
+    <!-- Monaco Loader -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs/loader.js"></script>
 
 
     <!-- Main JavaScript -->

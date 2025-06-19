@@ -6,6 +6,10 @@ urlpatterns = [
     path("activity/<int:activity_id>/delete/", views.delete_activity, name="delete-activity"),
 
 
+### URLS for code_runner_views.py
+    path("submit-code/", views.submit_code, name="submit_code"),
+    path("dev/code-editor-test/", views.test_code_component),
+
 ### URLS for course_topic_views.py
     path("get-course-topic-form/<int:unit_id>/", views.get_course_topic_form, name="get-course-topic-form"),
     path("submit-course-topic-form/", views.submit_course_topic_form, name="submit-course-topic-form"),
@@ -79,17 +83,15 @@ urlpatterns = [
 
 
 ### URLS for upload_questions_views.py
-    # multiple choice questions
-    path("questions/multiple-choice/", views.mc_questions, name="mc-questions"),
-    path("questions/multiple-choice/upload/", views.upload_mc_questions, name="upload-mc-questions"),
-    path("mc-question/<int:question_id>/edit/", views.edit_mc_question, name="edit-mc-question"),
-    path("questions/multiple-choice/delete-selected/", views.delete_selected_mc_questions, name="delete-selected-mc-questions"),
+    # generic question bank
+    path("questions/submit/", views.submit_question_view, name="submit-question"),
+    path("questions/<str:question_type>/", views.question_bank_view, name="question-bank"),
+    path("questions/<str:question_type>/delete-selected/", views.delete_selected_questions, name="delete-selected-questions"),
+    path("questions/<str:question_type>/new/", views.new_question_form, name="new-question-form"),
+    path("questions/<str:question_type>/<int:question_id>/edit/", views.edit_question_view, name="edit-question"),
+    path("questions/<str:question_type>/upload/", views.upload_questions, name="upload-questions"),
 
-    # tracing questions
-    path("questions/tracing/", views.tracing_questions, name="tracing-questions"),
-    path("questions/tracing/upload/", views.upload_tracing_questions, name="upload-tracing-questions"),
-    path("tracing-question/<int:question_id>/edit/", views.edit_tracing_question, name="edit-tracing-question"),
-    path("questions/tracing-choice/delete-selected/", views.delete_selected_tracing_questions, name="delete-selected-tracing-questions"),
+
 
 ### URLS for user_views.py
     path("login/", views.login_user, name="login"),
