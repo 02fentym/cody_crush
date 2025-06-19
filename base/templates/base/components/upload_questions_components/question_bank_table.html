@@ -28,7 +28,7 @@
             </button>
 
         </div>
-        <div class="overflow-x-auto shadow rounded-lg mb-10 max-h-[200px]">
+        <div class="overflow-auto shadow rounded-lg mb-10 max-h-[600px]">
             <table class="table table-xs table-zebra w-full">
                 <thead class="sticky top-0 bg-base-200 z-10">
                     <tr>
@@ -101,8 +101,11 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <div id="scroll-fade-{{ table_id }}" class="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-base-100 to-transparent pointer-events-none hidden"></div>
         </div>
     </form>
+
+    <!-- Initialize the delete checkbox handlers -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             initDeleteCheckboxHandlers('{{ table_id }}');
@@ -123,9 +126,31 @@
             }
         });
     </script>
+
+    <!-- Log HTMX events -->
     <script>
         htmx.logger = function (elt, event, data) {
             console.log('HTMX Event:', event, 'Element:', elt, 'Data:', data);
         };
     </script>
+
+    <!-- Scroll fade -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const wrapper = document.querySelector("#{{ table_id }}-wrapper .overflow-auto");
+            const fade = document.getElementById("scroll-fade-{{ table_id }}");
+
+            const checkScroll = () => {
+                if (wrapper.scrollHeight > wrapper.clientHeight) {
+                    fade.classList.remove("hidden");
+                } else {
+                    fade.classList.add("hidden");
+                }
+            };
+
+            checkScroll();
+            window.addEventListener("resize", checkScroll);
+        });
+    </script>
+
 </div>
