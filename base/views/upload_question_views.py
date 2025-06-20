@@ -17,7 +17,6 @@ QUESTION_TYPE_CONFIG = {
     "multiple_choice": {
         "model": MultipleChoiceQuestion,
         "form": MultipleChoiceQuestionForm,
-        "hx_get_url": "upload-questions",
         "table_id": "mc-table",
         "title": "Multiple Choice Questions",
         "fields": ["prompt", "choice_a", "choice_b", "choice_c", "choice_d", "correct_choice", "explanation", "language"]
@@ -25,7 +24,6 @@ QUESTION_TYPE_CONFIG = {
     "tracing": {
         "model": TracingQuestion,
         "form": TracingQuestionForm,
-        "hx_get_url": "upload-questions",
         "table_id": "tracing-table",
         "title": "Tracing Questions",
         "fields": ["prompt", "expected_output", "explanation", "language"]
@@ -55,16 +53,9 @@ def question_bank_view(request, question_type):
         "courses": get_all_courses(request.user.profile.role, request.user),
         "title": config["title"],
         "questions": model.objects.select_related("topic__unit").order_by(ordering),
-        "upload_button": "base/components/upload_questions_components/upload_questions_button.html",
-        "hx_get_url": config["hx_get_url"],
-        "table_template": "base/components/upload_questions_components/question_bank_table.html",
-        "row_url_name": "edit-question",
         "table_id": config["table_id"],
-        "form_container_id": f"{question_type}-edit-form-container",
         "sort_by": sort_by,
         "order": order,
-        "delete_url": "delete-selected-questions",
-        "new_question_url": "new-question-form",
         "question_type": question_type,
     }
     return render(request, "base/main/question_bank_base.html", context)
@@ -168,7 +159,6 @@ def edit_question_view(request, question_type, question_id):
         "form": form,
         "question": question,
         "post_url": "edit-question",
-        "form_container_id": f"{question_type}-edit-form-container",
         "table_id": config["table_id"],
         "question_type": question_type,
     })
