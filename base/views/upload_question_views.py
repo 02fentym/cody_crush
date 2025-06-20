@@ -1,7 +1,7 @@
 import csv
 import io
 
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseServerError
@@ -81,7 +81,6 @@ def new_question_form(request, question_type, question_id=None):
     return render(request, "base/components/upload_questions_components/generic_question_form.html", {
         "form": form,
         "topics": Topic.objects.all(),
-        "submit_url_name": "submit-question",
         "question_type": question_type,
         "title": config["title"],
         "question_id": question_id,
@@ -158,7 +157,6 @@ def edit_question_view(request, question_type, question_id):
     return render(request, "base/components/upload_questions_components/edit_question_form.html", {
         "form": form,
         "question": question,
-        "post_url": "edit-question",
         "table_id": config["table_id"],
         "question_type": question_type,
     })
