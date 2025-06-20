@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Course, Unit, Topic, Lesson, DmojExercise, Profile, CourseUnit, CourseTopic, MultipleChoiceQuestion, TracingQuestion
+from .models import Course, Unit, Topic, Lesson, DmojExercise, Profile, CourseUnit, CourseTopic, MultipleChoiceQuestion, TracingQuestion, CodeQuestion
 
 
 class UserForm(UserCreationForm):
@@ -214,3 +214,20 @@ class TracingQuestionForm(forms.ModelForm):
             "expected_output": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
             "explanation": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
         }
+
+
+class CodeQuestionForm(forms.ModelForm):
+    class Meta:
+        model = CodeQuestion
+        fields = [
+            "title", "prompt", "starter_code", "language", "explanation", "question_type"
+        ]
+        widgets = {
+            "title": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
+            "prompt": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
+            "starter_code": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
+            "language": forms.Select(attrs={"class": "select select-sm select-bordered text-sm auto-resize block"}),
+            "explanation": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
+            "question_type": forms.Select(attrs={"class": "select select-sm select-bordered text-sm auto-resize block"}),
+        }
+        

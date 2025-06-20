@@ -8,8 +8,8 @@ from django.http import HttpResponseServerError
 from django.views.decorators.http import require_POST
 
 from base.decorators import allowed_roles
-from base.forms import MultipleChoiceQuestionForm, TracingQuestionForm
-from base.models import Topic, MultipleChoiceQuestion, TracingQuestion, Course, Language
+from base.forms import MultipleChoiceQuestionForm, TracingQuestionForm, CodeQuestionForm
+from base.models import Topic, MultipleChoiceQuestion, TracingQuestion, Course, Language, CodeQuestion
 
 
 # Question type configurations
@@ -28,6 +28,15 @@ QUESTION_TYPE_CONFIG = {
         "title": "Tracing Questions",
         "fields": ["prompt", "expected_output", "explanation", "language"]
     },
+    "code": {
+        "model": CodeQuestion,
+        "form": CodeQuestionForm,
+        "table_id": "code-table",
+        "title": "Programming Questions",
+        "fields": [
+            "title", "prompt", "starter_code", "language", "explanation", "question_type"
+        ],
+    }
 }
 
 

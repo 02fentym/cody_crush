@@ -88,7 +88,6 @@ urlpatterns = [
     path("questions/<str:question_type>/delete-selected/", views.delete_selected_questions, name="delete-selected-questions"),
     path("questions/<str:question_type>/new/", views.new_question_form, name="new-question-form"),
     path('questions/<str:question_type>/<int:question_id>/edit/', views.new_question_form, name='new-question-form'),
-    #path("questions/<str:question_type>/<int:question_id>/edit/", views.edit_question_view, name="edit-question"),
     path("questions/<str:question_type>/upload/", views.upload_questions, name="upload-questions"),
 
 

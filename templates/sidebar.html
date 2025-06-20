@@ -78,14 +78,17 @@
                             class="{% if request.resolver_match.url_name == 'mc-questions' %}bg-base-300 font-semibold{% endif %}">
                             Multiple Choice
                         </a>
-
                     </li>
                     <li class="">
                         <a href="{% url 'question-bank' 'tracing' %}"
                             class="{% if request.resolver_match.url_name == 'tracing-questions' %}bg-base-300 font-semibold{% endif %}">
                             Tracing
                         </a>
-
+                    </li>
+                    <li>
+                        <a href="{% url 'question-bank' 'code' %}">
+                            Coding
+                        </a>
                     </li>
                 </ul>
             </details>

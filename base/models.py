@@ -295,6 +295,7 @@ class StudentCourseEnrollment(models.Model):
     
 
 class CodeQuestion(models.Model):
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     prompt = models.TextField()
     starter_code = models.TextField(blank=True, help_text="Code pre-filled for the student")
@@ -310,6 +311,8 @@ class CodeQuestion(models.Model):
         choices=QUESTION_TYPE_CHOICES,
         default="stdin",
     )
+
+    created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
