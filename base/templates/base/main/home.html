@@ -7,7 +7,7 @@
 <!-- Join Course Button -->
 {% if user.profile.role == "student" %}
 <div class="mb-4">
-    <button class="btn btn-secondary" hx-get="{% url 'get-enrolment-form' %}" hx-target="#modal-body"
+    <button class="btn btn-secondary btn-outline" hx-get="{% url 'get-enrolment-form' %}" hx-target="#modal-body"
         hx-swap="innerHTML" onclick="document.getElementById('modal-wrapper').checked = true">
         + Join a Course
     </button>

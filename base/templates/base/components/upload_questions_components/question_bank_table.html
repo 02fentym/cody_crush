@@ -13,6 +13,7 @@
             </button>
 
             <!-- Upload Questions Button -->
+            {% if question_type != "code" %}
             <button class="btn btn-secondary btn-sm btn-outline"
                 hx-get="{% url 'upload-questions' question_type %}" 
                 hx-target="#modal-body"
@@ -20,6 +21,7 @@
                 onclick="document.getElementById('modal-wrapper').checked = true">
                 + Upload Questions
             </button>
+            {% endif %}
 
             <!-- Delete Selected Button -->
             <button type="submit" class="btn btn-error btn-sm btn-outline" id="delete-selected-btn-{{ table_id }}"

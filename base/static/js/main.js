@@ -217,35 +217,3 @@ document.addEventListener('keydown', function (event) {
         }
     }
 });
-
-
-
-
-document.body.addEventListener("htmx:afterSwap", function (e) {
-    console.log("htmx swap triggered:", e.target.id);
-    if (e.target.id === "modal-body") {
-        const textarea = document.querySelector("#markdown-editor");
-        if (textarea && !textarea.dataset.editorAttached) {
-            textarea.style.display = "none";
-
-            const editorEl = document.createElement("div");
-            textarea.parentNode.insertBefore(editorEl, textarea.nextSibling);
-
-            const editor = new toastui.Editor({
-                el: editorEl,
-                height: "300px",
-                initialEditType: "markdown",
-                previewStyle: "vertical",
-                initialValue: textarea.value,
-                events: {
-                    change: () => {
-                        textarea.value = editor.getMarkdown();
-                    }
-                }
-            });
-
-            textarea.dataset.editorAttached = "true";
-        }
-    }
-    console.log("Found textarea?", textarea);
-});

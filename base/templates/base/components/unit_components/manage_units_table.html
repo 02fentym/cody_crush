@@ -5,7 +5,7 @@
         <div class="mb-4 flex gap-2">
             <button hx-get="{% url 'get-unit-form' %}" hx-target="#modal-body" hx-swap="innerHTML"
                     onclick="document.getElementById('modal-wrapper').checked = true"
-                    class="btn btn-primary btn-sm">
+                    class="btn btn-primary btn-sm btn-outline">
                 + Add Unit
             </button>
             <button type="submit" class="btn btn-error btn-sm" id="delete-selected-btn" disabled>
