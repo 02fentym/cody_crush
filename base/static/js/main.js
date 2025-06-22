@@ -165,43 +165,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Monaco Editor
 function initMonacoEditor() {
-  const editorMount = document.getElementById("monaco-editor");
-  if (!editorMount) {
-    console.log("❌ #monaco-editor not found");
-    return;
-  }
-
-  require.config({
-    paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs' }
-  });
-
-  require(['vs/editor/editor.main'], function () {
-    const editor = monaco.editor.create(editorMount, {
-      value: 'print(sum(map(int, [input(), input()])))',
-      language: 'python',
-      theme: 'vs-dark',
-      fontSize: 14,
-    });
-
-    const form = document.querySelector("form[action='/submit-code/']");
-    const codeInput = document.getElementById("code-input");
-
-    if (!form || !codeInput) {
-      console.log("❌ form or code input not found");
-      return;
+    const editorMount = document.getElementById("monaco-editor");
+    if (!editorMount) {
+        console.log("❌ #monaco-editor not found");
+        return;
     }
 
-
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      const code = editor.getValue();
-      console.log("🔥 FINAL SUBMIT VALUE:", code);
-      codeInput.value = code;
-
-      setTimeout(() => form.submit(), 50);
+    require.config({
+        paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs' }
     });
-  });
+
+    require(['vs/editor/editor.main'], function () {
+        const editor = monaco.editor.create(editorMount, {
+            value: 'print(sum(map(int, [input(), input()])))',
+            language: 'python',
+            theme: 'vs-dark',
+            fontSize: 14,
+        });
+
+        const form = document.querySelector("form[action='/submit-code/']");
+        const codeInput = document.getElementById("code-input");
+
+        if (!form || !codeInput) {
+            console.log("❌ form or code input not found");
+            return;
+        }
+
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const code = editor.getValue();
+            console.log("🔥 FINAL SUBMIT VALUE:", code);
+            codeInput.value = code;
+
+            setTimeout(() => form.submit(), 50);
+        });
+    });
 }
 
 window.addEventListener("load", initMonacoEditor);
@@ -209,12 +209,43 @@ window.addEventListener("load", initMonacoEditor);
 
 // Close Modal on Escape
 document.addEventListener('keydown', function (event) {
-  if (event.key === 'Escape') {
-    const modal = document.getElementById('modal-wrapper');
-    if (modal && modal.checked) {
-      modal.checked = false;
-      console.log('Modal closed via Escape key');
+    if (event.key === 'Escape') {
+        const modal = document.getElementById('modal-wrapper');
+        if (modal && modal.checked) {
+            modal.checked = false;
+            console.log('Modal closed via Escape key');
+        }
     }
-  }
 });
 
+
+
+
+document.body.addEventListener("htmx:afterSwap", function (e) {
+    console.log("htmx swap triggered:", e.target.id);
+    if (e.target.id === "modal-body") {
+        const textarea = document.querySelector("#markdown-editor");
+        if (textarea && !textarea.dataset.editorAttached) {
+            textarea.style.display = "none";
+
+            const editorEl = document.createElement("div");
+            textarea.parentNode.insertBefore(editorEl, textarea.nextSibling);
+
+            const editor = new toastui.Editor({
+                el: editorEl,
+                height: "300px",
+                initialEditType: "markdown",
+                previewStyle: "vertical",
+                initialValue: textarea.value,
+                events: {
+                    change: () => {
+                        textarea.value = editor.getMarkdown();
+                    }
+                }
+            });
+
+            textarea.dataset.editorAttached = "true";
+        }
+    }
+    console.log("Found textarea?", textarea);
+});

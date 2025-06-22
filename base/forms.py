@@ -223,8 +223,8 @@ class CodeQuestionForm(forms.ModelForm):
             "title", "prompt", "starter_code", "language", "explanation", "question_type"
         ]
         widgets = {
-            "title": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
-            "prompt": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
+            "title": forms.TextInput(attrs={"class": "input input-sm input-bordered text-sm w-full"}),
+            "prompt": forms.Textarea(attrs={"id": "markdown-editor", "rows": 1, "style": "overflow:hidden; display:none;", }),
             "starter_code": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
             "language": forms.Select(attrs={"class": "select select-sm select-bordered text-sm auto-resize block"}),
             "explanation": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),

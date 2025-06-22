@@ -2,10 +2,10 @@
     {% csrf_token %}
 
     {% if question_type %}
-        <input type="hidden" name="question_type" value="{{ question_type }}">
+    <input type="hidden" name="question_type" value="{{ question_type }}">
     {% endif %}
     {% if question_id %}
-        <input type="hidden" name="question_id" value="{{ question_id }}">
+    <input type="hidden" name="question_id" value="{{ question_id }}">
     {% endif %}
 
 
@@ -15,7 +15,7 @@
         <label class="label" for="topic_id">Select Topic</label>
         <select name="topic_id" id="topic_id" class="select select-bordered w-auto block" required>
             {% for topic in topics %}
-                <option value="{{ topic.id }}">{{ topic.unit.title }} → {{ topic.title }}</option>
+            <option value="{{ topic.id }}">{{ topic.unit.title }} → {{ topic.title }}</option>
             {% endfor %}
         </select>
     </div>
@@ -27,12 +27,94 @@
         <label for="modal-wrapper" class="btn">Cancel</label>
     </div>
 </form>
+
+<!-- Adjust the width of the modal box -->
 <script>
-  requestAnimationFrame(() => {
-    const box = document.querySelector('.modal-box');
-    if (box) {
-      box.classList.add('max-w-5xl');
-      box.classList.remove('max-w-lg');
+    requestAnimationFrame(() => {
+        const box = document.querySelector('.modal-box');
+        if (box) {
+            box.classList.add('max-w-5xl');
+            box.classList.remove('max-w-lg');
+        }
+    });
+</script>
+
+
+<!-- Toast UI Editor Customization -->
+<style>
+    /* Keep layout intact — just override colors */
+    .toastui-editor-defaultUI,
+    .toastui-editor-contents {
+        background-color: #ffffff;
+        color: #1f2937;
+        /* slate-800 */
     }
-  });
+
+    .toastui-editor-contents pre,
+    .toastui-editor-contents code {
+        background-color: #f3f4f6;
+        /* gray-100 */
+        color: #111827;
+        /* gray-900 */
+    }
+
+    /* Optional: force borders and icons to look normal */
+    .toastui-editor-defaultUI .toastui-editor-toolbar {
+        border-bottom: 1px solid #e5e7eb;
+        /* gray-200 */
+    }
+
+    .toastui-editor-toolbar-icons button {
+        filter: none !important;
+    }
+</style>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let editor = null;
+
+        function initializeEditor() {
+            const editorElement = document.querySelector('#markdown-editor');
+            if (editorElement && !editor) {
+                editorElement.style.display = 'none'; // Reinforce hiding
+                editor = new toastui.Editor({
+                    el: editorElement,
+                    height: '300px',
+                    initialEditType: 'markdown',
+                    previewStyle: 'vertical'
+                });
+                const form = editorElement.closest('form');
+                form.addEventListener('submit', () => {
+                    editorElement.value = editor.getMarkdown();
+                });
+            }
+        }
+
+        function destroyEditor() {
+            if (editor) {
+                editor.destroy();
+                editor = null;
+            }
+        }
+
+        initializeEditor();
+
+        const modal = document.querySelector('#modal-wrapper');
+        if (modal) {
+            modal.addEventListener('change', function (e) {
+                if (!modal.checked) {
+                    destroyEditor();
+                }
+            });
+        }
+
+        document.body.addEventListener('htmx:afterSwap', function (evt) {
+            if (evt.detail.elt.closest('.modal-box')) {
+                destroyEditor();
+                initializeEditor();
+            }
+        });
+    });
 </script>
