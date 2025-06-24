@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Course, Unit, Topic, Lesson, DmojExercise, Profile, CourseUnit, CourseTopic, MultipleChoiceQuestion, TracingQuestion, CodeQuestion
+from .models import Course, Unit, Topic, Lesson, DmojExercise, Profile, CourseUnit, CourseTopic, MultipleChoiceQuestion, TracingQuestion, CodeQuestion, CodeTestCase
 
 
 class UserForm(UserCreationForm):
@@ -217,13 +217,21 @@ class TracingQuestionForm(forms.ModelForm):
 
 
 class CodeQuestionForm(forms.ModelForm):
+    zip_file = forms.FileField(
+        required=False,
+        help_text="Upload a .zip file to import test cases",
+        widget=forms.ClearableFileInput(attrs={
+            "class": "file-input file-input-bordered file-input-sm auto-resize block text-sm"
+        })
+    )
+
     class Meta:
         model = CodeQuestion
         fields = [
             "title", "prompt", "starter_code", "language", "explanation", "question_type"
         ]
         widgets = {
-            "title": forms.TextInput(attrs={"class": "input input-sm input-bordered text-sm w-full"}),
+            "title": forms.TextInput(attrs={"class": "input input-sm input-bordered text-sm block"}),
             "prompt": forms.Textarea(attrs={"id": "markdown-editor", "rows": 1, "style": "overflow:hidden; display:none;", }),
             "starter_code": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
             "language": forms.Select(attrs={"class": "select select-sm select-bordered text-sm auto-resize block"}),
@@ -231,3 +239,24 @@ class CodeQuestionForm(forms.ModelForm):
             "question_type": forms.Select(attrs={"class": "select select-sm select-bordered text-sm auto-resize block"}),
         }
         
+
+class CodeTestCaseForm(forms.ModelForm):
+    class Meta:
+        model = CodeTestCase
+        fields = ["input_data", "expected_output", "order", "test_style"]
+        widgets = {
+            "input_data": forms.Textarea(attrs={
+                "class": "textarea textarea-sm textarea-bordered w-full",
+                "rows": 3
+            }),
+            "expected_output": forms.Textarea(attrs={
+                "class": "textarea textarea-sm textarea-bordered w-full",
+                "rows": 3
+            }),
+            "order": forms.NumberInput(attrs={
+                "class": "input input-sm input-bordered w-full"
+            }),
+            "test_style": forms.Select(attrs={
+                "class": "select select-sm select-bordered w-full"
+            }),
+        }

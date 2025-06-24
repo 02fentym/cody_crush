@@ -1,0 +1,170 @@
+{% extends "main.html" %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">
+    {% if action == "add" %}Add{% else %}Edit{% endif %} Code Question
+</h1>
+
+<form method="POST" enctype="multipart/form-data" class="space-y-6">
+    {% csrf_token %}
+
+    <div class="form-control">
+        <label class="label text-base-content" for="topic_id">Select Topic</label>
+        <select name="topic_id" id="topic_id" class="select select-bordered w-auto block" required>
+            {% for topic in topics %}
+            <option value="{{ topic.id }}" {% if question and question.topic.id == topic.id %}selected{% endif %}>
+                {{ topic.unit.title }} → {{ topic.title }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    {{ form.as_p }}
+
+    <div class="flex gap-4">
+        <button type="submit" class="btn btn-primary btn-outline">Save</button>
+        <a href="{% url 'question-bank' 'code' %}" class="btn">Cancel</a>
+    </div>
+</form>
+
+<!-- Show Test Cases-->
+<h2 class="text-lg font-semibold mt-10 mb-4">Test Cases</h2>
+
+<!-- Add Test Case Button -->
+{% if question %}
+<div class="mt-8">
+    <button
+        class="btn btn-secondary btn-outline"
+        hx-get="{% url 'code-testcase-form' question.id %}"
+        hx-target="#modal-body"
+        hx-swap="innerHTML"
+        onclick="document.getElementById('modal-wrapper').checked = true"
+    >
+        + Add Test Case
+    </button>
+</div>
+{% endif %}
+
+
+<form method="POST" action="{% url 'delete-code-testcases' question.id %}"
+    onsubmit="return confirm('Delete selected test cases?');">
+    {% csrf_token %}
+    <div class="overflow-auto max-h-[500px] shadow rounded-lg">
+        <table class="table table-xs table-zebra w-full">
+            <thead class="sticky top-0 bg-base-200 z-10">
+                <tr>
+                    <th class="w-12">
+                        <input type="checkbox" id="select-all" class="checkbox checkbox-sm" />
+                    </th>
+                    <th>Input</th>
+                    <th>Expected Output</th>
+                    <th>Style</th>
+                    <th>Order</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for case in question.test_cases.all %}
+                <tr hx-get="{% url 'code-testcase-form' question.id case.id %}" hx-target="#modal-body"
+                    hx-swap="innerHTML" onclick="document.getElementById('modal-wrapper').checked = true"
+                    class="cursor-pointer hover:bg-base-300 transition">
+                    <td>
+                        <input type="checkbox" name="testcase_ids" value="{{ case.id }}" class="checkbox checkbox-sm"
+                            onclick="event.stopPropagation()" />
+                    </td>
+                    <td>
+                        <pre>{{ case.input_data|truncatechars:50 }}</pre>
+                    </td>
+                    <td>
+                        <pre>{{ case.expected_output|truncatechars:50 }}</pre>
+                    </td>
+                    <td>{{ case.test_style }}</td>
+                    <td>{{ case.order }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <button type="submit" class="btn btn-error btn-sm mt-4" disabled id="delete-selected-btn">Delete Selected</button>
+</form>
+
+
+
+
+<!-- Toast UI Editor -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const textarea = document.querySelector("#markdown-editor");
+        if (textarea && !textarea.dataset.editorLoaded) {
+            textarea.style.display = "none";
+            const editorContainer = document.createElement("div");
+            textarea.parentNode.insertBefore(editorContainer, textarea);
+            const editor = new toastui.Editor({
+                el: editorContainer,
+                height: "300px",
+                initialEditType: "markdown",
+                previewStyle: "vertical",
+                initialValue: textarea.value,
+                events: {
+                    change: () => {
+                        textarea.value = editor.getMarkdown();
+                    }
+                }
+            });
+            textarea.dataset.editorLoaded = "true";
+        }
+    });
+</script>
+
+
+
+<!-- Toast UI Editor Customization -->
+<style>
+    /* Keep layout intact — just override colors */
+    .toastui-editor-defaultUI,
+    .toastui-editor-contents {
+        background-color: #ffffff;
+        color: #1f2937;
+        /* slate-800 */
+    }
+
+    .toastui-editor-contents pre,
+    .toastui-editor-contents code {
+        background-color: #f3f4f6;
+        /* gray-100 */
+        color: #111827;
+        /* gray-900 */
+    }
+
+    /* Optional: force borders and icons to look normal */
+    .toastui-editor-defaultUI .toastui-editor-toolbar {
+        border-bottom: 1px solid #e5e7eb;
+        /* gray-200 */
+    }
+
+    .toastui-editor-toolbar-icons button {
+        filter: none !important;
+    }
+</style>
+
+<!-- Enable Delete Selected Button -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const checkboxes = document.querySelectorAll("input[name='testcase_ids']");
+    const selectAll = document.getElementById("select-all");
+    const deleteBtn = document.getElementById("delete-selected-btn");
+
+    function updateDeleteButton() {
+      const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+      deleteBtn.disabled = !anyChecked;
+    }
+
+    checkboxes.forEach(cb => cb.addEventListener("change", updateDeleteButton));
+    selectAll.addEventListener("change", (e) => {
+      checkboxes.forEach(cb => cb.checked = e.target.checked);
+      updateDeleteButton();
+    });
+  });
+</script>
+
+
+{% endblock %}

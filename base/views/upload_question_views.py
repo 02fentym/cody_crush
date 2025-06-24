@@ -1,15 +1,16 @@
 import csv
 import io
+from base.utils import extract_code_question_zip, extract_code_question_yaml
 
-from django.http import JsonResponse
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseServerError
 from django.views.decorators.http import require_POST
 
 from base.decorators import allowed_roles
-from base.forms import MultipleChoiceQuestionForm, TracingQuestionForm, CodeQuestionForm
-from base.models import Topic, MultipleChoiceQuestion, TracingQuestion, Course, Language, CodeQuestion
+from base.forms import MultipleChoiceQuestionForm, TracingQuestionForm, CodeQuestionForm, CodeTestCaseForm
+from base.models import Topic, MultipleChoiceQuestion, TracingQuestion, Course, Language, CodeQuestion, CodeTestCase
 
 
 # Question type configurations
@@ -227,3 +228,88 @@ def upload_questions(request, question_type):
         "title": f"Upload {config['title']} (CSV)",
         "question_type": question_type,  # ✅ Required for form action
     })
+
+
+# Code Question Views
+from base.utils import extract_code_question_zip, extract_code_question_yaml
+
+@login_required
+@allowed_roles(["teacher"])
+def code_question(request, action, question_id=None):
+    if action not in ["add", "edit"]:
+        return HttpResponseBadRequest("Invalid action.")
+
+    instance = get_object_or_404(CodeQuestion, id=question_id) if action == "edit" else None
+    form = CodeQuestionForm(request.POST or None, request.FILES or None, instance=instance)
+
+    context = {"form": form, "question": instance, "action": action, "topics": Topic.objects.all()}
+
+    if request.method == "POST" and form.is_valid():
+        question = form.save(commit=False)
+        topic_id = request.POST.get("topic_id")
+        if topic_id:
+            question.topic = get_object_or_404(Topic, id=topic_id)
+        question.save()
+
+        # ✅ Delete existing test cases on edit
+        if action == "edit":
+            question.test_cases.all().delete()
+
+        # ✅ Handle uploaded file
+        uploaded_file = form.cleaned_data.get("zip_file")
+        if uploaded_file:
+            filename = uploaded_file.name.lower()
+
+            if filename.endswith(".zip"):
+                test_cases, _ = extract_code_question_zip(uploaded_file)
+            elif filename.endswith(".yaml") or filename.endswith(".yml"):
+                test_cases, _ = extract_code_question_yaml(uploaded_file)
+            else:
+                form.add_error("zip_file", "Unsupported file type. Upload a .zip or .yaml file.")
+                return render(request, "base/main/code_question.html", context)
+
+            for case in test_cases:
+                CodeTestCase.objects.create(
+                    question=question,
+                    input_data=case["input_data"],
+                    expected_output=case["expected_output"],
+                    order=case["order"],
+                    test_style=case["test_style"],
+                )
+
+        return redirect("question-bank", question_type="code")
+
+    return render(request, "base/main/code_question.html", context)
+
+
+@login_required
+@allowed_roles(["teacher"])
+def code_testcase_form(request, question_id, testcase_id=None):
+    question = get_object_or_404(CodeQuestion, id=question_id)
+
+    instance = None
+    if testcase_id:
+        instance = get_object_or_404(CodeTestCase, id=testcase_id, question=question)
+
+    form = CodeTestCaseForm(request.POST or None, instance=instance)
+
+    if request.method == "POST":
+        if form.is_valid():
+            testcase = form.save(commit=False)
+            testcase.question = question
+            testcase.save()
+            return redirect("code-question", action="edit", question_id=question.id)
+
+    context = {"form": form, "question": question, "testcase": instance}
+    return render(request, "base/components/upload_questions_components/code_testcase_form.html", context)
+
+
+@login_required
+@allowed_roles(["teacher"])
+@require_POST
+def delete_code_testcases(request, question_id):
+    question = get_object_or_404(CodeQuestion, id=question_id)
+    ids = request.POST.getlist("testcase_ids")
+    if ids:
+        CodeTestCase.objects.filter(id__in=ids, question=question).delete()
+    return redirect("code-question", action="edit", question_id=question_id)

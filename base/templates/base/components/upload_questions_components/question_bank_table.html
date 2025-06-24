@@ -6,11 +6,18 @@
         <div class="mb-4 flex gap-2">
 
             <!-- New Question Button -->
-            <button class="btn btn-primary btn-sm btn-outline" hx-get="{% url 'new-question-form' question_type %}"
+            {% if question_type == "code" %}
+        <a href="{% url 'code-question' action='add' %}" class="btn btn-primary btn-sm btn-outline">
+            + Add Question
+        </a>
+            {% else %}
+            <button class="btn btn-primary btn-sm btn-outline"
+                hx-get="{% url 'new-question-form' question_type %}"
                 hx-target="#modal-body" hx-swap="innerHTML"
                 onclick="document.getElementById('modal-wrapper').checked = true">
                 + Add Question
             </button>
+            {% endif %}
 
             <!-- Upload Questions Button -->
             {% if question_type != "code" %}
@@ -77,31 +84,39 @@
                 </thead>
                 <tbody>
                     {% for q in questions %}
-                    <tr 
-                        hx-get="{% url 'new-question-form' question_type q.id %}" 
-                        hx-target="#modal-body" 
-                        hx-swap="innerHTML"
-                        hx-trigger="click"
-                        onclick="document.getElementById('modal-wrapper').checked = true; console.log('Row clicked for question {{ q.id }}'); if (this.dataset.clicked) return; this.dataset.clicked = true; setTimeout(() => delete this.dataset.clicked, 1000);"
-                        hx-on="htmx:beforeRequest: console.log('Sending request for question {{ q.id }}');"
-                        hx-on="htmx:afterRequest: console.log('Received response for question {{ q.id }}'); console.log('Response status:', event.detail.xhr.status)"
-                        hx-on="htmx:afterSwap: console.log('Swapped content into modal-body'); console.log('Target element after swap:', event.detail.target); console.log('Modal content after swap:', document.getElementById('modal-body').innerHTML)"
-                        hx-on="htmx:responseError: console.log('Error for question {{ q.id }}:', event.detail.xhr.status, event.detail.xhr.statusText)"
-                        hx-on="htmx:abort: console.log('Request aborted for question {{ q.id }}')"
+                    <tr
+                        {% if question_type == "code" %}
+                            onclick="window.location.href='{% url 'code-question' action='edit' question_id=q.id %}'"
+                        {% else %}
+                            hx-get="{% url 'new-question-form' question_type q.id %}"
+                            hx-target="#modal-body"
+                            hx-swap="innerHTML"
+                            hx-trigger="click"
+                            onclick="document.getElementById('modal-wrapper').checked = true;
+                                    if (this.dataset.clicked) return;
+                                    this.dataset.clicked = true;
+                                    setTimeout(() => delete this.dataset.clicked, 1000);"
+                            hx-on="htmx:beforeRequest: console.log('Sending request for question {{ q.id }}');"
+                            hx-on="htmx:afterRequest: console.log('Received response for question {{ q.id }}');"
+                            hx-on="htmx:afterSwap: console.log('Swapped content into modal-body');"
+                            hx-on="htmx:responseError: console.log('Error for question {{ q.id }}');"
+                            hx-on="htmx:abort: console.log('Request aborted for question {{ q.id }}');"
+                        {% endif %}
                         class="cursor-pointer hover:bg-base-300 transition"
                     >
                         <td class="w-12">
                             <input type="checkbox" name="question_ids" value="{{ q.id }}"
-                                class="checkbox checkbox-sm question-checkbox-{{ table_id }}" onclick="event.stopPropagation()" />
+                                class="checkbox checkbox-sm question-checkbox-{{ table_id }}"
+                                onclick="event.stopPropagation()" />
                         </td>
                         <td>{{ q.topic.unit.title|truncatechars:30 }}</td>
                         <td>{{ q.topic.title|truncatechars:30 }}</td>
                         <td>{{ q.prompt|truncatechars:85 }}</td>
                         <td>{{ q.created|date:"Y-m-d" }}</td>
                     </tr>
-
                     {% endfor %}
                 </tbody>
+
             </table>
             <div id="scroll-fade-{{ table_id }}" class="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-base-100 to-transparent pointer-events-none hidden"></div>
         </div>

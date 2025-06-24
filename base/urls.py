@@ -10,6 +10,7 @@ urlpatterns = [
     path("submit-code/", views.submit_code, name="submit_code"),
     path("dev/code-editor-test/", views.test_code_component),
 
+
 ### URLS for course_topic_views.py
     path("get-course-topic-form/<int:unit_id>/", views.get_course_topic_form, name="get-course-topic-form"),
     path("submit-course-topic-form/", views.submit_course_topic_form, name="submit-course-topic-form"),
@@ -90,6 +91,12 @@ urlpatterns = [
     path('questions/<str:question_type>/<int:question_id>/edit/', views.new_question_form, name='new-question-form'),
     path("questions/<str:question_type>/upload/", views.upload_questions, name="upload-questions"),
 
+    # Code Questions
+    path("code_questions/<str:action>/", views.code_question, name="code-question"), # add question
+    path("code_questions/<str:action>/<int:question_id>/", views.code_question, name="code-question"), # edit question
+    path("code_testcase/form/<int:question_id>/", views.code_testcase_form, name="code-testcase-form"), # add testcase
+    path("code_testcase/form/<int:question_id>/<int:testcase_id>/", views.code_testcase_form, name="code-testcase-form"), # edit testcase
+    path("code_testcase/delete/<int:question_id>/", views.delete_code_testcases, name="delete-code-testcases"), # delete testcases
 
 
 ### URLS for user_views.py

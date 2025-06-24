@@ -1,0 +1,23 @@
+<form method="POST" class="space-y-4">
+    {% csrf_token %}
+    <h3 class="text-lg font-semibold">
+        {% if testcase %}Edit{% else %}Add{% endif %} Test Case
+    </h3>
+
+    {% for field in form.visible_fields %}
+    <div class="form-control">
+        <label class="label" for="{{ field.id_for_label }}">
+            <span class="label-text">{{ field.label }}</span>
+        </label>
+        {{ field }}
+        {% if field.errors %}
+        <div class="text-error text-sm">{{ field.errors|striptags }}</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <div class="modal-action">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <label for="modal-wrapper" class="btn">Cancel</label>
+    </div>
+</form>
