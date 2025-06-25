@@ -8,12 +8,12 @@
 </div>
 {% endif %}
 
-<div class="p-2 h-full">
+<div class="p-2 min-h-screen pb-28">
     <h2 class="text-2xl font-semibold mb-3">
         {% if is_edit %}Edit Lesson{% else %}Create Lesson{% endif %}
     </h2>
 
-    <form method="POST" class="lesson-form flex flex-col h-full">
+    <form method="POST" class="lesson-form flex flex-col">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
@@ -45,24 +45,24 @@
             <p class="text-error text-sm">{{ form.content.errors }}</p>
             {% endif %}
         </div>
-
-
-        <!-- Buttons -->
-        <div class="flex gap-4 justify-end pt-2">
-            <button type="submit" class="btn btn-primary btn-outline">
-                {% if is_edit %}Save{% else %}Create{% endif %}
-            </button>
-            <button type="button" onclick="window.history.back()" class="btn btn-outline">
-                Cancel
-            </button>
-        </div>
     </form>
+
+    <!-- Buttons (fixed to bottom) -->
+    <div class="fixed bottom-0 left-0 w-full bg-base-300 py-2 px-4 flex justify-end gap-2 z-50">
+        <button type="submit" class="btn btn-primary btn-outline">
+            {% if is_edit %}Save{% else %}Create{% endif %}
+        </button>
+        <button type="button" onclick="window.history.back()" class="btn btn-outline">
+            Cancel
+        </button>
+    </div>
+
 </div>
 
 <script>
     const editor = new toastui.Editor({
         el: document.querySelector('#toast-editor'),
-        height: '600px',
+        height: 'auto',
         initialEditType: 'markdown',
         previewStyle: 'vertical',
         initialValue: document.querySelector('#id_content').value,

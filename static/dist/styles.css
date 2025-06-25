@@ -1780,6 +1780,9 @@
   .absolute {
     position: absolute;
   }
+  .fixed {
+    position: fixed;
+  }
   .relative {
     position: relative;
   }
@@ -2788,6 +2791,10 @@
     border-style: var(--tw-border-style);
     border-width: 1px;
   }
+  .border-t {
+    border-top-style: var(--tw-border-style);
+    border-top-width: 1px;
+  }
   .border-b {
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 1px;
@@ -2809,6 +2816,9 @@
   }
   .border-base-100 {
     border-color: var(--color-base-100);
+  }
+  .border-base-300 {
+    border-color: var(--color-base-300);
   }
   .border-info {
     border-color: var(--color-info);
@@ -2976,6 +2986,9 @@
   }
   .pb-2 {
     padding-bottom: calc(var(--spacing) * 2);
+  }
+  .pb-28 {
+    padding-bottom: calc(var(--spacing) * 28);
   }
   .pl-0 {
     padding-left: calc(var(--spacing) * 0);
