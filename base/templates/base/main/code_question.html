@@ -20,19 +20,14 @@
     </div>
 
     {{ form.as_p }}
-
-    <div class="flex gap-4">
-        <button type="submit" class="btn btn-primary btn-outline">Save</button>
-        <a href="{% url 'question-bank' 'code' %}" class="btn">Cancel</a>
-    </div>
 </form>
 
 <!-- Show Test Cases-->
-<h2 class="text-lg font-semibold mt-10 mb-4">Test Cases</h2>
+<h3 class="text-xl font-semibold mt-3">Test Cases</h3>
 
 <!-- Add Test Case Button -->
 {% if question %}
-<div class="mt-8">
+<div class="mt-4 mb-4">
     <button
         class="btn btn-secondary btn-outline"
         hx-get="{% url 'code-testcase-form' question.id %}"
@@ -72,7 +67,7 @@
                             onclick="event.stopPropagation()" />
                     </td>
                     <td>
-                        <pre>{{ case.input_data|truncatechars:50 }}</pre>
+                        <pre>{{ case.input_data|truncatechars:10 }}</pre>
                     </td>
                     <td>
                         <pre>{{ case.expected_output|truncatechars:50 }}</pre>
@@ -87,6 +82,14 @@
     <button type="submit" class="btn btn-error btn-sm mt-4" disabled id="delete-selected-btn">Delete Selected</button>
 </form>
 
+<!-- Floating Save/Cancel Buttons -->
+<div class="fixed bottom-0 left-0 w-full bg-base-300 py-2 px-4 flex justify-end gap-2 z-50 border-t border-base-200">
+    <form method="POST" enctype="multipart/form-data" class="flex gap-2">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary btn-outline">Save</button>
+        <a href="{% url 'question-bank' 'code' %}" class="btn btn-outline">Cancel</a>
+    </form>
+</div>
 
 
 
@@ -165,6 +168,5 @@
     });
   });
 </script>
-
 
 {% endblock %}

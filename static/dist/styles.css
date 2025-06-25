@@ -2069,6 +2069,12 @@
       max-width: 96rem;
     }
   }
+  .m-2 {
+    margin: calc(var(--spacing) * 2);
+  }
+  .m-4 {
+    margin: calc(var(--spacing) * 4);
+  }
   .filter {
     display: flex;
     flex-wrap: wrap;
@@ -2816,6 +2822,9 @@
   }
   .border-base-100 {
     border-color: var(--color-base-100);
+  }
+  .border-base-200 {
+    border-color: var(--color-base-200);
   }
   .border-base-300 {
     border-color: var(--color-base-300);

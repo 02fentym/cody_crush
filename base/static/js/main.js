@@ -217,3 +217,58 @@ document.addEventListener('keydown', function (event) {
         }
     }
 });
+
+
+// Debounce function to limit scroll event frequency
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// Save and restore scroll position globally
+document.addEventListener("DOMContentLoaded", () => {
+  // Target specific scrollable container (e.g., .overflow-auto)
+  const container = document.querySelector(".overflow-auto");
+  if (container) {
+    // Save container scroll position
+    container.addEventListener("scroll", debounce(() => {
+      const scrollTop = container.scrollTop;
+      sessionStorage.setItem("containerScrollY", scrollTop);
+      console.log("[Scroll Debug] Saving containerScrollY =", scrollTop);
+    }, 100));
+
+    // Restore container scroll position
+    const savedContainerScrollY = sessionStorage.getItem("containerScrollY");
+    console.log("[Scroll Debug] Retrieved containerScrollY =", savedContainerScrollY);
+    if (savedContainerScrollY !== null && savedContainerScrollY !== "0") {
+      console.log("[Scroll Debug] Restoring containerScrollY =", savedContainerScrollY);
+      container.scrollTop = parseInt(savedContainerScrollY, 10);
+    } else {
+      console.log("[Scroll Debug] No valid containerScrollY found");
+    }
+  } else {
+    // Fallback to window-level scrolling if no container is found
+    window.addEventListener("scroll", debounce(() => {
+      const scrollY = window.scrollY;
+      sessionStorage.setItem("windowScrollY", scrollY);
+      console.log("[Scroll Debug] Saving windowScrollY =", scrollY);
+    }, 100));
+
+    // Restore window scroll position
+    const savedWindowScrollY = sessionStorage.getItem("windowScrollY");
+    console.log("[Scroll Debug] Retrieved windowScrollY =", savedWindowScrollY);
+    if (savedWindowScrollY !== null && savedWindowScrollY !== "0") {
+      console.log("[Scroll Debug] Restoring windowScrollY =", savedWindowScrollY);
+      window.scrollTo(0, parseInt(savedWindowScrollY, 10));
+    } else {
+      console.log("[Scroll Debug] No valid windowScrollY found");
+    }
+  }
+});
