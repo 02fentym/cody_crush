@@ -1,8 +1,10 @@
 import csv
 import io
+
+from django.urls import reverse
 from base.utils import extract_code_question_zip, extract_code_question_yaml
 
-from django.http import HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseServerError
@@ -285,6 +287,7 @@ def code_question(request, action, question_id=None):
 @login_required
 @allowed_roles(["teacher"])
 def code_testcase_form(request, question_id, testcase_id=None):
+    testcase_id = request.POST.get("testcase_id") or testcase_id
     question = get_object_or_404(CodeQuestion, id=question_id)
 
     instance = None
@@ -298,7 +301,12 @@ def code_testcase_form(request, question_id, testcase_id=None):
             testcase = form.save(commit=False)
             testcase.question = question
             testcase.save()
-            return redirect("code-question", action="edit", question_id=question.id)
+            
+            response = HttpResponse()
+            response["HX-Redirect"] = reverse("code-question", args=["edit", question.id])
+            return response
+        else:
+            print(form.errors)
 
     context = {"form": form, "question": question, "testcase": instance}
     return render(request, "base/components/upload_questions_components/code_testcase_form.html", context)

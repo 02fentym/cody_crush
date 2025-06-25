@@ -1,5 +1,17 @@
-<form method="POST" class="space-y-4">
+<form method="POST"
+    hx-post="{% if testcase %}{% url 'code-testcase-form' question.id testcase.id %}{% else %}{% url 'code-testcase-form' question.id %}{% endif %}"
+    hx-swap="none"
+    hx-target="this"
+    class="space-y-4"
+>
     {% csrf_token %}
+
+    <!-- Pass the testcase ID to the form -->
+    {% if testcase %}
+    <input type="hidden" name="testcase_id" value="{{ testcase.id }}">
+    {% endif %}
+    {{ testcase.id }}
+
     <h3 class="text-lg font-semibold">
         {% if testcase %}Edit{% else %}Add{% endif %} Test Case
     </h3>
