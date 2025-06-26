@@ -217,14 +217,6 @@ class TracingQuestionForm(forms.ModelForm):
 
 
 class CodeQuestionForm(forms.ModelForm):
-    zip_file = forms.FileField(
-        required=False,
-        help_text="Upload a .zip file to import test cases",
-        widget=forms.ClearableFileInput(attrs={
-            "class": "file-input file-input-bordered file-input-sm auto-resize block text-sm"
-        })
-    )
-
     class Meta:
         model = CodeQuestion
         fields = [

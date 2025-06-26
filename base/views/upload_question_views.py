@@ -238,13 +238,14 @@ from base.utils import extract_code_question_zip, extract_code_question_yaml
 @login_required
 @allowed_roles(["teacher"])
 def code_question(request, action, question_id=None):
+    courses = get_all_courses("teacher", request.user)
     if action not in ["add", "edit"]:
         return HttpResponseBadRequest("Invalid action.")
 
     instance = get_object_or_404(CodeQuestion, id=question_id) if action == "edit" else None
     form = CodeQuestionForm(request.POST or None, request.FILES or None, instance=instance)
 
-    context = {"form": form, "question": instance, "action": action, "topics": Topic.objects.all()}
+    context = {"form": form, "question": instance, "action": action, "topics": Topic.objects.all(), "courses": courses}
 
     if request.method == "POST" and form.is_valid():
         question = form.save(commit=False)
@@ -321,3 +322,36 @@ def delete_code_testcases(request, question_id):
     if ids:
         CodeTestCase.objects.filter(id__in=ids, question=question).delete()
     return redirect("code-question", action="edit", question_id=question_id)
+
+
+@login_required
+@allowed_roles(["teacher"])
+@require_POST
+def upload_code_testcases(request, question_id):
+    question = get_object_or_404(CodeQuestion, id=question_id)
+
+    uploaded_file = request.FILES.get("testcase_file")
+    if not uploaded_file:
+        return redirect("code-question", action="edit", question_id=question.id)
+
+    filename = uploaded_file.name.lower()
+
+    if filename.endswith(".zip"):
+        test_cases, _ = extract_code_question_zip(uploaded_file)
+    elif filename.endswith(".yaml") or filename.endswith(".yml"):
+        test_cases, _ = extract_code_question_yaml(uploaded_file)
+    else:
+        return redirect("code-question", action="edit", question_id=question.id)
+
+    question.test_cases.all().delete()
+
+    for case in test_cases:
+        CodeTestCase.objects.create(
+            question=question,
+            input_data=case["input_data"],
+            expected_output=case["expected_output"],
+            order=case["order"],
+            test_style=case["test_style"],
+        )
+
+    return redirect("code-question", action="edit", question_id=question.id)

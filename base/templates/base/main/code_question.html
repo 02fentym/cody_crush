@@ -1,94 +1,105 @@
 {% extends "main.html" %}
 
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">
-    {% if action == "add" %}Add{% else %}Edit{% endif %} Code Question
-</h1>
 
-<form method="POST" enctype="multipart/form-data" class="space-y-6">
-    {% csrf_token %}
+<div class="pb-16">
+    <h1 class="text-2xl font-bold mb-4">
+        {% if action == "add" %}Add{% else %}Edit{% endif %} Code Question
+    </h1>
 
-    <div class="form-control">
-        <label class="label text-base-content" for="topic_id">Select Topic</label>
-        <select name="topic_id" id="topic_id" class="select select-bordered w-auto block" required>
-            {% for topic in topics %}
-            <option value="{{ topic.id }}" {% if question and question.topic.id == topic.id %}selected{% endif %}>
-                {{ topic.unit.title }} → {{ topic.title }}
-            </option>
-            {% endfor %}
-        </select>
-    </div>
-
-    {{ form.as_p }}
-</form>
-
-<!-- Show Test Cases-->
-<h3 class="text-xl font-semibold mt-3">Test Cases</h3>
-
-<!-- Add Test Case Button -->
-{% if question %}
-<div class="mt-4 mb-4">
-    <button
-        class="btn btn-secondary btn-outline"
-        hx-get="{% url 'code-testcase-form' question.id %}"
-        hx-target="#modal-body"
-        hx-swap="innerHTML"
-        onclick="document.getElementById('modal-wrapper').checked = true"
-    >
-        + Add Test Case
-    </button>
-</div>
-{% endif %}
-
-
-<form method="POST" action="{% url 'delete-code-testcases' question.id %}"
-    onsubmit="return confirm('Delete selected test cases?');">
-    {% csrf_token %}
-    <div class="overflow-auto max-h-[500px] shadow rounded-lg">
-        <table class="table table-xs table-zebra w-full">
-            <thead class="sticky top-0 bg-base-200 z-10">
-                <tr>
-                    <th class="w-12">
-                        <input type="checkbox" id="select-all" class="checkbox checkbox-sm" />
-                    </th>
-                    <th>Input</th>
-                    <th>Expected Output</th>
-                    <th>Style</th>
-                    <th>Order</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for case in question.test_cases.all %}
-                <tr hx-get="{% url 'code-testcase-form' question.id case.id %}" hx-target="#modal-body"
-                    hx-swap="innerHTML" onclick="document.getElementById('modal-wrapper').checked = true"
-                    class="cursor-pointer hover:bg-base-300 transition">
-                    <td>
-                        <input type="checkbox" name="testcase_ids" value="{{ case.id }}" class="checkbox checkbox-sm"
-                            onclick="event.stopPropagation()" />
-                    </td>
-                    <td>
-                        <pre>{{ case.input_data|truncatechars:10 }}</pre>
-                    </td>
-                    <td>
-                        <pre>{{ case.expected_output|truncatechars:50 }}</pre>
-                    </td>
-                    <td>{{ case.test_style }}</td>
-                    <td>{{ case.order }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <button type="submit" class="btn btn-error btn-sm mt-4" disabled id="delete-selected-btn">Delete Selected</button>
-</form>
-
-<!-- Floating Save/Cancel Buttons -->
-<div class="fixed bottom-0 left-0 w-full bg-base-300 py-2 px-4 flex justify-end gap-2 z-50 border-t border-base-200">
-    <form method="POST" enctype="multipart/form-data" class="flex gap-2">
+    <form method="POST" enctype="multipart/form-data" class="space-y-6">
         {% csrf_token %}
-        <button type="submit" class="btn btn-primary btn-outline">Save</button>
-        <a href="{% url 'question-bank' 'code' %}" class="btn btn-outline">Cancel</a>
+
+        <div class="form-control">
+            <label class="label text-base-content" for="topic_id">Select Topic</label>
+            <select name="topic_id" id="topic_id" class="select select-bordered w-auto block" required>
+                {% for topic in topics %}
+                <option value="{{ topic.id }}" {% if question and question.topic.id == topic.id %}selected{% endif %}>
+                    {{ topic.unit.title }} → {{ topic.title }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        {{ form.as_p }}
     </form>
+
+    <!-- Show Test Cases-->
+    <h3 class="text-xl font-semibold mt-3">Test Cases</h3>
+
+    <!-- Add Test Case Button -->
+    {% if question %}
+    <div class="mt-4 mb-4">
+        <button
+            class="btn btn-secondary btn-outline"
+            hx-get="{% url 'code-testcase-form' question.id %}"
+            hx-target="#modal-body"
+            hx-swap="innerHTML"
+            onclick="document.getElementById('modal-wrapper').checked = true"
+        >
+            + Add Test Case
+        </button>
+    </div>
+    {% endif %}
+
+
+    <!-- Upload Test Cases Form -->
+    <form method="POST" action="{% url 'upload-code-testcases' question.id %}" enctype="multipart/form-data" class="flex gap-2 items-center mt-2">
+        {% csrf_token %}
+        <input type="file" name="testcase_file" accept=".zip,.yaml,.yml" class="file-input file-input-sm file-input-bordered" required>
+        <button type="submit" class="btn btn-sm btn-outline btn-accent">Upload</button>
+    </form>
+
+
+    <form method="POST" action="{% url 'delete-code-testcases' question.id %}"
+        onsubmit="return confirm('Delete selected test cases?');">
+        {% csrf_token %}
+        <div class="overflow-auto max-h-[500px] shadow rounded-lg">
+            <table class="table table-xs table-zebra w-full">
+                <thead class="sticky top-0 bg-base-200 z-10">
+                    <tr>
+                        <th class="w-12">
+                            <input type="checkbox" id="select-all" class="checkbox checkbox-sm" />
+                        </th>
+                        <th>Input</th>
+                        <th>Expected Output</th>
+                        <th>Style</th>
+                        <th>Order</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for case in question.test_cases.all %}
+                    <tr hx-get="{% url 'code-testcase-form' question.id case.id %}" hx-target="#modal-body"
+                        hx-swap="innerHTML" onclick="document.getElementById('modal-wrapper').checked = true"
+                        class="cursor-pointer hover:bg-base-300 transition">
+                        <td>
+                            <input type="checkbox" name="testcase_ids" value="{{ case.id }}" class="checkbox checkbox-sm"
+                                onclick="event.stopPropagation()" />
+                        </td>
+                        <td>
+                            <pre>{{ case.input_data|truncatechars:10 }}</pre>
+                        </td>
+                        <td>
+                            <pre>{{ case.expected_output|truncatechars:50 }}</pre>
+                        </td>
+                        <td>{{ case.test_style }}</td>
+                        <td>{{ case.order }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <button type="submit" class="btn btn-error btn-sm mt-4" disabled id="delete-selected-btn">Delete Selected</button>
+    </form>
+
+    <!-- Floating Save/Cancel Buttons -->
+    <div class="fixed bottom-0 left-0 w-full bg-base-300 py-2 px-4 flex justify-end gap-2 z-50 border-t border-base-200">
+        <form method="POST" enctype="multipart/form-data" class="flex gap-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-outline">Save</button>
+            <a href="{% url 'question-bank' 'code' %}" class="btn btn-outline">Cancel</a>
+        </form>
+    </div>
 </div>
 
 

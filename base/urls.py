@@ -97,6 +97,7 @@ urlpatterns = [
     path("code_testcase/form/<int:question_id>/", views.code_testcase_form, name="code-testcase-form"), # add testcase
     path("code_testcase/form/<int:question_id>/<int:testcase_id>/", views.code_testcase_form, name="code-testcase-form"), # edit testcase
     path("code_testcase/delete/<int:question_id>/", views.delete_code_testcases, name="delete-code-testcases"), # delete testcases
+    path("code_questions/<int:question_id>/upload_testcases/", views.upload_code_testcases, name="upload-code-testcases"), # upload testcases
 
 
 ### URLS for user_views.py
