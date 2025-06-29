@@ -232,9 +232,6 @@ def upload_questions(request, question_type):
     })
 
 
-# Code Question Views
-from base.utils import extract_code_question_zip, extract_code_question_yaml
-
 @login_required
 @allowed_roles(["teacher"])
 def code_question(request, action, question_id=None):
@@ -245,7 +242,7 @@ def code_question(request, action, question_id=None):
     instance = get_object_or_404(CodeQuestion, id=question_id) if action == "edit" else None
     form = CodeQuestionForm(request.POST or None, request.FILES or None, instance=instance)
 
-    context = {"form": form, "question": instance, "action": action, "topics": Topic.objects.all(), "courses": courses}
+    context = {"form": form, "question": instance, "action": action, "topics": Topic.objects.all(), "courses": courses,}
 
     if request.method == "POST" and form.is_valid():
         question = form.save(commit=False)
@@ -254,15 +251,14 @@ def code_question(request, action, question_id=None):
             question.topic = get_object_or_404(Topic, id=topic_id)
         question.save()
 
-        # ✅ Delete existing test cases on edit
-        if action == "edit":
+        # Delete old test cases only if uploading new ones
+        uploaded_file = form.cleaned_data.get("zip_file")
+        if action == "edit" and uploaded_file:
             question.test_cases.all().delete()
 
-        # ✅ Handle uploaded file
-        uploaded_file = form.cleaned_data.get("zip_file")
+        # Handle uploaded file
         if uploaded_file:
             filename = uploaded_file.name.lower()
-
             if filename.endswith(".zip"):
                 test_cases, _ = extract_code_question_zip(uploaded_file)
             elif filename.endswith(".yaml") or filename.endswith(".yml"):
@@ -283,6 +279,7 @@ def code_question(request, action, question_id=None):
         return redirect("question-bank", question_type="code")
 
     return render(request, "base/main/code_question.html", context)
+
 
 
 @login_required
