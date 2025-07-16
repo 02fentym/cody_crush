@@ -1,0 +1,25 @@
+{% extends "main.html" %}
+
+{% block content %}
+<div class="prose max-w-none mb-6">
+    {{ question.prompt|safe }}
+</div>
+
+<form method="POST" action="{% url 'submit-code' %}">
+    {% csrf_token %}
+    <input type="hidden" name="course_id" value="{{ course_id }}"> <!-- Used to pass the course ID to the view -->
+
+    <div id="monaco-editor" style="height: 400px; border: 1px solid gray;"></div>
+    <input type="hidden" name="code" id="code-input">
+    <input type="hidden" name="question_id" value="{{ question.id }}">
+    <input type="hidden" name="language" value="{{ question.language.name|lower }}">
+
+    <button type="submit" class="btn btn-primary mt-4">Submit</button>
+</form>
+
+<script>
+    const STARTER_CODE_FROM_DJANGO = `{{ starter_code|escapejs }}`;
+    const MONACO_LANGUAGE = `{{ question.language.name|lower }}`;
+</script>
+
+{% endblock %}

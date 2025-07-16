@@ -265,7 +265,7 @@ def code_question(request, action, question_id=None):
                 test_cases, _ = extract_code_question_yaml(uploaded_file)
             else:
                 form.add_error("zip_file", "Unsupported file type. Upload a .zip or .yaml file.")
-                return render(request, "base/main/code_question.html", context)
+                return render(request, "base/main/create_code_question.html", context)
 
             for case in test_cases:
                 CodeTestCase.objects.create(
@@ -278,7 +278,7 @@ def code_question(request, action, question_id=None):
 
         return redirect("question-bank", question_type="code")
 
-    return render(request, "base/main/code_question.html", context)
+    return render(request, "base/main/create_code_question.html", context)
 
 
 

@@ -1,0 +1,55 @@
+{% extends "main.html" %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Results: {{ question.title }}</h1>
+
+<div class="mb-6">
+  <p><strong>Passed:</strong> {{ summary.passed }} / {{ summary.total }}</p>
+  <p class="{% if summary.all_passed %}text-success{% else %}text-error{% endif %}">
+    {% if summary.all_passed %}
+    ✅ All test cases passed!
+    {% else %}
+    ❌ Some test cases failed.
+    {% endif %}
+  </p>
+</div>
+
+<table class="table table-zebra w-full text-sm">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Expected</th>
+      <th>Actual</th>
+      <th>Status</th>
+      <th>Error</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in results %}
+    <tr>
+      <td>{{ r.test }}</td>
+      <td>
+        <pre class="whitespace-pre-wrap">{{ r.expected }}</pre>
+      </td>
+      <td>
+        <pre class="whitespace-pre-wrap">{{ r.actual }}</pre>
+      </td>
+      <td>
+        {% if r.passed %}
+        <span class="badge badge-success">Passed</span>
+        {% else %}
+        <span class="badge badge-error">Failed</span>
+        {% endif %}
+      </td>
+      <td>
+        <pre class="whitespace-pre-wrap text-error">{{ r.error }}</pre>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="mt-8">
+  <a href="{% url 'course' course_id %}" class="btn btn-outline">← Back to Course</a>
+</div>
+{% endblock %}

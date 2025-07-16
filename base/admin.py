@@ -23,7 +23,7 @@ class ActivityAdmin(admin.ModelAdmin):
 
 @admin.register(ActivityCompletion)
 class ActivityCompletionAdmin(admin.ModelAdmin):
-    list_display = ('student', 'activity', 'activity_type', 'activity__weight', 'score','completed', 'date_completed')
+    list_display = ('id','student', 'activity', 'activity_type', 'activity__weight', 'score','completed', 'date_completed')
     list_filter = ('completed', 'date_completed')
     search_fields = ('student__username', 'activity__id')
 

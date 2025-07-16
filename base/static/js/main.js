@@ -177,9 +177,9 @@ function initMonacoEditor() {
 
     require(['vs/editor/editor.main'], function () {
         const editor = monaco.editor.create(editorMount, {
-            value: 'print(sum(map(int, [input(), input()])))',
-            language: 'python',
-            theme: 'vs-dark',
+            value: STARTER_CODE_FROM_DJANGO,
+            language: MONACO_LANGUAGE,
+            theme:  getMonacoTheme(),
             fontSize: 14,
         });
 
@@ -206,6 +206,16 @@ function initMonacoEditor() {
 
 window.addEventListener("load", initMonacoEditor);
 
+// Update Monaco theme on theme change
+const observer = new MutationObserver(() => {
+    const newTheme = getMonacoTheme();
+    monaco.editor.setTheme(newTheme);
+});
+
+observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"]
+});
 
 // Close Modal on Escape
 document.addEventListener('keydown', function (event) {
@@ -272,3 +282,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
+
+
+// Gets the appropriate monaco theme based on DaisyUI theme -> main.js
+function getMonacoTheme() {
+    const theme = document.documentElement.getAttribute("data-theme");
+    if (window.VALID_DARK_THEMES.includes(theme)) return "vs-dark";
+    if (window.VALID_LIGHT_THEMES.includes(theme)) return "vs";
+    return "vs-dark";
+}

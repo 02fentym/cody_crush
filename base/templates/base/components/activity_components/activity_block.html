@@ -4,4 +4,6 @@
     {% include "base/components/activity_components/quiz_activity.html" with activity=activity course_topic=course_topic course_id=course_id %}
 {% elif activity.content_type.model == "lesson" %}
     {% include "base/components/activity_components/lesson_activity.html" with activity=activity course_topic=course_topic course_id=course_id %}
+{% elif activity.content_type.model == "codequestion" %}
+    {% include "base/components/activity_components/code_question_activity.html" with activity=activity course_topic=course_topic course_id=course_id %}
 {% endif %}

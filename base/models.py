@@ -229,7 +229,7 @@ class Activity(models.Model):
         ordering = ["order"]
 
     def clean(self):
-        allowed_models = ["lesson", "quiztemplate", "dmojexercise"]
+        allowed_models = ["lesson", "quiztemplate", "dmojexercise", "codequestion"]
         if self.content_type.model not in allowed_models:
             raise ValidationError("Unknown activity type.")
     

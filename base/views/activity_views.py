@@ -4,7 +4,7 @@ from django.views.decorators.http import require_POST
 
 from base.decorators import allowed_roles
 from base.models import (
-    Activity, CourseUnit
+    Activity, CourseUnit, Lesson, QuizTemplate, DmojExercise
 )
 
 
@@ -15,15 +15,17 @@ from base.models import (
 def delete_activity(request, activity_id):
     activity = get_object_or_404(Activity, id=activity_id)
     content_object = activity.content_object
-    if content_object:
+
+    # Only delete the underlying object if it's not a CodeQuestion
+    if isinstance(content_object, (Lesson, QuizTemplate, DmojExercise)):
         content_object.delete()
+
     course_topic = activity.course_topic
     activity.delete()
     reorder_activities(course_topic)
 
     course = CourseUnit.objects.get(unit=course_topic.unit).course
-    course_id = course.id
-    return redirect("course", course_id=course_id)
+    return redirect("course", course_id=course.id)
 
 
 

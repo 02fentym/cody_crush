@@ -6,9 +6,19 @@ urlpatterns = [
     path("activity/<int:activity_id>/delete/", views.delete_activity, name="delete-activity"),
 
 
+### URLS for code_question_views.py
+    # Creation
+    path("code_question/get/<int:course_topic_id>/", views.get_code_question_form, name="get-code-question-form"),
+    path("code_question/submit/<int:course_topic_id>/", views.submit_code_question_form, name="submit-code-question-form"),
+
+    # Taking
+    path("code_questions/take/<int:activity_id>/", views.take_code_question, name="take-code-question"),
+
+
 ### URLS for code_runner_views.py
-    path("submit-code/", views.submit_code, name="submit_code"),
+    path("submit-code/", views.submit_code, name="submit-code"),
     path("dev/code-editor-test/", views.test_code_component),
+    path("code_questions/results/<int:ac_id>/", views.code_question_results, name="code-question-results"),
 
 
 ### URLS for course_topic_views.py
