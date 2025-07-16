@@ -337,3 +337,14 @@ class CodeTestCase(models.Model):
 
     def __str__(self):
         return f"Test {self.order} for {self.question.title}"
+
+
+class CodeSubmission(models.Model):
+    activity_completion = models.ForeignKey(ActivityCompletion, on_delete=models.CASCADE, related_name="code_submissions")
+    code = models.TextField()
+    results = models.JSONField(null=True, blank=True)
+    summary = models.JSONField(null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Submission by {self.activity_completion.student.username} for Activity {self.activity_completion.activity.id}"

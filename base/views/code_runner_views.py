@@ -8,44 +8,28 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from base.decorators import allowed_roles
 
-from base.models import CodeQuestion, ActivityCompletion, Activity, Course, CourseUnit
+from base.models import CodeQuestion, ActivityCompletion, Activity, Course, CourseUnit, CodeSubmission
 
 
-def submit_code(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "Only POST allowed"}, status=405)
-
-    course_id = request.POST.get("course_id")
-    code = request.POST.get("code")
-    language = request.POST.get("language", "python")
-    question_id = request.POST.get("question_id")
-
-    if not code or not question_id:
-        return JsonResponse({"error": "Missing required fields"}, status=400)
-
-    # Create temp dir for this submission
-    submission_id = str(uuid.uuid4())
-    base_path = os.path.join(settings.MEDIA_ROOT, "submissions", submission_id)
-    student_path = os.path.join(base_path, "student")
-    tests_path = os.path.join(base_path, "tests")
-
+# Create test files and test cases
+def write_test_files(code, question, student_path, tests_path):
     os.makedirs(student_path, exist_ok=True)
     os.makedirs(tests_path, exist_ok=True)
 
-    # Write student's code
     with open(os.path.join(student_path, "solution.py"), "w") as f:
         f.write(code)
 
-    question = get_object_or_404(CodeQuestion, id=question_id)
-    test_cases = question.test_cases.filter(is_hidden=True).order_by("order")
-
-    for i, case in enumerate(test_cases, start=1):
+    for i, case in enumerate(
+        question.test_cases.filter(is_hidden=True).order_by("order"), start=1
+    ):
         with open(os.path.join(tests_path, f"{i}.in"), "w") as f_in:
             f_in.write(case.input_data)
         with open(os.path.join(tests_path, f"{i}.out"), "w") as f_out:
             f_out.write(case.expected_output)
 
-    # Run Docker
+
+# Run tests in Docker container and capture output
+def run_docker(student_path, tests_path):
     docker_cmd = [
         "docker", "run", "--rm",
         "--memory=256m",
@@ -56,26 +40,60 @@ def submit_code(request):
         "code-runner-python"
     ]
 
+    result = subprocess.run(
+        docker_cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        timeout=10
+    )
+    return result.stdout.decode().strip()
+
+
+# Submit code to the server
+def submit_code(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Only POST allowed"}, status=405)
+
+    course_id = request.POST.get("course_id")
+    code = request.POST.get("code")
+    question_id = request.POST.get("question_id")
+
+    if not code or not question_id:
+        return JsonResponse({"error": "Missing required fields"}, status=400)
+
+    question = get_object_or_404(CodeQuestion, id=question_id)
+
+    # Prep paths
+    submission_id = str(uuid.uuid4())
+    base_path = os.path.join(settings.MEDIA_ROOT, "submissions", submission_id)
+    student_path = os.path.join(base_path, "student")
+    tests_path = os.path.join(base_path, "tests")
+
+    write_test_files(code, question, student_path, tests_path)
+
     try:
-        result = subprocess.run(
-            docker_cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            timeout=10
-        )
-        output = result.stdout.decode().strip()
+        output = run_docker(student_path, tests_path)
         data = json.loads(output)
 
         results = data.get("results", [])
         summary = data.get("summary", {})
 
-        # Save completion only if all tests passed
         activity = Activity.objects.filter(content_type__model="codequestion", object_id=question.id).first()
-        if activity and request.user.is_authenticated and summary.get("all_passed"):
-            ActivityCompletion.objects.update_or_create(
+        ac = None
+
+        if activity and request.user.is_authenticated:
+            ac, _ = ActivityCompletion.objects.update_or_create(
                 student=request.user,
                 activity=activity,
-                defaults={"completed": True}
+                defaults={"completed": summary.get("all_passed", False)},
+            )
+
+            # ✅ Save the submission
+            CodeSubmission.objects.create(
+                activity_completion=ac,
+                code=code,
+                results=results,
+                summary=summary,
             )
 
         return render(request, "base/main/code_results.html", {
@@ -96,13 +114,22 @@ def test_code_component(request):
     return render(request, "components/code_editor.html")
 
 
+# Code question results page
 @login_required(login_url="login")
 @allowed_roles(["student"])
 def code_question_results(request, ac_id):
-    courses = Course.objects.filter(students=request.user)
+    from base.models import CodeSubmission
+
     ac = get_object_or_404(ActivityCompletion, id=ac_id, student=request.user)
     activity = ac.activity
     question = activity.content_object
+
+    latest_submission = (
+        CodeSubmission.objects
+        .filter(activity_completion=ac)
+        .order_by("-created")
+        .first()
+    )
 
     unit = activity.course_topic.unit
     course_unit = CourseUnit.objects.select_related("course").filter(unit=unit).first()
@@ -111,11 +138,10 @@ def code_question_results(request, ac_id):
     context = {
         "question": question,
         "activity": activity,
-        "results": [],  # optionally ac.submission_data if storing
-        "summary": {"passed": 0, "total": 0, "all_passed": False},
+        "results": latest_submission.results if latest_submission else [],
+        "summary": latest_submission.summary if latest_submission else {"passed": 0, "total": 0, "all_passed": False},
         "course_id": course_id,
-        "courses": courses,
+        "courses": Course.objects.filter(students=request.user),
     }
 
     return render(request, "base/main/code_results.html", context)
-

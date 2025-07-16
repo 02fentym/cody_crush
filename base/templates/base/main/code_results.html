@@ -17,11 +17,8 @@
 <table class="table table-zebra w-full text-sm">
   <thead>
     <tr>
-      <th>#</th>
-      <th>Expected</th>
-      <th>Actual</th>
+      <th>Test #</th>
       <th>Status</th>
-      <th>Error</th>
     </tr>
   </thead>
   <tbody>
@@ -29,20 +26,11 @@
     <tr>
       <td>{{ r.test }}</td>
       <td>
-        <pre class="whitespace-pre-wrap">{{ r.expected }}</pre>
-      </td>
-      <td>
-        <pre class="whitespace-pre-wrap">{{ r.actual }}</pre>
-      </td>
-      <td>
         {% if r.passed %}
-        <span class="badge badge-success">Passed</span>
+          <span class="badge badge-success">Passed</span>
         {% else %}
-        <span class="badge badge-error">Failed</span>
+          <span class="badge badge-error">Failed</span>
         {% endif %}
-      </td>
-      <td>
-        <pre class="whitespace-pre-wrap text-error">{{ r.error }}</pre>
       </td>
     </tr>
     {% endfor %}

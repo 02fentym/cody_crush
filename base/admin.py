@@ -3,7 +3,7 @@ from .models import (
     Unit, Topic, Quiz, Answer, Profile, Course, Activity,
     QuizTemplate, Lesson, MultipleChoiceQuestion, TracingQuestion,
     DmojExercise, ActivityCompletion, Language, CourseUnit, CourseTopic,
-    CodeQuestion, CodeTestCase
+    CodeQuestion, CodeTestCase, CodeSubmission
 )
 
 # --- Customized Admin Classes ---
@@ -38,6 +38,14 @@ class CodeQuestionAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'language')
     search_fields = ('title', 'language')
     list_filter = ('language',)
+
+
+
+@admin.register(CodeSubmission) # Register the CodeSubmission model
+class CodeSubmissionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'activity_completion', 'created')
+
+
 
 
 @admin.register(CodeTestCase)
@@ -127,8 +135,6 @@ class TopicAdmin(admin.ModelAdmin):
 class UnitAdmin(admin.ModelAdmin):
     list_display = ('title',)
     search_fields = ('title',)
-
-
 
 
 # --- Default Simple Registrations ---
