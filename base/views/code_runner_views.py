@@ -1,3 +1,4 @@
+from django.utils import timezone
 import os
 import uuid
 import json
@@ -85,7 +86,8 @@ def submit_code(request):
             ac, _ = ActivityCompletion.objects.update_or_create(
                 student=request.user,
                 activity=activity,
-                defaults={"completed": summary.get("all_passed", False)},
+                defaults={"completed": summary.get("all_passed", False),
+                          "date_completed": timezone.now()},
             )
 
             # ✅ Save the submission
