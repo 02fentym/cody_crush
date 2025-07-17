@@ -1,42 +1,123 @@
 {% extends "main.html" %}
 
 {% block content %}
-<div class="flex flex-col h-[calc(100vh-4rem)]">  {# adjust based on your header height #}
+<div class="flex flex-col h-[calc(100vh-4rem)]">
 
-  <!-- Fixed Top Summary -->
-  <div class="shrink-0 bg-base-300 z-10 sticky top-0 py-4">
-    <div class="flex items-center justify-start gap-4 px-4">
-      <h2 class="text-2xl font-semibold mb-3">{{ quiz_template.course_topic.topic.title }} Quiz</h2>
-      <div class="radial-progress text-secondary"
-          style="--value: {{ quiz.grade|floatformat:0 }}; --size:4rem; --thickness:6px;">
-          {{ quiz.grade|floatformat:0 }}%
-      </div>
-    </div>
-    <div class="flex items-center gap-4 px-4">
-      <div class="text-sm text-base-content/80">
-        <strong>Correct:</strong> {{ correct }} / {{ total }}
-      </div>
-    </div>
-  </div>
+	<!-- Fixed Top Summary -->
+	<div class="shrink-0 bg-base-300 z-10 sticky top-0 py-6 px-4">
+		<div class="flex justify-between items-start flex-wrap gap-6">
 
-  <!-- Scrollable Answers -->
-  <div class="flex-1 overflow-y-auto px-4 space-y-4">
-    {% for answer in answers %}
-      {% if quiz_template.question_type == "multiple_choice" %}
-        {% include "base/components/quiz_components/mc_result_block.html" with answer=answer %}
-      {% elif quiz_template.question_type == "tracing" %}
-        {% include "base/components/quiz_components/tracing_result_block.html" with answer=answer %}
-      {% else %}
-        <div class="text-error">Unsupported question type.</div>
-      {% endif %}
-    {% endfor %}
+			<!-- Left: Title + Score Summary -->
+			<h2 class="text-3xl font-bold">{{ quiz_template.course_topic.topic.title }} Quiz</h2>
 
-    <div class="mt-6">
-      <a href="{% url 'course' course_id %}" class="back-button">
-        ← Back to Course
-      </a>
-    </div>
-  </div>
+			<!-- Right: Past Attempts Dropdown + Retake -->
+			<div class="flex flex-col items-end gap-2 ml-auto">
+
+				{% if all_quizzes|length > 1 %}
+				<div class="dropdown dropdown-end">
+					<div tabindex="0" role="button" class="btn btn-sm btn-outline w-40">
+						Past Attempts
+						<svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+							xmlns="http://www.w3.org/2000/svg">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+							</path>
+						</svg>
+					</div>
+					<ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-64">
+						{% for q in all_quizzes %}
+						{% if q.activity_completion %}
+						<li>
+							<a href="{% url 'quiz-results' q.activity_completion.id %}"
+								class="flex justify-between gap-2">
+								<span>#{{ forloop.counter }}</span>
+								<span class="text-xs text-base-content/60">{{ q.created|date:"Y-m-d H:i" }}</span>
+								<span class="text-xs font-medium">
+									{% if q.grade %}
+									{{ q.grade|floatformat:0 }}%
+									{% else %}
+									Pending
+									{% endif %}
+								</span>
+							</a>
+						</li>
+						{% endif %}
+						{% endfor %}
+					</ul>
+				</div>
+				{% endif %}
+
+				<!-- Retake Quiz -->
+				{% if activity.allow_resubmission %}
+				<form method="POST" action="{% url 'start-quiz' course_id activity.id %}">
+					{% csrf_token %}
+					<button class="btn btn-sm btn-accent btn-outline w-32">
+						<svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+						<path fill="currentColor" fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 1 1-6.445 7.348a.75.75 0 1 1 1.487-.194A5.001 5.001 0 1 0 4.43 4.5h1.32a.75.75 0 0 1 0 1.5h-3A.75.75 0 0 1 2 5.25v-3a.75.75 0 0 1 1.5 0v1.06A6.48 6.48 0 0 1 8 1.5" clip-rule="evenodd"></path>
+						</svg>
+						Retake
+					</button>
+				</form>
+				{% endif %}
+			</div>
+
+
+		</div>
+		<!-- Score -->
+		<div class="flex items-center gap-4">
+			<div class="radial-progress text-secondary"
+				style="--value: {{ quiz.grade|floatformat:0 }}; --size:4rem; --thickness:6px;">
+				{{ quiz.grade|floatformat:0 }}%
+			</div>
+			<div class="flex flex-col">
+				{% if quiz.grade == 100 %}
+				<span class="font-semibold text-lg">Perfect Score!</span>
+				{% endif %}
+				<span class="text-base-content/70 text-sm">Correct: {{ correct }} / {{ total }}</span>
+			</div>
+		</div>
+	</div>
+
+
+
+	<!-- Scrollable Answers -->
+	<div class="flex-1 overflow-y-auto px-4 space-y-4 mt-6">
+		{% for answer in answers %}
+		{% if quiz_template.question_type == "multiple_choice" %}
+		{% include "base/components/quiz_components/mc_result_block.html" with answer=answer %}
+		{% elif quiz_template.question_type == "tracing" %}
+		{% include "base/components/quiz_components/tracing_result_block.html" with answer=answer %}
+		{% else %}
+		<div class="text-error">Unsupported question type.</div>
+		{% endif %}
+		{% endfor %}
+
+		<div class="mt-6">
+			<a href="{% url 'course' course_id %}" class="back-button">
+				← Back to Course
+			</a>
+		</div>
+
+	</div>
 
 </div>
+
+<!-- Save open/closed state of past attempts -->
+<script>
+	document.addEventListener("DOMContentLoaded", () => {
+		const toggle = document.getElementById("past-attempts-toggle");
+		const key = "quizPastAttemptsOpen";
+
+		// Restore open/closed state
+		if (localStorage.getItem(key) === "true") {
+			toggle.setAttribute("open", "true");
+		}
+
+		// Save state on toggle
+		toggle.addEventListener("toggle", () => {
+			localStorage.setItem(key, toggle.open.toString());
+		});
+	});
+</script>
+
+
 {% endblock %}

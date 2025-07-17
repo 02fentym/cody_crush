@@ -218,6 +218,7 @@ class Activity(models.Model):
     weight = models.PositiveIntegerField(null=True, blank=True)
     order = models.PositiveIntegerField(default=1)
     created = models.DateTimeField(auto_now_add=True)
+    allow_resubmission = models.BooleanField(default=True, help_text="Allow students to retry this activity after submitting")
 
     # Generic relation
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)

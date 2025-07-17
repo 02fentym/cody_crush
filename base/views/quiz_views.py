@@ -50,11 +50,14 @@ def submit_quiz_form(request, course_topic_id):
             question_type=question_type,
         )
 
+        allow_resubmission = request.POST.get("allow_resubmission") == "on"
+
         Activity.objects.create(
             course_topic=course_topic,
             order=course_topic.activities.count() + 1,
             content_type=ContentType.objects.get_for_model(QuizTemplate),
-            object_id=quiz_template.id
+            object_id=quiz_template.id,
+            allow_resubmission=allow_resubmission
         )
 
         return render(request, "base/components/course_topic_components/course_topic_list.html", {
@@ -73,16 +76,18 @@ def start_quiz(request, course_id, activity_id):
     activity = get_object_or_404(Activity, id=activity_id)
     course_topic = activity.course_topic
     template = activity.content_object
+    allow_resubmission = activity.allow_resubmission
 
     # Check if the student has already completed this quiz
-    existing_completion = ActivityCompletion.objects.filter(
-        student=request.user,
-        activity=activity,
-        completed=True
-    ).first()
+    if activity.allow_resubmission == False:
+        existing_completion = ActivityCompletion.objects.filter(
+            student=request.user,
+            activity=activity,
+            completed=True
+        ).first()
 
-    if existing_completion:
-        return redirect("quiz-results", existing_completion.id)
+        if existing_completion:
+            return redirect("quiz-results", existing_completion.id)
 
 
     # Determine the question model
@@ -212,6 +217,12 @@ def quiz_results(request, ac_id):
     course_id = course_unit.course.id if course_unit else None
 
 
+    # Get all attempts for this student and activity
+    all_quizzes = Quiz.objects.filter(
+        activity=activity,
+        student=request.user
+    ).order_by("-created")
+
     quiz = answers.first().quiz if answers.exists() else None
     correct = answers.filter(is_correct=True).count()
     total = answers.count()
@@ -225,7 +236,8 @@ def quiz_results(request, ac_id):
         "course_id": course_id,
         "correct": correct,
         "total": total,
-        "courses": courses
+        "courses": courses,
+        "all_quizzes": all_quizzes
     }
 
     return render(request, "base/main/quiz_results.html", context)

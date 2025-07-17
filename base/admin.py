@@ -117,6 +117,11 @@ class ProfileAdmin(admin.ModelAdmin):
     list_filter = ('role',)
 
 
+@admin.register(Quiz)
+class QuizAdmin(admin.ModelAdmin):
+    list_display = ('id', 'course_topic', 'created')
+    search_fields = ('course_topic__title',)
+
 @admin.register(QuizTemplate)
 class QuizTemplateAdmin(admin.ModelAdmin):
     list_display = ('id', 'course_topic', 'question_type', 'question_count')
@@ -139,6 +144,5 @@ class UnitAdmin(admin.ModelAdmin):
 
 # --- Default Simple Registrations ---
 
-admin.site.register(Quiz)
 admin.site.register(Answer)
 admin.site.register(TracingQuestion)
