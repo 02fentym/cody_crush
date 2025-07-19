@@ -56,24 +56,36 @@ def take_code_question(request, activity_id):
     question = activity.content_object  # This is the CodeQuestion
     user = request.user
 
-    # ✅ Redirect if already completed
-    existing_completion = ActivityCompletion.objects.filter(
-        student=user, activity=activity, completed=True
-    ).first()
-    
-    if existing_completion:
-        print(f"existing_completion: {existing_completion.id}")
-        return redirect("code-question-results", existing_completion.id)
-
-    # Optional: preload the Course for breadcrumb/back nav
+    # For back button
     course_id = (
         CourseUnit.objects
         .filter(unit=course_topic.unit)
-        .select_related("course")
         .values_list("course__id", flat=True)
         .first()
     )
 
+    if request.method == "POST":
+        # Only allow POST-based retake if resubmissions are allowed
+        if not activity.allow_resubmission:
+            existing_completion = ActivityCompletion.objects.filter(
+                student=user, activity=activity, completed=True
+            ).order_by("-date_completed").first()
+
+            if existing_completion:
+                return redirect("code-question-results", existing_completion.id)
+
+        # Otherwise, fall through and render the page again to allow retake
+
+    elif request.method == "GET":
+        # If the student has already completed this activity, always redirect to results
+        existing_completion = ActivityCompletion.objects.filter(
+            student=user, activity=activity, completed=True
+        ).order_by("-date_completed").first()
+
+        if existing_completion:
+            return redirect("code-question-results", existing_completion.id)
+
+    # Either first attempt or resubmission is allowed
     context = {
         "question": question,
         "activity": activity,

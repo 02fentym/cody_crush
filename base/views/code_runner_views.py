@@ -50,7 +50,9 @@ def run_docker(student_path, tests_path):
     return result.stdout.decode().strip()
 
 
-# Submit code to the server
+# Submit code and create/save results
+@login_required
+@allowed_roles(["student"])
 def submit_code(request):
     if request.method != "POST":
         return JsonResponse({"error": "Only POST allowed"}, status=405)
@@ -64,7 +66,7 @@ def submit_code(request):
 
     question = get_object_or_404(CodeQuestion, id=question_id)
 
-    # Prep paths
+    # Set up file system paths
     submission_id = str(uuid.uuid4())
     base_path = os.path.join(settings.MEDIA_ROOT, "submissions", submission_id)
     student_path = os.path.join(base_path, "student")
@@ -78,16 +80,36 @@ def submit_code(request):
 
         results = data.get("results", [])
         summary = data.get("summary", {})
+        passed = summary.get("all_passed", False)
 
         activity = Activity.objects.filter(content_type__model="codequestion", object_id=question.id).first()
         ac = None
 
         if activity and request.user.is_authenticated:
-            ac, _ = ActivityCompletion.objects.update_or_create(
+            # 🔒 Check for existing completion if resubmissions not allowed
+            if not activity.allow_resubmission:
+                ac = ActivityCompletion.objects.filter(
+                    student=request.user,
+                    activity=activity,
+                    completed=True
+                ).first()
+
+                if ac:
+                    return redirect("code-question-results", ac.id)
+
+            # Count attempts for this user + activity
+            previous_attempts = ActivityCompletion.objects.filter(
+                student=request.user,
+                activity=activity
+            ).count()
+
+            # ✅ Create a new ActivityCompletion
+            ac = ActivityCompletion.objects.create(
                 student=request.user,
                 activity=activity,
-                defaults={"completed": summary.get("all_passed", False),
-                          "date_completed": timezone.now()},
+                completed=passed,
+                date_completed=timezone.now(),
+                attempt_number=previous_attempts + 1
             )
 
             # ✅ Save the submission
