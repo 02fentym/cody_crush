@@ -68,9 +68,15 @@
                     </button>
 
                     <!-- Code Question Creation -->
-                    <a href="{% url 'submit-code-question-form' ct.id %}" class="btn btn-outline btn-secondary btn-sm">
+                    <button class="btn btn-outline btn-secondary btn-sm"
+                        hx-get="{% url 'get-code-question-form' ct.id %}"
+                        hx-target="#modal-body"
+                        hx-swap="innerHTML"
+                        onclick="document.getElementById('modal-wrapper').checked = true">
                         + Code Question
-                    </a>
+                    </button>
+
+
 
 
 

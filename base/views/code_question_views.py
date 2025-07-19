@@ -1,45 +1,51 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from base.decorators import allowed_roles
-from django.contrib.contenttypes.models import ContentType
-from django.contrib import messages
+from django.views.decorators.http import require_POST
+import random
 
-
-from base.models import CourseTopic, CourseUnit, Language, CodeQuestion, Activity, ActivityCompletion
+from base.models import CourseTopic, CourseUnit, CodeQuestion, Activity, ActivityCompletion
 
 
 @login_required
 @allowed_roles(["teacher"])
 def get_code_question_form(request, course_topic_id):
     course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
-    course_unit = CourseUnit.objects.select_related("course").filter(unit=course_topic.unit).first()
-    course_id = course_unit.course.id if course_unit else None
+    code_questions = CodeQuestion.objects.filter(topic=course_topic.topic)
 
-    context = {"ct": course_topic, "course_id": course_id, "languages": Language.objects.all()}
+    context = {"course_topic": course_topic, "code_questions": code_questions}
     return render(request, "base/components/activity_components/code_question_form.html", context)
 
 
-@login_required
-@allowed_roles(["teacher"])
+@require_POST
 def submit_code_question_form(request, course_topic_id):
     course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
-    questions = CodeQuestion.objects.filter(topic=course_topic.topic)
 
-    if not questions.exists():
-        messages.error(request, "No code questions available for this topic.")
-        return redirect("course", course_id=CourseUnit.objects.get(unit=course_topic.unit).course.id)
+    allow_resubmission = request.POST.get("allow_resubmission") == "on"
+    random_select = request.POST.get("random_select") == "on"
+    question_id = request.POST.get("question_id")
+    course_id=CourseUnit.objects.get(unit=course_topic.unit).course.id
 
-    random_question = questions.order_by("?").first()
+    if random_select:
+        questions = CodeQuestion.objects.filter(topic=course_topic.topic)
+        if not questions.exists():
+            # Handle empty pool gracefully
+            return redirect("course", course_id=course_id)
+        code_question = random.choice(questions)
+    else:
+        code_question = get_object_or_404(CodeQuestion, id=question_id)
 
+    existing_count = course_topic.activities.count()
+
+    # Create Activity
     Activity.objects.create(
         course_topic=course_topic,
-        order=course_topic.activities.count() + 1,
-        content_type=ContentType.objects.get_for_model(CodeQuestion),
-        object_id=random_question.id
+        content_object=code_question,
+        allow_resubmission=allow_resubmission,
+        order=existing_count + 1
     )
 
-    messages.success(request, "Random code question assigned.")
-    return redirect("course", course_id=CourseUnit.objects.get(unit=course_topic.unit).course.id)
+    return redirect("course", course_id=course_id)
 
 
 @login_required

@@ -2885,6 +2885,10 @@
   .whitespace-pre-wrap {
     white-space: pre-wrap;
   }
+  .checkbox-primary {
+    color: var(--color-primary-content);
+    --input-color: var(--color-primary);
+  }
   .link-primary {
     color: var(--color-primary);
     @media (hover: hover) {

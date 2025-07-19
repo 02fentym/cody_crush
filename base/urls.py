@@ -8,8 +8,8 @@ urlpatterns = [
 
 ### URLS for code_question_views.py
     # Creation
-    path("code_question/get/<int:course_topic_id>/", views.get_code_question_form, name="get-code-question-form"),
-    path("code_question/submit/<int:course_topic_id>/", views.submit_code_question_form, name="submit-code-question-form"),
+    path("code-question-form/<int:course_topic_id>/", views.get_code_question_form, name="get-code-question-form"),
+    path("submit-code-question-form/<int:course_topic_id>/", views.submit_code_question_form, name="submit-code-question-form"),
 
     # Taking
     path("code_questions/take/<int:activity_id>/", views.take_code_question, name="take-code-question"),

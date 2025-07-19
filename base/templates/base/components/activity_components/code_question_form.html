@@ -1,0 +1,50 @@
+<form method="POST" action="{% url 'submit-code-question-form' course_topic.id %}" class="space-y-4">
+    {% csrf_token %}
+
+    <div class="form-control">
+        <label class="label cursor-pointer">
+            <span class="label-text">Allow Resubmission</span>
+            <input type="checkbox" name="allow_resubmission" class="checkbox checkbox-primary" />
+        </label>
+    </div>
+
+    <div class="form-control">
+        <label class="label cursor-pointer">
+            <span class="label-text">Randomly Select from Question Pool</span>
+            <input type="checkbox" name="random_select" id="random-select-checkbox" class="checkbox checkbox-primary" />
+        </label>
+    </div>
+
+    <div class="form-control">
+        <label class="label">
+            <span class="label-text">Choose Specific Code Question</span>
+        </label>
+        <select name="question_id" id="question-select" class="select select-bordered w-full">
+            {% for q in code_questions %}
+                <option value="{{ q.id }}">{{ q.title|truncatechars:80 }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="modal-action">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <label for="modal-wrapper" class="btn">Cancel</label>
+    </div>
+
+</form>
+
+<script>
+requestAnimationFrame(() => {
+    const checkbox = document.getElementById("random-select-checkbox");
+    const select = document.getElementById("question-select");
+
+    if (!checkbox || !select) return;
+
+    function toggleSelectDisabled() {
+        select.disabled = checkbox.checked;
+    }
+
+    toggleSelectDisabled();
+    checkbox.addEventListener("change", toggleSelectDisabled);
+});
+</script>
