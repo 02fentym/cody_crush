@@ -13,6 +13,7 @@
     <input type="hidden" name="code" id="code-input">
     <input type="hidden" name="question_id" value="{{ question.id }}">
     <input type="hidden" name="language" value="{{ question.language.name|lower }}">
+    <input type="hidden" name="activity_id" value="{{ activity.id }}">
 
     <button type="submit" class="btn btn-primary mt-4">Submit</button>
 </form>

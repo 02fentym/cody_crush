@@ -23,15 +23,21 @@
 					</div>
 					<ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-64">
 						{% for attempt in all_attempts %}
+						{% with sub=attempt.code_submissions.last %}
 						<li>
-							<a href="{% url 'code-results' attempt.id %}" class="flex justify-between gap-2">
-								<span>#{{ forloop.counter }}</span>
-								<span class="text-xs text-base-content/60">{{ attempt.created|date:"Y-m-d H:i" }}</span>
+							<a href="{% url 'code-question-results' attempt.id %}" class="flex justify-between gap-2">
+								<span>#{{ attempt.attempt_number }}</span>
+								<span class="text-xs text-base-content/60">{{ attempt.date_completed|date:"Y-m-d H:i" }}</span>
 								<span class="text-xs font-medium">
-									{{ attempt.summary.passed }}/{{ attempt.summary.total }}
+									{% if sub %}
+										{{ sub.summary.passed }}/{{ sub.summary.total }}
+									{% else %}
+										—
+									{% endif %}
 								</span>
 							</a>
 						</li>
+						{% endwith %}
 						{% endfor %}
 					</ul>
 				</div>

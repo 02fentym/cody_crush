@@ -4,7 +4,7 @@ import uuid
 import json
 import subprocess
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from base.decorators import allowed_roles
@@ -82,10 +82,14 @@ def submit_code(request):
         summary = data.get("summary", {})
         passed = summary.get("all_passed", False)
 
-        activity = Activity.objects.filter(content_type__model="codequestion", object_id=question.id).first()
+        activity_id = request.POST.get("activity_id")
+        activity = get_object_or_404(Activity, id=activity_id)
+
         ac = None
 
         if activity and request.user.is_authenticated:
+            print(f"[DEBUG] allow_resubmission=False; checking for existing completion...")
+
             # 🔒 Check for existing completion if resubmissions not allowed
             if not activity.allow_resubmission:
                 ac = ActivityCompletion.objects.filter(
@@ -103,6 +107,8 @@ def submit_code(request):
                 activity=activity
             ).count()
 
+
+            print(f"[DEBUG] Creating new ActivityCompletion for activity {activity.id}")
             # ✅ Create a new ActivityCompletion
             ac = ActivityCompletion.objects.create(
                 student=request.user,
@@ -120,13 +126,7 @@ def submit_code(request):
                 summary=summary,
             )
 
-        return render(request, "base/main/code_results.html", {
-            "question": question,
-            "activity": activity,
-            "results": results,
-            "summary": summary,
-            "course_id": course_id
-        })
+        return redirect("code-question-results", ac.id)
 
     except subprocess.TimeoutExpired:
         return JsonResponse({"error": "Code execution timed out"}, status=408)
@@ -148,6 +148,13 @@ def code_question_results(request, ac_id):
     activity = ac.activity
     question = activity.content_object
 
+    # 🆕 All previous attempts (newest first)
+    all_attempts = (
+        ActivityCompletion.objects
+        .filter(student=request.user, activity=activity)
+        .order_by("-date_completed")
+    )
+
     latest_submission = (
         CodeSubmission.objects
         .filter(activity_completion=ac)
@@ -165,7 +172,8 @@ def code_question_results(request, ac_id):
         "results": latest_submission.results if latest_submission else [],
         "summary": latest_submission.summary if latest_submission else {"passed": 0, "total": 0, "all_passed": False},
         "course_id": course_id,
-        "courses": Course.objects.filter(students=request.user),
+        "all_attempts": all_attempts,
     }
 
     return render(request, "base/main/code_results.html", context)
+
