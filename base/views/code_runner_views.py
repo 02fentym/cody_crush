@@ -165,12 +165,32 @@ def code_question_results(request, ac_id):
     unit = activity.course_topic.unit
     course_unit = CourseUnit.objects.select_related("course").filter(unit=unit).first()
     course_id = course_unit.course.id if course_unit else None
+    
+    if latest_submission and latest_submission.summary:
+        passed = latest_submission.summary.get("passed", 0)
+        total = latest_submission.summary.get("total", 1)
+        all_passed = latest_submission.summary.get("all_passed", False)
+        pct = round((passed / total) * 100) if total else 0
+        summary = {
+            "passed": passed,
+            "total": total,
+            "all_passed": all_passed,
+            "pct": pct,
+        }
+    else:
+        summary = {
+            "passed": 0,
+            "total": 0,
+            "all_passed": False,
+            "pct": 0,
+        }
+
 
     context = {
         "question": question,
         "activity": activity,
         "results": latest_submission.results if latest_submission else [],
-        "summary": latest_submission.summary if latest_submission else {"passed": 0, "total": 0, "all_passed": False},
+        "summary": summary,
         "course_id": course_id,
         "all_attempts": all_attempts,
     }
