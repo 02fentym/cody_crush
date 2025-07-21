@@ -61,16 +61,27 @@ def question_bank_view(request, question_type):
     ordering = sort_by if sort_by in allowed_sorts else "created"
     ordering = ordering if order == "asc" else f"-{ordering}"
 
+    # ✅ Use 'language_name' throughout
+    language_name = request.GET.get("language", "python")
+    queryset = model.objects.select_related("topic__unit", "language")
+
+    if "language" in [f.name for f in model._meta.get_fields()]:
+        queryset = queryset.filter(language__name__iexact=language_name)
+
     context = {
         "courses": get_all_courses(request.user.profile.role, request.user),
         "title": config["title"],
-        "questions": model.objects.select_related("topic__unit").order_by(ordering),
+        "questions": queryset.order_by(ordering),
         "table_id": config["table_id"],
         "sort_by": sort_by,
         "order": order,
         "question_type": question_type,
+        "language": language_name,
+        "all_languages": Language.objects.order_by("name"),
     }
     return render(request, "base/main/question_bank_base.html", context)
+
+
 
 
 # Adds single question

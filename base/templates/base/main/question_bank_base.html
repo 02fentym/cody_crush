@@ -5,8 +5,54 @@
 <h1 class="text-3xl font-bold mb-2">{{ title }}</h1>
 
 <div class="flex flex-col">
-  <div id="{{ table_id }}-wrapper">
-    {% include "base/components/upload_questions_components/question_bank_table.html" with questions=questions sort_by=sort_by order=order %}
-  </div>
+
+	<!-- Language selector -->
+	<div class="flex items-center gap-2 mb-4">
+		<label class="font-medium">Language:</label>
+		<select id="language-select" class="select select-bordered select-sm w-auto">
+			{% for lang in all_languages %}
+			<option value="{{ lang.name|lower }}" {% if language==lang.name|lower %}selected{% endif %}>
+				{{ lang.name }}
+			</option>
+			{% endfor %}
+		</select>
+	</div>
+
+	<!-- Table -->
+	<div id="{{ table_id }}-wrapper">
+		{% include "base/components/upload_questions_components/question_bank_table.html" with questions=questions sort_by=sort_by order=order %}
+	</div>
 </div>
+
+
+<!-- Remembers selected language -->
+<script>
+	document.addEventListener("DOMContentLoaded", () => {
+		const select = document.getElementById("language-select");
+
+		// 1. Get what's in localStorage and in the URL
+		const storedLang = localStorage.getItem("preferredLanguage");
+		const url = new URL(window.location.href);
+		const currentLang = url.searchParams.get("language");
+
+		// 2. If stored language exists and is different, apply it
+		if (storedLang && storedLang !== currentLang) {
+			url.searchParams.set("language", storedLang);
+			window.location.href = url.toString();
+			return; // Stop script after redirect
+		}
+
+		// 3. When the user changes the dropdown
+		if (select) {
+			select.addEventListener("change", function () {
+				const newLang = this.value;
+				localStorage.setItem("preferredLanguage", newLang);
+
+				url.searchParams.set("language", newLang);
+				window.location.href = url.toString();
+			});
+		}
+	});
+</script>
+
 {% endblock %}
