@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from base.models import (Course, CourseUnit, CourseTopic, )
+from base.models import (Course, CourseWeighting)
 from django.contrib.auth.decorators import login_required
 from base.forms import CourseForm, EnrollmentPasswordForm
-from django.http import HttpResponse
+from base.constants import DEFAULT_COURSE_WEIGHTINGS
 
 
 @login_required(login_url="login")
@@ -19,6 +19,15 @@ def home(request):
                 course = course_form.save(commit=False)
                 course.teacher = request.user
                 course.save()
+
+                # Set default weightings
+                for activity_type, weight in DEFAULT_COURSE_WEIGHTINGS.items():
+                    CourseWeighting.objects.create(
+                        course=course,
+                        activity_type=activity_type,
+                        weight=weight,
+                    )
+
                 messages.success(request, "Course created successfully!")
                 return redirect("home")
         elif form_type == "password":
