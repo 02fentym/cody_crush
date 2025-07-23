@@ -1,4 +1,4 @@
-<form method="POST" class="space-y-4">
+<form method="POST" action="{% url 'course-settings' course.id %}" class="space-y-4">
     {% csrf_token %}
     <table class="table table-zebra !w-auto">
         <thead>

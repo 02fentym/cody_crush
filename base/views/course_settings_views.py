@@ -1,12 +1,11 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from base.models import Course, CourseWeighting
-from base.forms import CourseWeightingForm
 from base.constants import WEIGHTING_DISPLAY_NAMES
-
+from django.contrib import messages
 
 @login_required
-def course_settings_view(request, course_id):
+def course_settings(request, course_id):
     course = get_object_or_404(Course, id=course_id, teacher=request.user)
 
     if request.method == "POST":
@@ -19,6 +18,8 @@ def course_settings_view(request, course_id):
                     cw.save()
                 except (CourseWeighting.DoesNotExist, ValueError):
                     pass
+        update_activity_weights(course)
+        messages.success(request, "Weights updated and all activities refreshed.")
 
     weightings = CourseWeighting.objects.filter(course=course).order_by("activity_type")
 
@@ -26,22 +27,24 @@ def course_settings_view(request, course_id):
     return render(request, "base/main/course_settings.html", context)
 
 
-@login_required
-def course_weight_settings(request, course_id):
-    course = get_object_or_404(Course, id=course_id, teacher=request.user)
+def update_activity_weights(course):
+    print(f"Updating weights for course: {course.title}")
+    weightings = CourseWeighting.objects.filter(course=course)
+    weighting_map = {w.activity_type: w.weight for w in weightings}
 
-    if request.method == "POST":
-        for key, value in request.POST.items():
-            if key.startswith("weight_"):
-                _, weighting_id = key.split("_")
-                try:
-                    cw = CourseWeighting.objects.get(id=weighting_id, course=course)
-                    cw.weight = int(value)
-                    cw.save()
-                except (CourseWeighting.DoesNotExist, ValueError):
-                    pass
+    for ct in course.coursetopic_set.all():
+        print(f"  CourseTopic: {ct}")
+        for activity in ct.activities.all():
+            print(f"    Activity {activity.id} ({activity.content_type.model}) current weight: {activity.weight}")
+            model = activity.content_type.model
+            if model == "quiztemplate":
+                qt = activity.content_object
+                key = f"{model}_{qt.question_type}"
+            else:
+                key = model
 
-    weightings = CourseWeighting.objects.filter(course=course).order_by("activity_type")
-
-    context = {"course": course, "weightings": weightings}
-    return render(request, "base/main/course_weight_settings.html", context)
+            new_weight = weighting_map.get(key)
+            if new_weight is not None and activity.weight != new_weight:
+                activity.weight = new_weight
+                print(f"    → Updating weight to {new_weight}")
+                activity.save()

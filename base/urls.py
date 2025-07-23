@@ -22,7 +22,7 @@ urlpatterns = [
 
 
 ### URLS for course_settings_views.py
-    path("courses/<int:course_id>/settings/", views.course_settings_view, name="course-settings"),
+    path("courses/<int:course_id>/settings/", views.course_settings, name="course-settings"),
 
 
 ### URLS for course_topic_views.py
