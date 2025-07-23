@@ -21,6 +21,10 @@ urlpatterns = [
     path("code_questions/results/<int:ac_id>/", views.code_question_results, name="code-question-results"),
 
 
+### URLS for course_settings_views.py
+    path("courses/<int:course_id>/settings/", views.course_settings_view, name="course-settings"),
+
+
 ### URLS for course_topic_views.py
     path("get-course-topic-form/<int:unit_id>/", views.get_course_topic_form, name="get-course-topic-form"),
     path("submit-course-topic-form/", views.submit_course_topic_form, name="submit-course-topic-form"),

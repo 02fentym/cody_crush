@@ -11,6 +11,13 @@ from base.decorators import allowed_roles
 
 from base.models import CodeQuestion, ActivityCompletion, Activity, Course, CourseUnit, CodeSubmission
 
+# Helper function for getting all courses
+def get_all_courses(role, user):
+    if role == "student":
+        courses = user.enrolled_courses.all()
+    else:
+        courses = Course.objects.filter(teacher=user)
+    return courses
 
 # Create test files and test cases
 def write_test_files(code, question, student_path, tests_path):
@@ -142,8 +149,7 @@ def test_code_component(request):
 @login_required(login_url="login")
 @allowed_roles(["student"])
 def code_question_results(request, ac_id):
-    from base.models import CodeSubmission
-
+    courses = get_all_courses("student", request.user)
     ac = get_object_or_404(ActivityCompletion, id=ac_id, student=request.user)
     activity = ac.activity
     question = activity.content_object
@@ -193,6 +199,7 @@ def code_question_results(request, ac_id):
         "summary": summary,
         "course_id": course_id,
         "all_attempts": all_attempts,
+        "courses": courses,
     }
 
     return render(request, "base/main/code_results.html", context)

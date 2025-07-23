@@ -76,6 +76,7 @@ class Topic(models.Model):
 
 
 class CourseTopic(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE) # specific course
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE) # universal unit
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)  # universal topic
     order = models.PositiveIntegerField(default=1)
@@ -84,7 +85,7 @@ class CourseTopic(models.Model):
 
     class Meta:
         ordering = ['order']
-        unique_together = ('unit', 'topic')
+        unique_together = ('course', 'unit', 'topic')
 
     def __str__(self):
         return f"{self.unit.title} → {self.topic.title}"
@@ -236,23 +237,25 @@ class Activity(models.Model):
     
     def save(self, *args, **kwargs):
         if self.weight is None:
-            model = self.content_type.model
+            model = self.content_type.model  # e.g., 'lesson', 'quiztemplate'
+            course = self.course_topic.course
 
+            # Special case for quiztemplate subtype
             if model == "quiztemplate":
-                template = self.content_object
-                if template.question_type == "multiple_choice":
-                    self.weight = 50
-                elif template.question_type == "tracing":
-                    self.weight = 100
-
-            elif model == "dmojexercise":
-                self.weight = 10
-
-            elif model == "lesson":
-                self.weight = 5
-
+                try:
+                    template = self.content_object  # QuizTemplate
+                    quiz_type = template.question_type  # 'multiple_choice' or 'tracing'
+                    activity_type = f"{model}_{quiz_type}"  # e.g. 'quiztemplate_multiple_choice'
+                except Exception:
+                    activity_type = model  # fallback
             else:
-                self.weight = 1  # Fallback default
+                activity_type = model
+
+            try:
+                weighting = CourseWeighting.objects.get(course=course, activity_type=activity_type)
+                self.weight = weighting.weight
+            except CourseWeighting.DoesNotExist:
+                self.weight = 1  # fallback
         super().save(*args, **kwargs)
 
 
@@ -349,3 +352,28 @@ class CodeSubmission(models.Model):
 
     def __str__(self):
         return f"Submission by {self.activity_completion.student.username} for Activity {self.activity_completion.activity.id}"
+
+
+class CourseWeighting(models.Model):
+    DISPLAY_NAMES = {
+        "lesson": "Lesson",
+        "dmojexercise": "DMOJ Exercise",
+        "codequestion": "Code Question",
+        "quiztemplate_multiple_choice": "Multiple Choice",
+        "quiztemplate_tracing": "Tracing",
+    }
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    activity_type = models.CharField(max_length=30)
+    weight = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = ("course", "activity_type")
+
+    def __str__(self):
+        return f"{self.course.title}: {self.activity_type} → {self.weight}"
+
+    @property
+    def display_name(self):
+        # Use the display name if it exists otherwise use the activity type and title case it
+        return self.DISPLAY_NAMES.get(self.activity_type, self.activity_type.replace("_", " ").title())

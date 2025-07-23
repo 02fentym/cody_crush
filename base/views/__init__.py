@@ -1,6 +1,7 @@
 from .activity_views import *
 from .code_question_views import *
 from .code_runner_views import *
+from .course_settings_views import *
 from .course_topic_views import *
 from .course_unit_views import *
 from .course_views import *

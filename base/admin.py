@@ -3,7 +3,7 @@ from .models import (
     Unit, Topic, Quiz, Answer, Profile, Course, Activity,
     QuizTemplate, Lesson, MultipleChoiceQuestion, TracingQuestion,
     DmojExercise, ActivityCompletion, Language, CourseUnit, CourseTopic,
-    CodeQuestion, CodeTestCase, CodeSubmission
+    CodeQuestion, CodeTestCase, CodeSubmission, CourseWeighting
 )
 
 # --- Customized Admin Classes ---
@@ -75,6 +75,13 @@ class CourseUnitAdmin(admin.ModelAdmin):
     list_filter = ("course",)
     search_fields = ("course__title", "unit__title")
 
+
+@admin.register(CourseWeighting)
+class CourseWeightingAdmin(admin.ModelAdmin):
+    list_display = ('id', 'course', 'activity_type', 'weight')
+    search_fields = ('course__title', 'activity_type')
+    list_filter = ('activity_type',)
+    
 
 @admin.register(DmojExercise)
 class DmojExerciseAdmin(admin.ModelAdmin):

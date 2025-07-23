@@ -1,0 +1,23 @@
+<form method="POST" class="space-y-4">
+    {% csrf_token %}
+    <table class="table table-zebra !w-auto">
+        <thead>
+            <tr>
+                <th>Activity Type</th>
+                <th>Weight</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for w in weightings %}
+            <tr>
+                <td>{{ w.display_name }}</td>
+                <td>
+                    <input type="number" name="weight_{{ w.id }}" value="{{ w.weight }}"
+                        class="input input-bordered w-24">
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button class="btn btn-primary mt-4">Save Changes</button>
+</form>

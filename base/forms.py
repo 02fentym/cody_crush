@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Course, Unit, Topic, Lesson, DmojExercise, Profile, CourseUnit, CourseTopic, MultipleChoiceQuestion, TracingQuestion, CodeQuestion, CodeTestCase
+from .models import Course, Unit, Topic, Lesson, DmojExercise, Profile, CourseUnit, CourseTopic, MultipleChoiceQuestion, TracingQuestion, CodeQuestion, CodeTestCase, CourseWeighting
 
 
 class UserForm(UserCreationForm):
@@ -252,3 +252,15 @@ class CodeTestCaseForm(forms.ModelForm):
                 "class": "select select-sm select-bordered w-full"
             }),
         }
+
+
+
+class CourseWeightingForm(forms.ModelForm):
+    class Meta:
+        model = CourseWeighting
+        fields = ["activity_type", "weight"]
+        widgets = {
+            "activity_type": forms.TextInput(attrs={"readonly": "readonly", "class": "input input-bordered"}),
+            "weight": forms.NumberInput(attrs={"class": "input input-bordered w-24"}),
+        }
+
