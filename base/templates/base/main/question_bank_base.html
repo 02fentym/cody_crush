@@ -9,13 +9,14 @@
 	<!-- Language selector -->
 	<div class="flex items-center gap-2 mb-4">
 		<label class="font-medium">Language:</label>
-		<select id="language-select" class="select select-bordered select-sm w-auto">
+		<select id="language-select" class="select">
 			{% for lang in all_languages %}
-			<option value="{{ lang.name|lower }}" {% if language==lang.name|lower %}selected{% endif %}>
+			<option value="{{ lang.name|lower }}" {% if lang.name|lower == language %}selected{% endif %}>
 				{{ lang.name }}
 			</option>
 			{% endfor %}
 		</select>
+
 	</div>
 
 	<!-- Table -->
