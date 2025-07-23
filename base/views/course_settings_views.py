@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from base.models import Course, CourseWeighting
 from base.forms import CourseWeightingForm
+from base.constants import WEIGHTING_DISPLAY_NAMES
 
 
 @login_required
@@ -20,9 +21,10 @@ def course_settings_view(request, course_id):
                     pass
 
     weightings = CourseWeighting.objects.filter(course=course).order_by("activity_type")
-    context = {"course": course, "weightings": weightings}
 
+    context = {"course": course, "weightings": weightings}
     return render(request, "base/main/course_settings.html", context)
+
 
 @login_required
 def course_weight_settings(request, course_id):

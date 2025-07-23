@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils import timezone
+from base.constants import WEIGHTING_DISPLAY_NAMES
 
 
 class Profile(models.Model):
@@ -355,14 +356,6 @@ class CodeSubmission(models.Model):
 
 
 class CourseWeighting(models.Model):
-    DISPLAY_NAMES = {
-        "lesson": "Lesson",
-        "dmojexercise": "DMOJ Exercise",
-        "codequestion": "Code Question",
-        "quiztemplate_multiple_choice": "Multiple Choice",
-        "quiztemplate_tracing": "Tracing",
-    }
-
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     activity_type = models.CharField(max_length=30)
     weight = models.PositiveIntegerField()
@@ -376,4 +369,4 @@ class CourseWeighting(models.Model):
     @property
     def display_name(self):
         # Use the display name if it exists otherwise use the activity type and title case it
-        return self.DISPLAY_NAMES.get(self.activity_type, self.activity_type.replace("_", " ").title())
+        return WEIGHTING_DISPLAY_NAMES.get(self.activity_type, self.activity_type.replace("_", " ").title())
