@@ -7,14 +7,12 @@ from django.utils.timezone import localtime
 
 @login_required
 @allowed_roles(["student"])
-@login_required
-@allowed_roles(["student"])
 def progress(request, course_id):
     student = request.user
     courses = student.enrolled_courses.all()
     course = get_object_or_404(student.enrolled_courses, id=course_id)
 
-    percent = get_course_progress(student, course)
+    mark = get_course_mark(student, course)  # weighted average
 
     activities = (
         Activity.objects
@@ -27,6 +25,11 @@ def progress(request, course_id):
         ac.activity_id: ac
         for ac in ActivityCompletion.objects.filter(student=student, activity__in=activities)
     }
+
+    # Compute progress
+    total_activities = len(activities)
+    completed_count = sum(1 for ac in completions.values() if ac.completed)
+    progress = round((completed_count / total_activities) * 100, 1) if total_activities > 0 else 0
 
     activity_rows = []
     for activity in activities:
@@ -45,14 +48,16 @@ def progress(request, course_id):
     context = {
         "courses": courses,
         "course": course,
-        "percent": percent,
+        "mark": mark,
+        "progress": progress,
         "activity_rows": activity_rows,
     }
 
     return render(request, "base/main/progress.html", context)
 
 
-def get_course_progress(student, course):
+
+def get_course_mark(student, course):
     all_activities = Activity.objects.filter(
         course_topic__unit__courseunit__course=course
     ).select_related("course_topic", "content_type")
@@ -65,15 +70,11 @@ def get_course_progress(student, course):
     ).select_related("activity", "activity__content_type")
 
     earned = 0
+    completed_weight = 0
+
     for ac in completions:
-        model = ac.activity.content_type.model
-        if model == "quiztemplate":
-            earned_val = ac.score  # already percentage-based
-        else:
-            earned_val = ac.score  # DMOJ, raw marks out of activity.weight
+        earned += ac.score
+        completed_weight += ac.activity.weight
 
-        earned += min(earned_val, ac.activity.weight)
+    return round((earned / completed_weight) * 100, 1)
 
-    total = sum(a.weight for a in all_activities)
-    percent = round((earned / total) * 100, 1) if total > 0 else 0
-    return percent

@@ -56,6 +56,7 @@ def take_code_question(request, activity_id):
     course_topic = activity.course_topic
     question = activity.content_object  # This is the CodeQuestion
     user = request.user
+    courses = user.enrolled_courses.all()
 
     # For back button
     course_id = course_topic.course.id
@@ -82,5 +83,5 @@ def take_code_question(request, activity_id):
             return redirect("code-question-results", existing_completion.id)
 
     # Either first attempt or resubmission is allowed
-    context = {"question": question, "activity": activity, "starter_code": question.starter_code, "course_id": course_id,}
+    context = {"question": question, "activity": activity, "starter_code": question.starter_code, "course_id": course_id, "courses": courses}
     return render(request, "base/main/take_code_question.html", context)

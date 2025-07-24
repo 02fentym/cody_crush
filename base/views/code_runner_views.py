@@ -64,7 +64,6 @@ def submit_code(request):
     if request.method != "POST":
         return JsonResponse({"error": "Only POST allowed"}, status=405)
 
-    course_id = request.POST.get("course_id")
     code = request.POST.get("code")
     question_id = request.POST.get("question_id")
 
@@ -95,8 +94,6 @@ def submit_code(request):
         ac = None
 
         if activity and request.user.is_authenticated:
-            print(f"[DEBUG] allow_resubmission=False; checking for existing completion...")
-
             # 🔒 Check for existing completion if resubmissions not allowed
             if not activity.allow_resubmission:
                 ac = ActivityCompletion.objects.filter(
@@ -114,13 +111,18 @@ def submit_code(request):
                 activity=activity
             ).count()
 
+            # Calculate score
+            total_tests = len(results)
+            passed_tests = sum(1 for r in results if r.get("passed"))
+            score = activity.weight * (passed_tests / total_tests) if total_tests > 0 else 0
+            score = activity.weight * (passed_tests / total_tests) if total_tests > 0 else 0
 
-            print(f"[DEBUG] Creating new ActivityCompletion for activity {activity.id}")
             # ✅ Create a new ActivityCompletion
             ac = ActivityCompletion.objects.create(
                 student=request.user,
                 activity=activity,
                 completed=passed,
+                score=score,
                 date_completed=timezone.now(),
                 attempt_number=previous_attempts + 1
             )
