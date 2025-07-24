@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 from base.decorators import allowed_roles
-from base.models import Activity, ActivityCompletion, CourseUnit
+from base.models import Activity, ActivityCompletion
 from django.utils.timezone import localtime
 
 
@@ -42,7 +42,7 @@ def progress(request, course_id):
             "weight": activity.weight,
             "completed": ac.completed if ac else False,
             "score": ac.score if ac else None,
-            "date_completed": localtime(ac.date_completed).strftime("%Y-%m-%d %H:%M") if ac and ac.date_completed else None,
+            "date_completed": localtime(ac.date_completed) if ac and ac.date_completed else None,
         })
 
     context = {

@@ -3,79 +3,212 @@
 
 <div class="p-6 space-y-8">
 
-  <!-- Course Title -->
-  <div>
-    <h1 class="text-3xl font-bold mb-2">{{ course.title }} Progress</h1>
-  </div>
-
-  <!-- Progress and Mark Stats -->
-  <div class="flex gap-6">
-    <div class="stat bg-base-200 rounded-box p-4 shadow-md w-fit">
-      <div class="stat-title text-lg">Progress</div>
-      <div class="stat-value text-primary text-3xl">{{ progress }}%</div>
+    <!-- Course Title -->
+    <div>
+        <h1 class="text-3xl font-bold mb-2">{{ course.title }} Progress</h1>
     </div>
-    <div class="stat bg-base-200 rounded-box p-4 shadow-md w-fit">
-      <div class="stat-title text-lg">Mark</div>
-      <div class="stat-value text-secondary text-3xl">{{ mark }}%</div>
-    </div>
-  </div>
 
-  <!-- Activity Completion Table -->
-  <div class="overflow-x-auto">
-    <table class="table table-zebra w-full">
-      <thead>
-        <tr>
-          <th>Status</th>
-          <th>Activity</th>
-          <th>Unit</th>
-          <th>Topic</th>
-          <th>Type</th>
-          <th>Weight</th>
-          <th>Score</th>
-          <th>Date Completed</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in activity_rows %}
-        <tr>
-          <td>
-            {% if row.completed %}
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-              <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                stroke-width="1" class="text-success">
-                <rect width="18" height="18" x="3" y="3" rx="4" />
-                <path d="m9 12l2.25 2L15 10" />
-              </g>
-            </svg>
-            {% else %}
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-              <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                stroke-width="1" class="text-error">
-                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                <path d="m9 9l6 6m0-6l-6 6" />
-              </g>
-            </svg>
-            {% endif %}
-          </td>
-          <td>{{ row.activity.content_object }}</td>
-          <td>{{ row.course_unit }}</td>
-          <td>{{ row.course_topic }}</td>
-          <td>{{ row.type|title }}</td>
-          <td>{{ row.weight }}</td>
-          <td>
-            {% if row.score != None %}
-            {{ row.score|floatformat:1 }}
-            {% else %}
-            —
-            {% endif %}
-          </td>
-          <td>{{ row.date_completed|default:"—" }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+    <!-- Progress and Mark Stats -->
+    <div class="flex gap-6">
+        <div class="stat bg-base-200 rounded-box p-4 shadow-md w-fit">
+            <div class="stat-title text-lg">Progress</div>
+            <div class="stat-value text-primary text-3xl">{{ progress }}%</div>
+        </div>
+        <div class="stat bg-base-200 rounded-box p-4 shadow-md w-fit">
+            <div class="stat-title text-lg">Mark</div>
+            <div class="stat-value text-secondary text-3xl">{{ mark }}%</div>
+        </div>
+    </div>
+
+    <!-- Filter: Activity Type -->
+    <div class="flex justify-end mb-4 relative z-50">
+        <div class="dropdown dropdown-end dropdown-top">
+            <label tabindex="0" class="btn btn-outline btn-sm">Filters</label>
+            <div tabindex="0" class="dropdown-content bg-base-200 p-4 shadow-md rounded-box space-y-4 w-80">
+
+                <!-- Activity Type Filters -->
+                <div>
+                    <div class="font-medium mb-1">Activity Type</div>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="btn btn-xs filter-btn" data-type="lesson">Lesson</button>
+                        <button class="btn btn-xs filter-btn" data-type="quiztemplate">Quiz</button>
+                        <button class="btn btn-xs filter-btn" data-type="codequestion">Code</button>
+                        <button class="btn btn-xs filter-btn" data-type="dmojexercise">DMOJ</button>
+                        <button class="btn btn-xs filter-btn" data-type="all">Clear</button>
+                    </div>
+                </div>
+
+                <!-- Completion Status Filters -->
+                <div>
+                    <div class="font-medium mb-1">Status</div>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="btn btn-xs status-btn" data-status="complete">Complete</button>
+                        <button class="btn btn-xs status-btn" data-status="incomplete">Incomplete</button>
+                        <button class="btn btn-xs status-btn" data-status="all">Clear</button>
+                    </div>
+                </div>
+
+                <!-- Clear All Filters -->
+                <div class="pt-2 border-t border-base-300">
+                    <button id="clear-all-btn" class="btn btn-sm btn-outline w-full">Clear All Filters</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Activity Completion Table -->
+    <div class="overflow-x-auto">
+        <table class="table table-zebra w-full">
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Activity</th>
+                    <th>Unit</th>
+                    <th>Topic</th>
+                    <th>Type</th>
+                    <th>Weight</th>
+                    <th>Score</th>
+                    <th>Date Completed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in activity_rows %}
+                <tr data-type="{{ row.type }}"
+                    data-status="{% if row.completed %}complete{% else %}incomplete{% endif %}">
+                    <td>
+                        {% if row.completed %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="1" class="text-success">
+                                <rect width="18" height="18" x="3" y="3" rx="4" />
+                                <path d="m9 12l2.25 2L15 10" />
+                            </g>
+                        </svg>
+                        {% else %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="1" class="text-error">
+                                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                                <path d="m9 9l6 6m0-6l-6 6" />
+                            </g>
+                        </svg>
+                        {% endif %}
+                    </td>
+                    <td>{{ row.activity.content_object }}</td>
+                    <td>{{ row.course_unit }}</td>
+                    <td>{{ row.course_topic }}</td>
+                    <td>{{ row.type|title }}</td>
+                    <td>{{ row.weight }}</td>
+                    <td>
+                        {% if row.score != None %}
+                        {{ row.score|floatformat:1 }}
+                        {% else %}
+                        —
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if row.date_completed %}
+                        {{ row.date_completed|timesince }} ago
+                        {% else %}
+                        —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
 </div>
+
+
+<!-- Filter table rows -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const rows = document.querySelectorAll("tbody tr");
+        const typeButtons = document.querySelectorAll(".filter-btn");
+        const statusButtons = document.querySelectorAll(".status-btn");
+
+        const activeTypes = new Set();
+        const activeStatuses = new Set();
+
+        function updateTable() {
+            rows.forEach(row => {
+                const rowType = row.getAttribute("data-type");
+                const rowStatus = row.getAttribute("data-status");
+
+                const typeMatch = activeTypes.size === 0 || activeTypes.has(rowType);
+                const statusMatch = activeStatuses.size === 0 || activeStatuses.has(rowStatus);
+
+                if (typeMatch && statusMatch) {
+                    row.classList.remove("hidden");
+                } else {
+                    row.classList.add("hidden");
+                }
+            });
+        }
+
+        function toggleFilter(set, value, button) {
+            if (set.has(value)) {
+                set.delete(value);
+                button.classList.remove("bg-primary", "text-white");
+            } else {
+                set.add(value);
+                button.classList.add("bg-primary", "text-white");
+            }
+            updateTable();
+        }
+
+        // Type filters
+        typeButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                const type = button.getAttribute("data-type");
+                if (type === "all") {
+                    activeTypes.clear();
+                    typeButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
+                } else {
+                    toggleFilter(activeTypes, type, button);
+                }
+                updateTable();
+            });
+        });
+
+        // Status filters
+        statusButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                const status = button.getAttribute("data-status");
+
+                // Clear all visual states first
+                statusButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
+
+                if (status === "all") {
+                    activeStatuses.clear();
+                } else {
+                    activeStatuses.clear();           // only one at a time
+                    activeStatuses.add(status);
+                    button.classList.add("bg-primary", "text-white");
+                }
+
+                updateTable();
+            });
+        });
+
+        // Clear all filters
+        document.getElementById("clear-all-btn").addEventListener("click", () => {
+            activeTypes.clear();
+            activeStatuses.clear();
+
+            typeButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
+            statusButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
+
+            updateTable();
+        });
+    });
+</script>
+
+
+
 
 {% endblock %}
