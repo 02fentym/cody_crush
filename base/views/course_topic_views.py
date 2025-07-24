@@ -49,8 +49,7 @@ def submit_course_topic_form(request):
 def delete_course_topic(request, course_topic_id):
     course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
     unit = course_topic.unit
-    course_unit = CourseUnit.objects.get(unit=unit)
-    course_id = course_unit.course.id
+    course_id = course_topic.course.id
 
     course_topic.delete()
 

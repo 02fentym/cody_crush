@@ -24,13 +24,10 @@ def get_all_courses(role, user):
 @allowed_roles(["teacher"])
 def get_quiz_form(request, course_topic_id):
     course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
-    course_unit = CourseUnit.objects.select_related("course").filter(unit=course_topic.unit).first()
-    course_id = course_unit.course.id if course_unit else None
+    course_id = course_topic.course.id
 
-    return render(request, "base/components/quiz_components/quiz_form.html", {
-        "ct": course_topic,
-        "course_id": course_id
-    })
+    context = {"ct": course_topic, "course_id": course_id}
+    return render(request, "base/components/quiz_components/quiz_form.html", context)
 
 
 @login_required
@@ -79,7 +76,7 @@ def start_quiz(request, course_id, activity_id):
     allow_resubmission = activity.allow_resubmission
 
     # Check if the student has already completed this quiz
-    if activity.allow_resubmission == False:
+    if allow_resubmission == False:
         existing_completion = ActivityCompletion.objects.filter(
             student=request.user,
             activity=activity,
@@ -211,11 +208,7 @@ def quiz_results(request, ac_id):
     activity = ac.activity
     quiz_template = activity.content_object
     answers = Answer.objects.filter(activity_completion=ac).select_related('quiz_question')
-    
-    unit = ac.activity.course_topic.unit
-    course_unit = CourseUnit.objects.select_related("course").filter(unit=unit).first()
-    course_id = course_unit.course.id if course_unit else None
-
+    course_id = activity.course_topic.course.id
 
     # Get all attempts for this student and activity
     all_quizzes = Quiz.objects.filter(

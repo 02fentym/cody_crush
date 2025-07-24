@@ -16,7 +16,8 @@ from django.db.models import Max
 def get_course_unit_form(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     form = CourseUnitForm()
-    return render(request, "base/components/course_unit_components/course_unit_form.html", {"form": form, "course": course})
+    context = {"form": form, "course": course}
+    return render(request, "base/components/course_unit_components/course_unit_form.html", context)
 
 
 @login_required

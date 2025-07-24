@@ -17,6 +17,7 @@ def get_code_question_form(request, course_topic_id):
     return render(request, "base/components/activity_components/code_question_form.html", context)
 
 
+# Selects a CodeQuestion and adds it to the Activity
 @require_POST
 def submit_code_question_form(request, course_topic_id):
     course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
@@ -24,7 +25,7 @@ def submit_code_question_form(request, course_topic_id):
     allow_resubmission = request.POST.get("allow_resubmission") == "on"
     random_select = request.POST.get("random_select") == "on"
     question_id = request.POST.get("question_id")
-    course_id=CourseUnit.objects.get(unit=course_topic.unit).course.id
+    course_id = course_topic.course.id
 
     if random_select:
         questions = CodeQuestion.objects.filter(topic=course_topic.topic)
@@ -57,12 +58,7 @@ def take_code_question(request, activity_id):
     user = request.user
 
     # For back button
-    course_id = (
-        CourseUnit.objects
-        .filter(unit=course_topic.unit)
-        .values_list("course__id", flat=True)
-        .first()
-    )
+    course_id = course_topic.course.id
 
     if request.method == "POST":
         # Only allow POST-based retake if resubmissions are allowed
@@ -86,10 +82,5 @@ def take_code_question(request, activity_id):
             return redirect("code-question-results", existing_completion.id)
 
     # Either first attempt or resubmission is allowed
-    context = {
-        "question": question,
-        "activity": activity,
-        "starter_code": question.starter_code,
-        "course_id": course_id,
-    }
+    context = {"question": question, "activity": activity, "starter_code": question.starter_code, "course_id": course_id,}
     return render(request, "base/main/take_code_question.html", context)

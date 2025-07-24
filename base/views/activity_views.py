@@ -24,8 +24,8 @@ def delete_activity(request, activity_id):
     activity.delete()
     reorder_activities(course_topic)
 
-    course = CourseUnit.objects.get(unit=course_topic.unit).course
-    return redirect("course", course_id=course.id)
+    course_id = activity.course_topic.course.id
+    return redirect("course", course_id=course_id)
 
 
 

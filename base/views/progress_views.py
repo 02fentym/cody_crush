@@ -41,7 +41,6 @@ def progress(request, course_id):
             "score": ac.score if ac else None,
             "date_completed": localtime(ac.date_completed).strftime("%Y-%m-%d %H:%M") if ac and ac.date_completed else None,
         })
-        print(f"Activity: {activity}")
 
     context = {
         "courses": courses,

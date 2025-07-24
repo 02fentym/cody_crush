@@ -75,8 +75,8 @@ def submit_dmoj_form(request, course_topic_id):
         )
 
         messages.success(request, "DMOJ exercise created successfully!")
-        course_unit = CourseUnit.objects.get(unit=course_topic.unit)
-        return redirect("course", course_id=course_unit.course.id)
+        course_id = course_topic.course.id
+        return redirect("course", course_id=course_id)
 
 
     # If form is invalid, re-render the modal with errors
@@ -123,10 +123,9 @@ def update_dmoj(request, exercise_id):
         content_type=ContentType.objects.get_for_model(DmojExercise),
         object_id=exercise.id
     )
-    course_unit = CourseUnit.objects.get(unit=activity.course_topic.unit)
-    course = course_unit.course
+    course_id = activity.course_topic.course.id
 
-    return redirect("course", course_id=course.id)
+    return redirect("course", course_id=course_id)
 
 
 
