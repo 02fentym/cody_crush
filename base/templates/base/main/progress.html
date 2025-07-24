@@ -22,9 +22,20 @@
 
     <!-- Filter: Activity Type -->
     <div class="flex justify-end mb-4 relative z-50">
-        <div class="dropdown dropdown-end dropdown-top">
+        <div class="dropdown dropdown-end">
             <label tabindex="0" class="btn btn-outline btn-sm">Filters</label>
             <div tabindex="0" class="dropdown-content bg-base-200 p-4 shadow-md rounded-box space-y-4 w-80">
+
+                <!-- Unit Filters -->
+                <div>
+                    <div class="font-medium mb-1">Unit</div>
+                    <div class="flex flex-wrap gap-2">
+                        {% for unit in course_units %}
+                        <button class="btn btn-xs unit-btn" data-unit="{{ unit }}">{{ unit }}</button>
+                        {% endfor %}
+                        <button class="btn btn-xs unit-btn" data-unit="all">Clear</button>
+                    </div>
+                </div>
 
                 <!-- Activity Type Filters -->
                 <div>
@@ -76,7 +87,8 @@
             <tbody>
                 {% for row in activity_rows %}
                 <tr data-type="{{ row.type }}"
-                    data-status="{% if row.completed %}complete{% else %}incomplete{% endif %}">
+                    data-status="{% if row.completed %}complete{% else %}incomplete{% endif %}"
+                    data-unit="{{ row.course_unit }}">
                     <td>
                         {% if row.completed %}
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -130,6 +142,8 @@
         const rows = document.querySelectorAll("tbody tr");
         const typeButtons = document.querySelectorAll(".filter-btn");
         const statusButtons = document.querySelectorAll(".status-btn");
+        const unitButtons = document.querySelectorAll(".unit-btn");
+        const activeUnits = new Set();
 
         const activeTypes = new Set();
         const activeStatuses = new Set();
@@ -138,17 +152,20 @@
             rows.forEach(row => {
                 const rowType = row.getAttribute("data-type");
                 const rowStatus = row.getAttribute("data-status");
+                const rowUnit = row.getAttribute("data-unit");
 
                 const typeMatch = activeTypes.size === 0 || activeTypes.has(rowType);
                 const statusMatch = activeStatuses.size === 0 || activeStatuses.has(rowStatus);
+                const unitMatch = activeUnits.size === 0 || activeUnits.has(rowUnit);
 
-                if (typeMatch && statusMatch) {
+                if (typeMatch && statusMatch && unitMatch) {
                     row.classList.remove("hidden");
                 } else {
                     row.classList.add("hidden");
                 }
             });
         }
+
 
         function toggleFilter(set, value, button) {
             if (set.has(value)) {
@@ -160,6 +177,25 @@
             }
             updateTable();
         }
+
+        // Unit filters
+        unitButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                const unit = button.getAttribute("data-unit");
+
+                // Clear all visual states first
+                unitButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
+                activeUnits.clear();
+
+                if (unit !== "all") {
+                    activeUnits.add(unit);
+                    button.classList.add("bg-primary", "text-white");
+                }
+
+                updateTable();
+            });
+        });
+
 
         // Type filters
         typeButtons.forEach(button => {
@@ -199,9 +235,11 @@
         document.getElementById("clear-all-btn").addEventListener("click", () => {
             activeTypes.clear();
             activeStatuses.clear();
+            activeUnits.clear();
 
             typeButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
             statusButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
+            unitButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
 
             updateTable();
         });

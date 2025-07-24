@@ -45,12 +45,22 @@ def progress(request, course_id):
             "date_completed": localtime(ac.date_completed) if ac and ac.date_completed else None,
         })
 
+    course_units = (
+        course.coursetopic_set
+        .select_related("unit")
+        .order_by("unit__title")
+        .values_list("unit__title", flat=True)
+        .distinct()
+    )
+
+
     context = {
         "courses": courses,
         "course": course,
         "mark": mark,
         "progress": progress,
         "activity_rows": activity_rows,
+        "course_units": course_units
     }
 
     return render(request, "base/main/progress.html", context)
