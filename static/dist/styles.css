@@ -1614,6 +1614,34 @@
   .sticky {
     position: sticky;
   }
+  .dropdown-center {
+    --anchor-h: center;
+    :where(.dropdown-content) {
+      inset-inline-end: calc(1/2 * 100%);
+      translate: 50% 0;
+      [dir="rtl"] & {
+        translate: -50% 0;
+      }
+    }
+    &.dropdown-left {
+      --anchor-h: left;
+      --anchor-v: center;
+      .dropdown-content {
+        top: auto;
+        bottom: calc(1/2 * 100%);
+        translate: 0 50%;
+      }
+    }
+    &.dropdown-right {
+      --anchor-h: right;
+      --anchor-v: center;
+      .dropdown-content {
+        top: auto;
+        bottom: calc(1/2 * 100%);
+        translate: 0 50%;
+      }
+    }
+  }
   .dropdown-end {
     --anchor-h: span-left;
     :where(.dropdown-content) {
@@ -1634,6 +1662,28 @@
       .dropdown-content {
         top: auto;
         bottom: calc(0.25rem * 0);
+      }
+    }
+  }
+  .dropdown-start {
+    --anchor-h: span-right;
+    :where(.dropdown-content) {
+      inset-inline-end: auto;
+    }
+    &.dropdown-left {
+      --anchor-h: left;
+      --anchor-v: span-bottom;
+      .dropdown-content {
+        top: calc(0.25rem * 0);
+        bottom: auto;
+      }
+    }
+    &.dropdown-right {
+      --anchor-h: right;
+      --anchor-v: span-bottom;
+      .dropdown-content {
+        top: calc(0.25rem * 0);
+        bottom: auto;
       }
     }
   }
@@ -2386,6 +2436,15 @@
   .h-screen {
     height: 100vh;
   }
+  .max-h-\[50vh\] {
+    max-height: 50vh;
+  }
+  .max-h-\[60vh\] {
+    max-height: 60vh;
+  }
+  .max-h-\[65vh\] {
+    max-height: 65vh;
+  }
   .max-h-\[80vh\] {
     max-height: 80vh;
   }
@@ -2481,6 +2540,9 @@
   }
   .max-w-none {
     max-width: none;
+  }
+  .min-w-max {
+    min-width: max-content;
   }
   .flex-1 {
     flex: 1;
@@ -2679,6 +2741,9 @@
     border-color: var(--color-success);
     color: var(--color-success-content);
     --alert-color: var(--color-success);
+  }
+  .border-accent {
+    border-color: var(--color-accent);
   }
   .border-base-100 {
     border-color: var(--color-base-100);

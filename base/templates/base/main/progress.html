@@ -1,7 +1,7 @@
 {% extends "main.html" %}
 {% block content %}
 
-<div class="p-6 space-y-8">
+<div class="p-6 space-y-4">
 
     <!-- Course Title -->
     <div>
@@ -21,15 +21,16 @@
     </div>
 
     <!-- Filter: Activity Type -->
-    <div class="flex justify-end mb-4 relative z-50">
+    <div class="flex justify-end relative z-50">
         <div class="dropdown dropdown-end">
             <label tabindex="0" class="btn btn-outline btn-sm">Filters</label>
-            <div tabindex="0" class="dropdown-content bg-base-200 p-4 shadow-md rounded-box space-y-4 w-80">
+            <div tabindex="0"
+                class="dropdown-content bg-base-200 p-4 shadow-md rounded-box space-y-4 w-max min-w-max border">
 
                 <!-- Unit Filters -->
                 <div>
                     <div class="font-medium mb-1">Unit</div>
-                    <div class="flex flex-wrap gap-2">
+                    <div class="flex gap-1 flex-wrap">
                         {% for unit in course_units %}
                         <button class="btn btn-xs unit-btn" data-unit="{{ unit }}">{{ unit }}</button>
                         {% endfor %}
@@ -40,7 +41,7 @@
                 <!-- Activity Type Filters -->
                 <div>
                     <div class="font-medium mb-1">Activity Type</div>
-                    <div class="flex flex-wrap gap-2">
+                    <div class="flex gap-1 flex-wrap">
                         <button class="btn btn-xs filter-btn" data-type="lesson">Lesson</button>
                         <button class="btn btn-xs filter-btn" data-type="quiztemplate">Quiz</button>
                         <button class="btn btn-xs filter-btn" data-type="codequestion">Code</button>
@@ -52,7 +53,7 @@
                 <!-- Completion Status Filters -->
                 <div>
                     <div class="font-medium mb-1">Status</div>
-                    <div class="flex flex-wrap gap-2">
+                    <div class="flex gap-1 flex-wrap">
                         <button class="btn btn-xs status-btn" data-status="complete">Complete</button>
                         <button class="btn btn-xs status-btn" data-status="incomplete">Incomplete</button>
                         <button class="btn btn-xs status-btn" data-status="all">Clear</button>
@@ -69,10 +70,11 @@
     </div>
 
 
+
     <!-- Activity Completion Table -->
-    <div class="overflow-x-auto">
+    <div class="max-h-[60vh] overflow-y-auto rounded-lg">
         <table class="table table-zebra w-full">
-            <thead>
+            <thead class="sticky top-0 bg-base-200 z-10">
                 <tr>
                     <th>Status</th>
                     <th>Activity</th>
@@ -108,7 +110,7 @@
                         </svg>
                         {% endif %}
                     </td>
-                    <td>{{ row.activity.content_object }}</td>
+                    <td>{{ row.activity.content_object|truncatechars:35 }}</td>
                     <td>{{ row.course_unit }}</td>
                     <td>{{ row.course_topic }}</td>
                     <td>{{ row.type|title }}</td>

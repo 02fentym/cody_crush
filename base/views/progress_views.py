@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from base.decorators import allowed_roles
 from base.models import Activity, ActivityCompletion
 from django.utils.timezone import localtime
+from base.constants import WEIGHTING_DISPLAY_NAMES
 
 
 @login_required
@@ -34,11 +35,22 @@ def progress(request, course_id):
     activity_rows = []
     for activity in activities:
         ac = completions.get(activity.id)
+
+        model = activity.content_type.model
+        if model == "quiztemplate":
+            quiz_obj = activity.content_object
+            key = f"{model}_{quiz_obj.question_type}"
+        else:
+            key = model
+
+        display_type = WEIGHTING_DISPLAY_NAMES.get(key, model.title())
+
+
         activity_rows.append({
             "activity": activity,
             "course_unit": activity.course_topic.unit.title,
             "course_topic": activity.course_topic.topic.title,
-            "type": activity.content_type.model,
+            "type": display_type,
             "weight": activity.weight,
             "completed": ac.completed if ac else False,
             "score": ac.score if ac else None,
