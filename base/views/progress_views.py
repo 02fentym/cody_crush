@@ -109,6 +109,11 @@ def student_list(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     students = course.students.select_related("profile").all()
 
+    # ✅ Count all activities for this course
+    total_activities = Activity.objects.filter(
+        course_topic__course=course
+    ).count()
+
     rows = []
     for student in students:
         mark = get_course_mark(student, course)
@@ -117,20 +122,21 @@ def student_list(request, course_id):
             student=student,
             activity__course_topic__unit__courseunit__course=course
         )
-        total = completions.count()
-        done = completions.filter(completed=True).count()
-        percent = round((done / total) * 100) if total > 0 else 0
+        done = completions.filter(completed=True).values("activity_id").distinct().count()
 
-        # FIXED: use a valid field
-        last_active = completions.order_by("-date_completed").first().date_completed if completions else None
+        percent = round((done / total_activities) * 100) if total_activities > 0 else 0
 
+        if completions.exists():
+            last_active = completions.order_by("-date_completed").first().date_completed
+        else:
+            last_active = student.date_joined
 
         rows.append({
             "name": student.get_full_name(),
             "email": student.email,
             "progress": percent,
             "score": mark,
-            "completed": f"{done}/{total}",
+            "completed": f"{done}/{total_activities}",
             "last_active": last_active,
         })
 
@@ -139,3 +145,4 @@ def student_list(request, course_id):
         "rows": rows,
         "active_tab": "overview"
     })
+
