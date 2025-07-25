@@ -1,0 +1,47 @@
+{% extends "main.html" %}
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-4">Students Overview</h1>
+
+<div role="tablist" class="tabs tabs-boxed mb-4">
+    <a href="#" class="tab {% if active_tab == 'overview' %}tab-active{% endif %}">Overview</a>
+    <a href="#" class="tab {% if active_tab == 'detailed' %}tab-active{% endif %}">Detailed Progress</a>
+    <a href="#" class="tab {% if active_tab == 'analytics' %}tab-active{% endif %}">Analytics</a>
+</div>
+
+<div class="overflow-auto shadow rounded-lg">
+    <table class="table w-full table-zebra">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Progress</th>
+                <th>Score</th>
+                <th>Completed</th>
+                <th>Last Active</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>
+                    <div>
+                        <div class="font-bold">{{ row.name }}</div>
+                        <div class="text-sm opacity-50">{{ row.email }}</div>
+                    </div>
+                </td>
+                <td>
+                    <progress class="progress progress-primary w-24" value="{{ row.progress }}" max="100"></progress>
+                    <span class="ml-2">{{ row.progress }}%</span>
+                </td>
+                <td class="text-yellow-500 font-semibold">
+                    🏆 {{ row.score }}
+                </td>
+                <td>{{ row.completed }}</td>
+                <td>{{ row.last_active|timesince }} ago</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

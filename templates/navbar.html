@@ -13,7 +13,7 @@
 		{% endif %}
 		{% elif user.profile.role == "teacher" %}
 		{% if course %}
-		<a class="btn btn-ghost btn-lg rounded-btn">Students</a>
+		<a href={% url 'student-list' course.id %} class="btn btn-ghost btn-lg rounded-btn">Students</a>
 		<a href="{% url 'course-settings' course.id %}" class="btn btn-ghost btn-lg rounded-btn">Settings</a>
 		{% endif %}
 		{% endif %}

@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 from base.decorators import allowed_roles
-from base.models import Activity, ActivityCompletion
+from base.models import Activity, ActivityCompletion, Course
 from django.utils.timezone import localtime
 from base.constants import WEIGHTING_DISPLAY_NAMES
 
@@ -78,7 +78,6 @@ def progress(request, course_id):
     return render(request, "base/main/progress.html", context)
 
 
-
 def get_course_mark(student, course):
     all_activities = Activity.objects.filter(
         course_topic__unit__courseunit__course=course
@@ -100,3 +99,40 @@ def get_course_mark(student, course):
 
     return round((earned / completed_weight) * 100, 1)
 
+
+@login_required
+@allowed_roles(["teacher"])
+def student_list(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    students = course.students.select_related("profile").all()
+
+    rows = []
+    for student in students:
+        mark = get_course_mark(student, course)
+
+        completions = ActivityCompletion.objects.filter(
+            student=student,
+            activity__course_topic__unit__courseunit__course=course
+        )
+        total = completions.count()
+        done = completions.filter(completed=True).count()
+        percent = round((done / total) * 100) if total > 0 else 0
+
+        # FIXED: use a valid field
+        last_active = completions.order_by("-date_completed").first().date_completed if completions else None
+
+
+        rows.append({
+            "name": student.get_full_name(),
+            "email": student.email,
+            "progress": percent,
+            "score": mark,
+            "completed": f"{done}/{total}",
+            "last_active": last_active,
+        })
+
+    return render(request, "base/main/students.html", {
+        "course": course,
+        "rows": rows,
+        "active_tab": "overview"
+    })

@@ -68,6 +68,7 @@ urlpatterns = [
 
 ### URLS for progress_views.py
     path("course/<int:course_id>/progress/", views.progress, name="progress"),
+    path("course/<int:course_id>/students/", views.student_list, name="student-list"),
 
 
 ### URLS for quiz_views.py

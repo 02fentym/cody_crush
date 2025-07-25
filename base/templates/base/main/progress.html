@@ -110,7 +110,11 @@
                         </svg>
                         {% endif %}
                     </td>
-                    <td>{{ row.activity.content_object|truncatechars:35 }}</td>
+                    <td>
+                        <span title="{{ row.activity.content_object }}">
+                            {{ row.activity.content_object|truncatechars:35 }}
+                        </span>
+                    </td>
                     <td>{{ row.course_unit }}</td>
                     <td>{{ row.course_topic }}</td>
                     <td>{{ row.type|title }}</td>
