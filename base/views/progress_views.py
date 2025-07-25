@@ -97,6 +97,9 @@ def get_course_mark(student, course):
         earned += ac.score
         completed_weight += ac.activity.weight
 
+    if completed_weight == 0:
+        return 0
+
     return round((earned / completed_weight) * 100, 1)
 
 
