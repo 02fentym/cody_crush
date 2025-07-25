@@ -29,17 +29,18 @@ def submit_course_topic_form(request):
     unit_id = request.POST.get("unit_id")
     unit = get_object_or_404(Unit, id=unit_id)
 
+    # 🔧 Resolve the Course
+    course_unit = CourseUnit.objects.get(unit=unit)
+    course = course_unit.course
+
     if form.is_valid():
         topic = form.cleaned_data["topic"]
-        CourseTopic.objects.get_or_create(unit=unit, topic=topic)
-
-    # 🔧 Add this to resolve the Course
-    course_unit = CourseUnit.objects.get(unit=unit)
-    course_id = course_unit.course.id
+        CourseTopic.objects.get_or_create(course=course, unit=unit, topic=topic)
 
     course_topics = CourseTopic.objects.filter(unit=unit).select_related("topic")
-    context = {"course_topics": course_topics, "unit": unit, "course_id": course_id }
+    context = {"course_topics": course_topics, "unit": unit, "course_id": course.id}
     return render(request, "base/components/course_topic_components/course_topic_list.html", context)
+
 
 
 
