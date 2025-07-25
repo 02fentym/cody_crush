@@ -6,22 +6,30 @@ from .models import Course, Unit, Topic, Lesson, DmojExercise, Profile, CourseUn
 
 
 class UserForm(UserCreationForm):
-    dmoj_username = forms.CharField(
-        required=True,
-        widget=forms.TextInput()
-    )
+    dmoj_username = forms.CharField(required=True)
 
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2', 'dmoj_username']
+        fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2', 'dmoj_username']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Apply daisyUI/Tailwind classes
         self.fields['username'].widget.attrs.update({
             'class': 'input input-bordered w-full mb-4',
             'placeholder': 'Username'
+        })
+        self.fields['first_name'].widget.attrs.update({
+            'class': 'input input-bordered w-full mb-4',
+            'placeholder': 'First Name'
+        })
+        self.fields['last_name'].widget.attrs.update({
+            'class': 'input input-bordered w-full mb-4',
+            'placeholder': 'Last Name'
+        })
+        self.fields['email'].widget.attrs.update({
+            'class': 'input input-bordered w-full mb-4',
+            'placeholder': 'Email Address'
         })
         self.fields['password1'].widget.attrs.update({
             'class': 'input input-bordered w-full mb-4',
@@ -33,29 +41,37 @@ class UserForm(UserCreationForm):
         })
         self.fields['dmoj_username'].widget.attrs.update({
             'class': 'input input-bordered w-full mb-4',
-            'placeholder': 'DMOJ username'
+            'placeholder': 'DMOJ Username'
         })
 
-        # Remove verbose help text from Django's defaults
-        self.fields['username'].help_text = ''
-        self.fields['password1'].help_text = ''
-        self.fields['password2'].help_text = ''
+        # Clean up help texts
+        for field in ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']:
+            self.fields[field].help_text = ''
 
     def clean(self):
         cleaned_data = super().clean()
-        dmoj_username = cleaned_data.get('dmoj_username')
 
+        dmoj_username = cleaned_data.get('dmoj_username')
         if not dmoj_username:
             self.add_error('dmoj_username', "DMOJ username is required.")
 
+        email = cleaned_data.get('email')
+        if not email:
+            self.add_error('email', "Email is required.")
+        elif User.objects.filter(email__iexact=email).exists():
+            self.add_error('email', "A user with this email already exists.")
+
         return cleaned_data
+
 
     def save(self, commit=True):
         user = super().save(commit=False)
         user.username = user.username.lower()
-        user.save()  # save user to get a valid user.id
+        user.email = self.cleaned_data['email']
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        user.save()
 
-        # Create and attach the profile manually
         Profile.objects.create(
             user=user,
             role='student',
@@ -63,6 +79,7 @@ class UserForm(UserCreationForm):
         )
 
         return user
+
 
 
 
