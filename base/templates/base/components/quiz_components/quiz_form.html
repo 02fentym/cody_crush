@@ -1,35 +1,47 @@
-<form method="POST" hx-post="{% url 'submit-quiz-form' ct.id %}" hx-target="#topic-list-{{ ct.unit.id }}"
-    hx-swap="outerHTML" hx-on="htmx:afterRequest: document.getElementById('modal-wrapper').checked = false"
+<form method="POST"
+    hx-post="{% if quiz_template %}{% url 'update-quiz-form' quiz_template.id %}{% else %}{% url 'submit-quiz-form' ct.id %}{% endif %}"
+    hx-target="#topic-list-{{ ct.unit.id }}"
+    hx-swap="outerHTML"
+    hx-on="htmx:afterRequest: document.getElementById('modal-wrapper').checked = false"
     class="space-y-4">
+
 
     {% csrf_token %}
     <input type="hidden" name="course_id" value="{{ course_id }}">
 
-    <h3 class="text-xl font-semibold mb-2">Create a Quiz</h3>
+    <h3 class="text-xl font-semibold mb-2">
+    {% if quiz_template %}Edit Quiz{% else %}Create a Quiz{% endif %}
+    </h3>
+
     <p class="text-sm text-base-content/60">Generate a quiz from the topic’s question pool.</p>
 
     <div class="form-control">
         <label class="label" for="question_count">Number of Questions</label>
         <select name="question_count" id="question_count" class="select select-bordered w-full" required>
-            <option value="5">5</option>
-            <option value="10" selected>10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
+            <option value="5" {% if quiz_template and quiz_template.question_count == 5 %}selected{% endif %}>5</option>
+            <option value="10" {% if not quiz_template or quiz_template.question_count == 10 %}selected{% endif %}>10</option>
+            <option value="15" {% if quiz_template and quiz_template.question_count == 15 %}selected{% endif %}>15</option>
+            <option value="20" {% if quiz_template and quiz_template.question_count == 20 %}selected{% endif %}>20</option>
         </select>
     </div>
 
     <div class="form-control">
         <label class="label" for="question_type">Question Type</label>
         <select name="question_type" id="question_type" class="select select-bordered w-full" required>
-            <option value="multiple_choice" selected>Multiple Choice</option>
-            <option value="tracing">Tracing</option>
+            <option value="multiple_choice" {% if not quiz_template or quiz_template.question_type == "multiple_choice" %}selected{% endif %}>
+                Multiple Choice
+            </option>
+            <option value="tracing" {% if quiz_template and quiz_template.question_type == "tracing" %}selected{% endif %}>
+                Tracing
+            </option>
         </select>
     </div>
 
     <div class="form-control">
         <label class="cursor-pointer label" for="allow_resubmission">
             <span class="label-text">Enable Multiple Attempts?</span>
-            <input type="checkbox" name="allow_resubmission" id="allow_resubmission" class="checkbox" unchecked>
+            <input type="checkbox" name="allow_resubmission" id="allow_resubmission" class="checkbox"
+                {% if quiz_template and activity.allow_resubmission %}checked{% endif %}>
         </label>
     </div>
 

@@ -1,9 +1,5 @@
 import requests
 from urllib.parse import urlparse
-import zipfile
-import tempfile
-import yaml
-import os
 from base.models import Course
 
 # DMOJ: Gets metadata from a problem URL

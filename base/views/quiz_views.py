@@ -9,9 +9,10 @@ from base.decorators import allowed_roles
 from base.models import (
     CourseTopic, Activity, Quiz, QuizTemplate, QuizQuestion,
     MultipleChoiceQuestion, TracingQuestion,
-    Answer, ActivityCompletion, CourseUnit, Course
+    Answer, ActivityCompletion, Course
 )
 from base.utils import get_all_courses
+
 
 # Quiz Addition
 @login_required
@@ -21,6 +22,24 @@ def get_quiz_form(request, course_topic_id):
     course_id = course_topic.course.id
 
     context = {"ct": course_topic, "course_id": course_id}
+    return render(request, "base/components/quiz_components/quiz_form.html", context)
+
+
+# Allows a teacher to edit a quiz
+@login_required
+@allowed_roles(["teacher"])
+def edit_quiz_form(request, quiz_id):
+    quiz_template = get_object_or_404(QuizTemplate, id=quiz_id)
+    course_topic = quiz_template.course_topic
+
+    activity = Activity.objects.get(object_id=quiz_template.id, content_type=ContentType.objects.get_for_model(QuizTemplate))
+
+    context = {
+        "quiz_template": quiz_template,
+        "ct": course_topic,
+        "course_id": course_topic.course.id,
+        "activity": activity
+    }
     return render(request, "base/components/quiz_components/quiz_form.html", context)
 
 
@@ -58,6 +77,35 @@ def submit_quiz_form(request, course_topic_id):
         })
 
     return HttpResponse("<div class='text-error'>Failed to create quiz</div>")
+
+
+@login_required
+@allowed_roles(["teacher"])
+def update_quiz_form(request, quiz_id):
+    quiz_template = get_object_or_404(QuizTemplate, id=quiz_id)
+
+    if request.method == "POST":
+        # Update quiz template fields
+        quiz_template.question_count = int(request.POST.get("question_count"))
+        quiz_template.question_type = request.POST.get("question_type")
+        quiz_template.save()
+
+        # Update the related Activity
+        activity = Activity.objects.get(
+            object_id=quiz_template.id,
+            content_type=ContentType.objects.get_for_model(QuizTemplate)
+        )
+        activity.allow_resubmission = request.POST.get("allow_resubmission") == "on"
+        activity.save()
+
+        # Return partial to update the course topic list
+        return render(request, "base/components/course_topic_components/course_topic_list.html", {
+            "unit": quiz_template.course_topic.unit,
+            "course_topics": CourseTopic.objects.filter(unit=quiz_template.course_topic.unit),
+            "course_id": quiz_template.course_topic.course.id
+        })
+
+    return HttpResponse("<div class='text-error'>Failed to update quiz</div>")
 
 
 

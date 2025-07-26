@@ -76,6 +76,8 @@ urlpatterns = [
     # Creation
     path("topic/<int:course_topic_id>/quiz-form/", views.get_quiz_form, name="get-quiz-form"),
     path("topic/<int:course_topic_id>/submit-quiz/", views.submit_quiz_form, name="submit-quiz-form"),
+    path("quiz/edit/<int:quiz_id>/", views.edit_quiz_form, name="edit-quiz-form"),
+    path("quiz/update/<int:quiz_id>/", views.update_quiz_form, name="update-quiz-form"),
 
     # Taking
     path("course/<int:course_id>/activity/<int:activity_id>/start-quiz/", views.start_quiz, name="start-quiz"),
