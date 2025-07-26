@@ -8,13 +8,13 @@
 	<div class="hidden md:flex gap-8 justify-between">
 		{% if user.profile.role == "student" %}
 		{% if course_id %}
-		<a href="{% url 'progress' course_id %}" class="btn btn-ghost btn-lg rounded-btn">Progress</a>
-		<a class="btn btn-ghost btn-lg rounded-btn">Settings</a>
+		<a href="{% url 'progress' course_id %}" class="btn btn-ghost btn-md rounded-btn">Progress</a>
+		<a class="btn btn-ghost btn-md rounded-btn">Settings</a>
 		{% endif %}
 		{% elif user.profile.role == "teacher" %}
 		{% if course %}
-		<a href={% url 'student-list' course.id %} class="btn btn-ghost btn-lg rounded-btn">Students</a>
-		<a href="{% url 'course-settings' course.id %}" class="btn btn-ghost btn-lg rounded-btn">Settings</a>
+		<a href={% url 'student-list' course.id %} class="btn btn-ghost btn-md rounded-btn">Students</a>
+		<a href="{% url 'course-settings' course.id %}" class="btn btn-ghost btn-md rounded-btn">Settings</a>
 		{% endif %}
 		{% endif %}
 	</div>

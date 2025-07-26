@@ -3,14 +3,19 @@
 
 <h1 class="text-3xl font-bold mb-4">Students Overview</h1>
 
-<div role="tablist" class="tabs tabs-boxed mb-4">
-    <a href="#" class="tab {% if active_tab == 'overview' %}tab-active{% endif %}">Overview</a>
-    <a href="#" class="tab {% if active_tab == 'detailed' %}tab-active{% endif %}">Detailed Progress</a>
-    <a href="#" class="tab {% if active_tab == 'analytics' %}tab-active{% endif %}">Analytics</a>
+<div class="tabs tabs-box mb-4 w-fit">
+  <input type="radio" name="tab" role="tab" class="tab" aria-label="Overview"
+         {% if active_tab == 'overview' %}checked{% endif %} />
+  <input type="radio" name="tab" role="tab" class="tab" aria-label="Detailed Progress"
+         {% if active_tab == 'detailed' %}checked{% endif %} />
+  <input type="radio" name="tab" role="tab" class="tab" aria-label="Analytics"
+         {% if active_tab == 'analytics' %}checked{% endif %} />
 </div>
 
+
+<!-- Overview Table -->
 <div class="overflow-auto shadow rounded-lg">
-    <table class="table w-full table-zebra">
+    <table class="table table-zebra table-hover w-full">
         <thead>
             <tr>
                 <th>Student</th>
@@ -22,7 +27,8 @@
         </thead>
         <tbody>
             {% for row in rows %}
-            <tr>
+            <tr class="hover:bg-base-100 transition cursor-pointer" onclick="window.location.href='{% url 'student-progress' course.id row.student_id %}'">
+
                 <td>
                     <div>
                         <div class="font-bold">{{ row.name }}</div>

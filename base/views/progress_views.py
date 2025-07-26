@@ -1,19 +1,28 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 from base.decorators import allowed_roles
-from base.models import Activity, ActivityCompletion, Course
+from base.models import Activity, ActivityCompletion, Course, User
 from django.utils.timezone import localtime
 from base.constants import WEIGHTING_DISPLAY_NAMES
 
 
 @login_required
-@allowed_roles(["student"])
-def progress(request, course_id):
-    student = request.user
-    courses = student.enrolled_courses.all()
-    course = get_object_or_404(student.enrolled_courses, id=course_id)
+def student_progress(request, course_id, student_id=None):
+    if student_id and request.user.profile.role == "teacher":
+        student = get_object_or_404(User, id=student_id)
+    else:
+        student = request.user
 
-    mark = get_course_mark(student, course)  # weighted average
+    courses = student.enrolled_courses.all()
+    
+    # Get course from enrolled_courses if student, otherwise check membership
+    if request.user.profile.role == "student":
+        course = get_object_or_404(student.enrolled_courses, id=course_id)
+    else:
+        course = get_object_or_404(Course, id=course_id)
+
+
+    score = get_course_score(student, course)  # weighted average
 
     activities = (
         Activity.objects
@@ -67,7 +76,7 @@ def progress(request, course_id):
     context = {
         "courses": courses,
         "course": course,
-        "mark": mark,
+        "score": score,
         "progress": progress,
         "activity_rows": activity_rows,
         "course_units": course_units
@@ -76,7 +85,7 @@ def progress(request, course_id):
     return render(request, "base/main/progress.html", context)
 
 
-def get_course_mark(student, course):
+def get_course_score(student, course):
     completions = (
         ActivityCompletion.objects
         .filter(
@@ -140,7 +149,7 @@ def student_list(request, course_id):
 
     rows = []
     for student in students:
-        mark = get_course_mark(student, course)
+        mark = get_course_score(student, course)
         print(f"Mark for {student}: {mark}")
 
         completions = ActivityCompletion.objects.filter(
@@ -157,6 +166,7 @@ def student_list(request, course_id):
             last_active = student.date_joined
 
         rows.append({
+            "student_id": student.id,
             "name": student.get_full_name(),
             "email": student.email,
             "progress": progress,
