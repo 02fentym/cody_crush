@@ -3,16 +3,6 @@
 
 <h1 class="text-3xl font-bold mb-4">Students Overview</h1>
 
-<div class="tabs tabs-box mb-4 w-fit">
-  <input type="radio" name="tab" role="tab" class="tab" aria-label="Overview"
-         {% if active_tab == 'overview' %}checked{% endif %} />
-  <input type="radio" name="tab" role="tab" class="tab" aria-label="Detailed Progress"
-         {% if active_tab == 'detailed' %}checked{% endif %} />
-  <input type="radio" name="tab" role="tab" class="tab" aria-label="Analytics"
-         {% if active_tab == 'analytics' %}checked{% endif %} />
-</div>
-
-
 <!-- Overview Table -->
 <div class="overflow-auto shadow rounded-lg">
     <table class="table table-zebra table-hover w-full">

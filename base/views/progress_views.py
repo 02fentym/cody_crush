@@ -74,6 +74,7 @@ def student_progress(request, course_id, student_id=None):
 
 
     context = {
+        "student": student,
         "courses": courses,
         "course": course,
         "score": score,
@@ -150,7 +151,6 @@ def student_list(request, course_id):
     rows = []
     for student in students:
         mark = get_course_score(student, course)
-        print(f"Mark for {student}: {mark}")
 
         completions = ActivityCompletion.objects.filter(
             student=student,
