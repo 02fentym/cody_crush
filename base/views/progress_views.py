@@ -4,6 +4,7 @@ from base.decorators import allowed_roles
 from base.models import Activity, ActivityCompletion, Course, User
 from django.utils.timezone import localtime
 from base.constants import WEIGHTING_DISPLAY_NAMES
+from base.utils import get_all_courses
 
 
 @login_required
@@ -140,6 +141,7 @@ def get_course_progress(student, course):
 @login_required
 @allowed_roles(["teacher"])
 def student_list(request, course_id):
+    courses = get_all_courses("teacher", request.user)
     course = get_object_or_404(Course, id=course_id)
     students = course.students.select_related("profile").all()
 
@@ -176,6 +178,7 @@ def student_list(request, course_id):
         })
 
     return render(request, "base/main/students.html", {
+        "courses": courses,
         "course": course,
         "rows": rows,
         "active_tab": "overview"

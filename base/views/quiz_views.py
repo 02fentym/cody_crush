@@ -11,13 +11,7 @@ from base.models import (
     MultipleChoiceQuestion, TracingQuestion,
     Answer, ActivityCompletion, CourseUnit, Course
 )
-
-def get_all_courses(role, user):
-    if role == "student":
-        courses = user.enrolled_courses.all()
-    else:
-        courses = Course.objects.filter(teacher=user)
-    return courses
+from base.utils import get_all_courses
 
 # Quiz Addition
 @login_required

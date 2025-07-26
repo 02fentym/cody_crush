@@ -13,14 +13,7 @@ from django.contrib.contenttypes.models import ContentType
 from base.decorators import allowed_roles
 from base.models import Course, Lesson, Activity, ActivityCompletion, CourseTopic, CourseUnit
 from base.forms import LessonForm
-
-
-def get_all_courses(role, user):
-    if role == "student":
-        courses = user.enrolled_courses.all()
-    else:
-        courses = Course.objects.filter(teacher=user)
-    return courses
+from base.utils import get_all_courses
 
 
 @login_required

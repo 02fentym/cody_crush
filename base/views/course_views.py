@@ -8,6 +8,7 @@ from django.http import HttpResponseBadRequest
 from base.models import Course, CourseUnit, CourseTopic, Activity, ActivityCompletion
 from base.forms import EnrollmentPasswordForm
 from base.decorators import allowed_roles
+from base.utils import get_all_courses
 
 
 @login_required(login_url="login")
@@ -72,14 +73,6 @@ def course(request, course_id):
         "unit_progress": unit_progress
     }
     return render(request, "base/main/course.html", context)
-
-# Helper function
-def get_all_courses(role, user):
-    if role == "student":
-        courses = user.enrolled_courses.all()
-    else:
-        courses = Course.objects.filter(teacher=user)
-    return courses
 
 
 def delete_course(request, course_id):

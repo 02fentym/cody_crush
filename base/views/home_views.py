@@ -4,6 +4,7 @@ from base.models import (Course, CourseWeighting)
 from django.contrib.auth.decorators import login_required
 from base.forms import CourseForm, EnrollmentPasswordForm
 from base.constants import DEFAULT_COURSE_WEIGHTINGS
+from base.utils import get_all_courses
 
 
 @login_required(login_url="login")
@@ -48,13 +49,3 @@ def home(request):
 
     context = {"courses": courses, "course_form": course_form, "password_form": password_form}
     return render(request, "base/main/home.html", context)
-
-
-# Helper function to get all courses
-def get_all_courses(role, user):
-    if role == "student":
-        courses = user.enrolled_courses.all()
-    else:
-        courses = Course.objects.filter(teacher=user)
-    return courses
-        

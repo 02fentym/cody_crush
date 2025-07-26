@@ -4,6 +4,7 @@ import zipfile
 import tempfile
 import yaml
 import os
+from base.models import Course
 
 # DMOJ: Gets metadata from a problem URL
 def fetch_dmoj_metadata_from_url(url):
@@ -128,3 +129,12 @@ def extract_code_question_yaml(yaml_file):
         })
 
     return test_cases, meta
+
+
+# Returns all courses a user is enrolled in
+def get_all_courses(role, user):
+    if role == "student":
+        courses = user.enrolled_courses.all()
+    else:
+        courses = Course.objects.filter(teacher=user)
+    return courses

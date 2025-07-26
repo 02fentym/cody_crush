@@ -8,16 +8,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from base.decorators import allowed_roles
-
+from base.utils import get_all_courses
 from base.models import CodeQuestion, ActivityCompletion, Activity, Course, CourseUnit, CodeSubmission
 
-# Helper function for getting all courses
-def get_all_courses(role, user):
-    if role == "student":
-        courses = user.enrolled_courses.all()
-    else:
-        courses = Course.objects.filter(teacher=user)
-    return courses
 
 # Create test files and test cases
 def write_test_files(code, question, student_path, tests_path):

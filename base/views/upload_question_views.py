@@ -13,7 +13,7 @@ from django.views.decorators.http import require_POST
 from base.decorators import allowed_roles
 from base.forms import MultipleChoiceQuestionForm, TracingQuestionForm, CodeQuestionForm, CodeTestCaseForm
 from base.models import Topic, MultipleChoiceQuestion, TracingQuestion, Course, Language, CodeQuestion, CodeTestCase
-
+from base.utils import get_all_courses
 
 # Question type configurations
 QUESTION_TYPE_CONFIG = {
@@ -42,9 +42,6 @@ QUESTION_TYPE_CONFIG = {
     }
 }
 
-
-def get_all_courses(role, user):
-    return user.enrolled_courses.all() if role == "student" else Course.objects.filter(teacher=user)
 
 
 @allowed_roles(["teacher"])

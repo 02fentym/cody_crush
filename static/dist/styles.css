@@ -3218,8 +3218,14 @@
       color: color-mix(in oklab, var(--color-accent) 70%, transparent);
     }
   }
+  .text-base-100 {
+    color: var(--color-base-100);
+  }
   .text-base-200 {
     color: var(--color-base-200);
+  }
+  .text-base-300 {
+    color: var(--color-base-300);
   }
   .text-base-content {
     color: var(--color-base-content);
