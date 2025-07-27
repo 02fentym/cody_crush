@@ -289,8 +289,10 @@ class DmojExercise(models.Model):
 class StudentCourseEnrollment(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    overall_grade = models.FloatField(null=True, blank=True)
-    date_enrolled = models.DateTimeField(auto_now_add=True)
+    enrollment_date = models.DateTimeField(auto_now_add=True)
+
+    score = models.FloatField(null=True, blank=True)
+    progress = models.IntegerField(default=0)
 
     class Meta:
         unique_together = ("student", "course")

@@ -1,6 +1,6 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib import messages
-from base.models import (Course, CourseWeighting)
+from base.models import (Course, CourseWeighting, StudentCourseEnrollment)
 from django.contrib.auth.decorators import login_required
 from base.forms import CourseForm, EnrollmentPasswordForm
 from base.constants import DEFAULT_COURSE_WEIGHTINGS
@@ -37,7 +37,10 @@ def home(request):
 
             try:
                 course = Course.objects.get(enrollment_password=enrollment_password)
-                course.students.add(request.user)
+                StudentCourseEnrollment.objects.get_or_create(
+                    student=request.user,
+                    course=course,
+                )
                 messages.success(request, f"You have been enrolled in {course.title}!")
             except Course.DoesNotExist:
                 messages.error(request, "Invalid enrollment password. Please try again.")

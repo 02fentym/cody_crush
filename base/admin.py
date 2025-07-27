@@ -3,7 +3,7 @@ from .models import (
     Unit, Topic, Quiz, Answer, Profile, Course, Activity,
     QuizTemplate, Lesson, MultipleChoiceQuestion, TracingQuestion,
     DmojExercise, ActivityCompletion, Language, CourseUnit, CourseTopic,
-    CodeQuestion, CodeTestCase, CodeSubmission, CourseWeighting
+    CodeQuestion, CodeTestCase, CodeSubmission, CourseWeighting, StudentCourseEnrollment
 )
 
 # --- Customized Admin Classes ---
@@ -135,6 +135,13 @@ class QuizTemplateAdmin(admin.ModelAdmin):
     search_fields = ('course_topic__title',)
     list_filter = ('question_type',)
 
+
+
+@admin.register(StudentCourseEnrollment)
+class StudentCourseEnrollmentAdmin(admin.ModelAdmin):
+    list_display = ('student', 'course', 'enrollment_date')
+    search_fields = ('student__username', 'course__title')
+    list_filter = ('enrollment_date',)
 
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):

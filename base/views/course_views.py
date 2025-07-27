@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponseBadRequest
 
-from base.models import Course, CourseUnit, CourseTopic, Activity, ActivityCompletion
+from base.models import Course, CourseUnit, CourseTopic, Activity, ActivityCompletion, StudentCourseEnrollment
 from base.forms import EnrollmentPasswordForm
 from base.decorators import allowed_roles
 from base.utils import get_all_courses
@@ -17,11 +17,10 @@ def course(request, course_id):
     courses = get_all_courses(user.profile.role, user)
 
     if user.profile.role == "teacher":
-        qs = Course.objects.filter(id=course_id, teacher=user)
+        course = get_object_or_404(Course, id=course_id, teacher=user)
     else:
-        qs = Course.objects.filter(id=course_id, students=user)
-
-    course = get_object_or_404(qs)
+        enrollment = get_object_or_404(StudentCourseEnrollment, student=user, course_id=course_id)
+        course = enrollment.course
 
     # Get CourseUnits and preload related Unit
     course_units = CourseUnit.objects.filter(course=course).select_related("unit")
@@ -96,7 +95,11 @@ def enrol_in_course(request):
             course = Course.objects.filter(enrollment_password=password).first()
 
             if course:
-                course.students.add(request.user)
+                StudentCourseEnrollment.objects.get_or_create(
+                    student=request.user,
+                    course=course,
+                )
+                messages.success(request, f"Enrolled in {course}")
                 return render(request, "base/components/course_components/course_card.html", {"course": course})
             return HttpResponse("<div class='text-error'>Invalid course password.</div>")
     return HttpResponse("<div class='text-error'>Submission failed.</div>")

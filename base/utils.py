@@ -1,6 +1,6 @@
 import requests
 from urllib.parse import urlparse
-from base.models import Course
+from base.models import Course, StudentCourseEnrollment
 
 # DMOJ: Gets metadata from a problem URL
 def fetch_dmoj_metadata_from_url(url):
@@ -130,7 +130,8 @@ def extract_code_question_yaml(yaml_file):
 # Returns all courses a user is enrolled in
 def get_all_courses(role, user):
     if role == "student":
-        courses = user.enrolled_courses.all()
+        enrollments = StudentCourseEnrollment.objects.filter(student=user)
+        courses = [enrollment.course for enrollment in enrollments]
     else:
         courses = Course.objects.filter(teacher=user)
     return courses
