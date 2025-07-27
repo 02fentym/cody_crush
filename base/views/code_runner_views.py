@@ -8,9 +8,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from base.decorators import allowed_roles
-from base.utils import get_all_courses
-from base.models import CodeQuestion, ActivityCompletion, Activity, Course, CourseUnit, CodeSubmission
-
+from base.utils import get_all_courses, update_student_progress
+from base.models import CodeQuestion, ActivityCompletion, Activity, CourseUnit, CodeSubmission
+from django.db import transaction
 
 # Create test files and test cases
 def write_test_files(code, question, student_path, tests_path):
@@ -110,23 +110,30 @@ def submit_code(request):
             score = activity.weight * (passed_tests / total_tests) if total_tests > 0 else 0
             score = activity.weight * (passed_tests / total_tests) if total_tests > 0 else 0
 
-            # ✅ Create a new ActivityCompletion
-            ac = ActivityCompletion.objects.create(
-                student=request.user,
-                activity=activity,
-                completed=passed,
-                score=score,
-                date_completed=timezone.now(),
-                attempt_number=previous_attempts + 1
-            )
+            with transaction.atomic():
+                # ✅ Create a new ActivityCompletion
+                ac = ActivityCompletion.objects.create(
+                    student=request.user,
+                    activity=activity,
+                    completed=passed,
+                    score=score,
+                    date_completed=timezone.now(),
+                    attempt_number=previous_attempts + 1
+                )
 
-            # ✅ Save the submission
-            CodeSubmission.objects.create(
-                activity_completion=ac,
-                code=code,
-                results=results,
-                summary=summary,
-            )
+                # ✅ Save the submission
+                CodeSubmission.objects.create(
+                    activity_completion=ac,
+                    code=code,
+                    results=results,
+                    summary=summary,
+                )
+
+                # ✅ Update course-level progress and score
+                update_student_progress(
+                    request.user,
+                    activity.course_topic.course
+                )
 
         return redirect("code-question-results", ac.id)
 

@@ -1,6 +1,6 @@
 import requests
 from urllib.parse import urlparse
-from base.models import Course, StudentCourseEnrollment
+from base.models import Course, StudentCourseEnrollment, Activity, ActivityCompletion
 
 # DMOJ: Gets metadata from a problem URL
 def fetch_dmoj_metadata_from_url(url):
@@ -135,3 +135,39 @@ def get_all_courses(role, user):
     else:
         courses = Course.objects.filter(teacher=user)
     return courses
+
+
+# Updates the progress and score of a student in a course
+def update_student_progress(student, course):
+    # Get all activities for this course
+    activities = Activity.objects.filter(
+        course_topic__unit__courseunit__course=course
+    )
+
+    completions = ActivityCompletion.objects.filter(
+        student=student,
+        activity__in=activities
+    ).select_related("activity")
+
+    total_activities = len(activities)
+    completed_activities = sum(1 for ac in completions if ac.completed)
+    progress = round((completed_activities / total_activities) * 100) if total_activities > 0 else 0
+
+    # Weighted average score
+    total_score = 0
+    total_weight = 0
+
+    for ac in completions:
+        if ac.completed and ac.score is not None:
+            weight = ac.activity.weight or 1
+            total_weight += weight
+            total_score += ac.score
+           
+
+    score = round(total_score / total_weight * 100, 2) if total_weight > 0 else 0.0
+
+    # Save to StudentCourseEnrollment
+    enrollment = StudentCourseEnrollment.objects.get(student=student, course=course)
+    enrollment.progress = progress
+    enrollment.score = score
+    enrollment.save()

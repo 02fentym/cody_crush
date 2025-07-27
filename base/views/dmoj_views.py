@@ -9,9 +9,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import now
 
 from base.decorators import allowed_roles
-from base.models import CourseTopic, DmojExercise, Activity, ActivityCompletion, CourseUnit, Course
+from base.models import CourseTopic, DmojExercise, Activity, ActivityCompletion, CourseUnit, StudentCourseEnrollment
 from base.forms import DmojForm
-from base.utils import fetch_dmoj_metadata_from_url, fetch_dmoj_user_data
+from base.utils import fetch_dmoj_metadata_from_url, fetch_dmoj_user_data, update_student_progress
+from django.db import transaction
 
 
 
@@ -132,7 +133,8 @@ def update_dmoj(request, exercise_id):
 @login_required
 @require_POST
 def refresh_dmoj_progress(request, course_id):
-    course = get_object_or_404(Course, id=course_id, students=request.user)
+    enrollment = get_object_or_404(StudentCourseEnrollment, student=request.user, course_id=course_id)
+    course = enrollment.course
     username = request.user.profile.dmoj_username  # assumes you store it here
 
     solved_problems = fetch_dmoj_user_data(username)
@@ -152,21 +154,26 @@ def refresh_dmoj_progress(request, course_id):
         content_type__model="dmojexercise"
     ).select_related("course_topic", "content_type")
 
-    for activity in activities:
-        exercise = activity.content_object
-        if exercise is None:
-            print(f"[WARN] Activity {activity.id} has no content_object")
-            continue
+    with transaction.atomic():
+        for activity in activities:
+            exercise = activity.content_object
+            if exercise is None:
+                print(f"[WARN] Activity {activity.id} has no content_object")
+                continue
 
-        if exercise.problem_code in solved_problems:
-            ActivityCompletion.objects.update_or_create(
-                student=request.user,
-                activity=activity,
-                defaults={
-                    "completed": True,
-                    "score": 10,
-                    "date_completed": now(),
-                }
-            )
+            if exercise.problem_code in solved_problems:
+                ActivityCompletion.objects.update_or_create(
+                    student=request.user,
+                    activity=activity,
+                    defaults={
+                        "completed": True,
+                        "score": activity.weight,  # ✅ consistent scoring
+                        "date_completed": now(),
+                    }
+                )
+
+        # ✅ Recalculate after all completions
+        update_student_progress(request.user, course)
+
 
     return redirect("course", course_id=course_id)

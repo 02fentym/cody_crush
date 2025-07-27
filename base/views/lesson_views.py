@@ -11,9 +11,10 @@ from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
 
 from base.decorators import allowed_roles
-from base.models import Course, Lesson, Activity, ActivityCompletion, CourseTopic, CourseUnit
+from base.models import Lesson, Activity, ActivityCompletion, CourseTopic, CourseUnit
 from base.forms import LessonForm
-from base.utils import get_all_courses
+from base.utils import get_all_courses, update_student_progress
+from django.db import transaction
 
 
 @login_required
@@ -82,17 +83,33 @@ def view_lesson(request, lesson_id):
 
     # Handle completion POST
     if request.method == "POST":
-        if 'mark_as_complete' in request.POST:
-            ActivityCompletion.objects.update_or_create(
-                student=request.user,
-                activity=activity,
-                defaults={'completed': True, 'date_completed': timezone.now()}
+        with transaction.atomic():
+            if 'mark_as_complete' in request.POST:
+                ActivityCompletion.objects.update_or_create(
+                    student=request.user,
+                    activity=activity,
+                    defaults={
+                        'completed': True,
+                        'score': activity.weight,  # ✅ Full marks for reading
+                        'date_completed': timezone.now()
+                    }
+                )
+            else:
+                ActivityCompletion.objects.filter(
+                    student=request.user,
+                    activity=activity
+                ).update(
+                    completed=False,
+                    score=None,  # ❌ Remove score if unmarked
+                    date_completed=None
+                )
+
+            update_student_progress(
+                request.user,
+                activity.course_topic.course
             )
-        else:
-            ActivityCompletion.objects.filter(
-                student=request.user,
-                activity=activity
-            ).update(completed=False, date_completed=None)
+
+
 
         return redirect('view-lesson', lesson_id=lesson.id)
 

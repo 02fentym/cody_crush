@@ -11,7 +11,9 @@ from base.models import (
     MultipleChoiceQuestion, TracingQuestion,
     Answer, ActivityCompletion, Course
 )
-from base.utils import get_all_courses
+
+from base.utils import get_all_courses, update_student_progress
+from django.db import transaction
 
 
 # Quiz Addition
@@ -174,59 +176,63 @@ def take_quiz(request, quiz_id, activity_id):
     courses = get_all_courses("student", request.user)
 
     if request.method == "POST":
-        # Create the ActivityCompletion so we can link answers to it
-        previous_attempts = ActivityCompletion.objects.filter(student=request.user, activity=activity).count()
+        with transaction.atomic():
+            # Create the ActivityCompletion so we can link answers to it
+            previous_attempts = ActivityCompletion.objects.filter(student=request.user, activity=activity).count()
 
-        ac = ActivityCompletion.objects.create(
-            student=request.user,
-            activity=activity,
-            completed=False,
-            attempt_number=previous_attempts + 1,
-            date_completed=timezone.now()
-        )
-        quiz.activity_completion = ac
-        quiz.save()
+            ac = ActivityCompletion.objects.create(
+                student=request.user,
+                activity=activity,
+                completed=False,
+                attempt_number=previous_attempts + 1,
+                date_completed=timezone.now()
+            )
+            quiz.activity_completion = ac
+            quiz.save()
 
-        correct_count = 0
-        total = quiz_questions.count()
+            correct_count = 0
+            total = quiz_questions.count()
 
-        for qq in quiz_questions:
-            question = qq.question
-            user_input = request.POST.get(f'q{question.id}')
+            for qq in quiz_questions:
+                question = qq.question
+                user_input = request.POST.get(f'q{question.id}')
 
-            if user_input:
-                # Default to False in case we can't validate
-                is_correct = False
+                if user_input:
+                    is_correct = False
 
-                if question_type == "multiple_choice":
-                    is_correct = user_input == question.correct_choice
-                elif question_type == "tracing":
-                    student_output = normalize_output(user_input)
-                    correct_output = normalize_output(question.expected_output)
-                    is_correct = student_output == correct_output
+                    if question_type == "multiple_choice":
+                        is_correct = user_input == question.correct_choice
+                    elif question_type == "tracing":
+                        student_output = normalize_output(user_input)
+                        correct_output = normalize_output(question.expected_output)
+                        is_correct = student_output == correct_output
 
-                # Save the answer
-                Answer.objects.create(
-                    quiz=quiz,
-                    quiz_question=qq,
-                    activity_completion=ac,
-                    selected_choice=user_input if question_type == "multiple_choice" else None,
-                    text_answer=user_input if question_type == "tracing" else None,
-                    is_correct=is_correct
-                )
+                    Answer.objects.create(
+                        quiz=quiz,
+                        quiz_question=qq,
+                        activity_completion=ac,
+                        selected_choice=user_input if question_type == "multiple_choice" else None,
+                        text_answer=user_input if question_type == "tracing" else None,
+                        is_correct=is_correct
+                    )
 
-                if is_correct:
-                    correct_count += 1
+                    if is_correct:
+                        correct_count += 1
 
-        # Save grade
-        grade = (correct_count / total) * 100
-        quiz.grade = round(grade, 2)
-        quiz.save()
+            grade = (correct_count / total) * 100
+            quiz.grade = round(grade, 2)
+            quiz.save()
 
-        weighted_score = (grade / 100) * activity.weight  # ← scale to weight
-        ac.completed = True
-        ac.score = round(weighted_score, 2)
-        ac.save()
+            weighted_score = (grade / 100) * activity.weight
+            ac.completed = True
+            ac.score = round(weighted_score, 2)
+            ac.save()
+
+            # ✅ NEW: Update course progress + score
+            update_student_progress(
+                request.user,
+                activity.course_topic.course
+            )
 
         return redirect("quiz-results", ac.id)
 
