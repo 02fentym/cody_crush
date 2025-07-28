@@ -3,15 +3,36 @@
 {% block content %}
 <div class="flex flex-col h-[calc(100vh-4rem)]">
 
-	<!-- Fixed Top Summary -->
-	<div class="shrink-0 bg-base-200 z-10 sticky top-0 py-6 px-4">
-		<div class="flex justify-between items-start flex-wrap gap-6">
+    <!-- Fixed Top Summary -->
+	<div class="shrink-0 bg-base-200 z-10 sticky top-0 py-3 px-4">
 
-			<!-- Title -->
-			<h2 class="text-3xl font-bold">{{ question.title }}</h2>
+		<!-- Back Button -->
+		<div class="btn btn-soft btn-sm mt-1 mb-3">
+			<a href="{% url 'course' course_id %}" class="back-button">← Back to Course</a>
+		</div>
 
-			<!-- Past Attempts + Retake -->
-			<div class="flex flex-col items-end gap-2 ml-auto">
+		<!-- Header Section -->
+		<div class="flex justify-between gap-6 items-center flex-wrap">
+
+			<!-- Left: Radial + Title + Score -->
+			<div class="flex items-center gap-4">
+				<div class="radial-progress text-secondary"
+					style="--value: {{ summary.pct|default:0 }}; --size:4rem; --thickness:6px;">
+					{{ summary.pct|default:0 }}%
+				</div>
+				<div class="flex flex-col">
+					<h2 class="text-3xl font-bold">{{ question.title }}</h2>
+					<span class="text-base-content/70 text-sm">
+						Passed: {{ summary.passed }} / {{ summary.total }}
+					</span>
+					{% if summary.all_passed %}
+					<span class="font-semibold text-lg text-success">Perfect Score!</span>
+					{% endif %}
+				</div>
+			</div>
+
+			<!-- Right: Past Attempts + Resubmit -->
+			<div class="flex items-center gap-2 ml-auto">
 
 				{% if all_attempts|length > 1 %}
 				<div class="dropdown dropdown-end">
@@ -27,7 +48,9 @@
 						<li>
 							<a href="{% url 'code-question-results' attempt.id %}" class="flex justify-between gap-2">
 								<span>#{{ attempt.attempt_number }}</span>
-								<span class="text-xs text-base-content/60">{{ attempt.date_completed|date:"Y-m-d H:i" }}</span>
+								<span class="text-xs text-base-content/60">
+									{{ attempt.date_completed|date:"Y-m-d H:i" }}
+								</span>
 								<span class="text-xs font-medium">
 									{% if sub %}
 										{{ sub.summary.passed }}/{{ sub.summary.total }}
@@ -59,53 +82,33 @@
 				{% endif %}
 			</div>
 		</div>
-
-		<!-- Radial Score -->
-		<div class="flex items-center gap-4 mt-4">
-			<div class="radial-progress text-secondary"
-				style="--value: {{ summary.pct|default:0 }}; --size:4rem; --thickness:6px;">
-				{{ summary.pct|default:0 }}%
-			</div>
-			<div class="flex flex-col">
-				{% if summary.all_passed %}
-				<span class="font-semibold text-lg">Perfect Score!</span>
-				{% endif %}
-				<span class="text-base-content/70 text-sm">Passed: {{ summary.passed }} / {{ summary.total }}</span>
-			</div>
-		</div>
 	</div>
 
-	<!-- Scrollable Test Results -->
-	<div class="flex-1 overflow-y-auto px-4 space-y-4 mt-6">
 
-		<table class="table table-zebra w-full text-sm">
-			<thead class="sticky top-0 bg-base-100 z-10">
-				<tr>
-					<th>Test #</th>
-					<th>Status</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for r in results %}
-				<tr>
-					<td>{{ r.test }}</td>
-					<td>
-						{% if r.passed %}
-						<span class="badge badge-success">Passed</span>
-						{% else %}
-						<span class="badge badge-error">Failed</span>
-						{% endif %}
-					</td>
-				</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-
-		<div class="mt-6">
-			<a href="{% url 'course' course_id %}" class="back-button">
-				← Back to Course
-			</a>
-		</div>
-	</div>
+    <!-- Scrollable Test Results -->
+    <div class="flex-1 overflow-y-auto px-4 space-y-4" style="min-height: 0; margin-top: 80px;">
+        <table class="table table-zebra w-full text-sm">
+            <thead class="sticky top-0 bg-base-100 z-10">
+                <tr>
+                    <th>Test #</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in results %}
+                <tr>
+                    <td>{{ r.test }}</td>
+                    <td>
+                        {% if r.passed %}
+                        <span class="badge badge-success">Passed</span>
+                        {% else %}
+                        <span class="badge badge-error">Failed</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

@@ -1,43 +1,50 @@
 {% extends "main.html" %}
 {% block content %}
 
-<h1 class="text-3xl font-bold mb-4">Students Overview</h1>
+<div class="py-1">
+    <!-- Back Button -->
+    <div class="btn btn-soft btn-sm mt-1 mb-3">
+        <a href="{% url 'course' course.id %}" class="back-button">← Back to Course</a>
+    </div>
 
-<!-- Overview Table -->
-<div class="overflow-auto shadow rounded-lg">
-    <table class="table table-zebra table-hover w-full">
-        <thead>
-            <tr>
-                <th>Student</th>
-                <th>Progress</th>
-                <th>Score</th>
-                <th>Completed</th>
-                <th>Last Active</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in rows %}
-            <tr class="hover:bg-base-100 transition cursor-pointer" onclick="window.location.href='{% url 'student-progress' course.id row.student_id %}'">
+    <h1 class="text-3xl font-bold mb-4">Students Overview</h1>
 
-                <td>
-                    <div>
-                        <div class="font-bold">{{ row.name }}</div>
-                        <div class="text-sm opacity-50">{{ row.email }}</div>
-                    </div>
-                </td>
-                <td>
-                    <progress class="progress progress-primary w-24" value="{{ row.progress }}" max="100"></progress>
-                    <span class="ml-2">{{ row.progress }}%</span>
-                </td>
-                <td class="text-yellow-500 font-semibold">
-                    🏆 {{ row.score|floatformat:1 }}
-                </td>
-                <td>{{ row.completed }}</td>
-                <td>{{ row.last_active|timesince }} ago</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <!-- Overview Table -->
+    <div class="overflow-auto shadow rounded-lg">
+        <table class="table table-zebra table-hover w-full">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Progress</th>
+                    <th>Score</th>
+                    <th>Completed</th>
+                    <th>Last Active</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr class="hover:bg-base-100 transition cursor-pointer" onclick="window.location.href='{% url 'student-progress' course.id row.student_id %}'">
+
+                    <td>
+                        <div>
+                            <div class="font-bold">{{ row.name }}</div>
+                            <div class="text-sm opacity-50">{{ row.email }}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <progress class="progress progress-primary w-24" value="{{ row.progress }}" max="100"></progress>
+                        <span class="ml-2">{{ row.progress }}%</span>
+                    </td>
+                    <td class="text-yellow-500 font-semibold">
+                        🏆 {{ row.score|floatformat:1 }}
+                    </td>
+                    <td>{{ row.completed }}</td>
+                    <td>{{ row.last_active|timesince }} ago</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 {% endblock %}

@@ -1,7 +1,12 @@
 {% extends "main.html" %}
 {% block content %}
 
-<div class="p-6 space-y-4">
+<div class="py-1">
+
+    <!-- Back Button -->
+    <div class="btn btn-soft btn-sm mt-1 mb-3">
+        <a href="{% url 'course' course.id %}" class="back-button">← Back to Course</a>
+    </div>
 
     <!-- Course Title -->
     <div>
