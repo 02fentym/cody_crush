@@ -3,38 +3,34 @@
 
     {% if user.profile.role == "student" %}
     <a class="flex items-center gap-4 flex-1" href="{% url 'take-code-question' activity.id %}">
-    {% else %}
-    <button class="flex items-center gap-4 flex-1 text-left"
-        onclick="window.location.href='{% url 'code-question' 'edit' activity.content_object.id %}'">
-    {% endif %}
+        {% else %}
+        <button class="flex items-center gap-4 flex-1 text-left"
+            onclick="window.location.href='{% url 'code-question' 'edit' activity.content_object.id %}'">
+            {% endif %}
 
-        {% if user.profile.role == "teacher" %}
-        <div class="flex items-center justify-center bg-primary text-primary-content font-normal text-sm rounded-full"
-            style="width: 1.5rem; height: 1.5rem;">
-            {{ activity.order }}
-        </div>
-        {% endif %}
+            {% if user.profile.role == "teacher" %}
+            <div class="flex items-center justify-center bg-base-content text-primary-content font-normal text-sm rounded-full"
+                style="width: 1.5rem; height: 1.5rem;">
+                {{ activity.order }}
+            </div>
+            {% endif %}
 
-        <!-- Badge -->
-        <div class="badge badge-primary">
-            <svg class="w-6 h-6 text-primary-content" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 24 24" aria-hidden="true">
-                    <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1">
-                        <path
-                            d="M7.4 7H4.6a.6.6 0 0 0-.6.6v8.8a.6.6 0 0 0 .6.6h2.8a.6.6 0 0 0 .6-.6V7.6a.6.6 0 0 0-.6-.6Zm12 0h-2.8a.6.6 0 0 0-.6.6v8.8a.6.6 0 0 0 .6.6h2.8a.6.6 0 0 0 .6-.6V7.6a.6.6 0 0 0-.6-.6Z" />
-                        <path
-                            d="M1 14.4V9.6a.6.6 0 0 1 .6-.6h1.8a.6.6 0 0 1 .6.6v4.8a.6.6 0 0 1-.6.6H1.6a.6.6 0 0 1-.6-.6Zm22 0V9.6a.6.6 0 0 0-.6-.6h-1.8a.6.6 0 0 0-.6.6v4.8a.6.6 0 0 0 .6.6h1.8a.6.6 0 0 0 .6-.6ZM8 12h8" />
-                    </g>
+            <!-- Badge -->
+            <div class="btn btn-outline-contrast pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20" fill="none"
+                    stroke="currentColor" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M.7 9.3L5.5 4.5l1.4 1.42L2.84 10l4.07 4.07-1.41 1.42L0 10l.7-.7z" />
+                    <path d="M19.3 10.7l.7-.7-5.49-5.49-1.4 1.42L17.16 10l-4.07 4.07 1.41 1.42 4.78-4.78z" />
                 </svg>
-            Code Exercise
-        </div>
+                CODE
+            </div>
 
-        <!-- Title -->
-        <div>
-            <div class="font-semibold">{{ activity.content_object.title|striptags }}</div>
-        </div>
+            <!-- Title -->
+            <div>
+                <div class="font-normal text-sm">{{ activity.content_object.title|striptags }}</div>
+            </div>
 
-    {% if user.profile.role == "student" %}
+            {% if user.profile.role == "student" %}
     </a>
     {% else %}
     </button>

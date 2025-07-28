@@ -30,7 +30,7 @@
                     <span class="ml-2">{{ row.progress }}%</span>
                 </td>
                 <td class="text-yellow-500 font-semibold">
-                    🏆 {{ row.score }}
+                    🏆 {{ row.score|floatformat:1 }}
                 </td>
                 <td>{{ row.completed }}</td>
                 <td>{{ row.last_active|timesince }} ago</td>

@@ -1,39 +1,51 @@
 {% with quiz=activity.content_object %}
 <li id="activity-{{ activity.id }}"
     class="flex items-center justify-between mb-4 px-4 py-3 bg-base-100 rounded-md hover:bg-info/5">
-    <a class="flex items-center gap-4 flex-1"
-        {% if user.profile.role == "teacher" %}
-            hx-get="{% url 'edit-quiz-form' quiz.id %}"
-            hx-target="#modal-body"
-            hx-swap="innerHTML"
-            onclick="document.getElementById('modal-wrapper').checked = true"
-            role="button"
-        {% else %}
-            href="{% url 'start-quiz' course_id activity.id %}" target="_blank"
-        {% endif %}>
+    <a class="flex items-center gap-4 flex-1" {% if user.profile.role == "teacher" %}
+        hx-get="{% url 'edit-quiz-form' quiz.id %}" hx-target="#modal-body" hx-swap="innerHTML"
+        onclick="document.getElementById('modal-wrapper').checked = true" role="button" {% else %}
+        href="{% url 'start-quiz' course_id activity.id %}" target="_blank" {% endif %}>
 
 
         {% if user.profile.role == "teacher" %}
-        <div class="flex items-center justify-center bg-accent text-accent-content font-normal text-sm rounded-full"
+        <div class="flex items-center justify-center bg-base-content text-primary-content font-normal text-sm rounded-full"
             style="width: 1.5rem; height: 1.5rem;">
             {{ activity.order }}
         </div>
         {% endif %}
 
         <!-- Badge -->
-        <div class="badge badge-accent flex items-center gap-1">
-            <svg class="w-5 h-5 text-accent-content" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165
-            3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28" />
+        <div class="btn btn-outline-contrast pointer-events-none">
+            {% if quiz.question_type == "tracing" %}
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+                stroke-width="1" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="14" height="3" rx="1" />
+                <rect x="3" y="10" width="10" height="3" rx="1" />
+                <rect x="3" y="16" width="6" height="3" rx="1" />
+                <path d="M18 8l3 4-3 4" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            <span class="text-xs font-semibold uppercase">
-                {% if quiz.question_type == "tracing" %}Tracing Quiz{% else %}MC Quiz{% endif %}
-            </span>
+            {% else %}
+            <svg class="w-6 h-6 text-base-content" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none"
+                stroke="currentColor" stroke-width="1" stroke-linejoin="round" stroke-linecap="round">
+                <!-- Grid -->
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <rect x="27" y="3" width="18" height="18" rx="2" />
+                <rect x="3" y="27" width="18" height="18" rx="2" />
+                <rect x="27" y="27" width="18" height="18" rx="2" />
+
+                <!-- Letters -->
+                <text x="12" y="15" text-anchor="middle" font-size="10" fill="currentColor">A</text>
+                <text x="36" y="15" text-anchor="middle" font-size="10" fill="currentColor">B</text>
+                <text x="12" y="39" text-anchor="middle" font-size="10" fill="currentColor">C</text>
+                <text x="36" y="39" text-anchor="middle" font-size="10" fill="currentColor">D</text>
+            </svg>
+            {% endif %}
+            QUIZ
         </div>
 
         <!-- Title -->
         <div class="truncate">
-            <div class="font-semibold">{{ quiz.question_count }} Questions</div>
+            <div class="font-normal text-sm">{{ quiz.question_count }} Questions ({% if quiz.question_type == "tracing" %}Tracing{% else %}Multiple Choice{% endif %})</div>
         </div>
     </a>
 

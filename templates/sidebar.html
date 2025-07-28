@@ -23,10 +23,12 @@
         <li>
             <a href="{% url 'course' course.id %}"
                 class="{% if course.id|stringformat:'s' == request.resolver_match.kwargs.course_id|stringformat:'s' %}bg-base-300 font-semibold{% endif %}">
-                <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                    fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                        d="M12 6.03v13m0-13c-2.819-.831-4.715-1.076-8.029-1.023A.99.99 0 0 0 3 6v11c0 .563.466 1.014 1.03 1.007 3.122-.043 5.018.212 7.97 1.023m0-13c2.819-.831 4.715-1.076 8.029-1.023A.99.99 0 0 1 21 6v11c0 .563-.466 1.014-1.03 1.007-3.122-.043-5.018.212-7.97 1.023" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="1">
+                        <path d="M22 10v6M2 10l10-5l10 5l-10 5z" />
+                        <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                    </g>
                 </svg>
                 {{ course.title }}
             </a>
@@ -76,29 +78,33 @@
                     <li>
                         <a href="{% url 'question-bank' 'multiple_choice' %}"
                             class="{% if request.resolver_match.url_name == 'mc-questions' %}bg-base-300 font-semibold{% endif %}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-  <text x="2" y="7" font-size="5" font-family="sans-serif" fill="currentColor">A.</text>
-  <line x1="8" y1="6" x2="22" y2="6" stroke="currentColor" stroke-width="1"/>
+                            <svg class="w-6 h-6 text-base-content" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none"
+                                stroke="currentColor" stroke-width="1" stroke-linejoin="round" stroke-linecap="round">
+                                <!-- Grid -->
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                <rect x="27" y="3" width="18" height="18" rx="2" />
+                                <rect x="3" y="27" width="18" height="18" rx="2" />
+                                <rect x="27" y="27" width="18" height="18" rx="2" />
 
-  <text x="2" y="13" font-size="5" font-family="sans-serif" fill="currentColor">B.</text>
-  <line x1="8" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="1"/>
-
-  <text x="2" y="19" font-size="5" font-family="sans-serif" fill="currentColor">C.</text>
-  <line x1="8" y1="18" x2="22" y2="18" stroke="currentColor" stroke-width="1"/>
-</svg>
-
+                                <!-- Letters -->
+                                <text x="12" y="15" text-anchor="middle" font-size="10" fill="currentColor">A</text>
+                                <text x="36" y="15" text-anchor="middle" font-size="10" fill="currentColor">B</text>
+                                <text x="12" y="39" text-anchor="middle" font-size="10" fill="currentColor">C</text>
+                                <text x="36" y="39" text-anchor="middle" font-size="10" fill="currentColor">D</text>
+                            </svg>
                             Multiple Choice
                         </a>
                     </li>
                     <li class="">
                         <a href="{% url 'question-bank' 'tracing' %}"
                             class="{% if request.resolver_match.url_name == 'tracing-questions' %}bg-base-300 font-semibold{% endif %}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
-  <rect x="3" y="4" width="14" height="3" rx="1" />
-  <rect x="3" y="10" width="10" height="3" rx="1" />
-  <rect x="3" y="16" width="6" height="3" rx="1" />
-  <path d="M18 8l3 4-3 4" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+                                <rect x="3" y="4" width="14" height="3" rx="1" />
+                                <rect x="3" y="10" width="10" height="3" rx="1" />
+                                <rect x="3" y="16" width="6" height="3" rx="1" />
+                                <path d="M18 8l3 4-3 4" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
 
 
 
@@ -107,8 +113,11 @@
                     </li>
                     <li>
                         <a href="{% url 'question-bank' 'code' %}">
-                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="m8 8-4 4 4 4m8 0 4-4-4-4m-2-3-4 14"/>
+                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="1" d="m8 8-4 4 4 4m8 0 4-4-4-4m-2-3-4 14" />
                             </svg>
                             Code
                         </a>

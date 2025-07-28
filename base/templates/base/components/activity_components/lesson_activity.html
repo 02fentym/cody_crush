@@ -9,29 +9,29 @@
 
             <!-- Order -->
             {% if user.profile.role == "teacher" %}
-            <div class="flex items-center justify-center bg-secondary text-secondary-content font-normal text-sm rounded-full"
+            <div class="flex items-center justify-center bg-base-content text-primary-content font-normal text-sm rounded-full"
                 style="width: 1.5rem; height: 1.5rem;">
                 {{ activity.order }}
             </div>
             {% endif %}
 
             <!-- Badge -->
-            <div class="badge badge-secondary">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-secondary-content" viewBox="0 0 32 32"
-                    fill="none">
-                    <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
+            <div class="btn btn-outline-contrast pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                    <g fill="none" stroke="currentColor" stroke-width="1">
                         <path
-                            d="M10 9h4m-4 7h12m-12 4h12m-12 4h4m-6 5h16a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v22a2 2 0 0 0 2 2Z" />
+                            d="M4 8c0-2.828 0-4.243.879-5.121C5.757 2 7.172 2 10 2h4c2.828 0 4.243 0 5.121.879C20 3.757 20 5.172 20 8v8c0 2.828 0 4.243-.879 5.121C18.243 22 16.828 22 14 22h-4c-2.828 0-4.243 0-5.121-.879C4 20.243 4 18.828 4 16V8Z" />
+                        <path d="M19.898 16h-12c-.93 0-1.395 0-1.777.102A3 3 0 0 0 4 18.224" />
+                        <path stroke-linecap="round" d="M8 7h8m-8 3.5h5m6.5 8.5H8" />
                     </g>
-                    <circle cx="22" cy="9" r="0.75" fill="currentColor" />
                 </svg>
-                Lesson
+                LESSON
             </div>
 
 
             <!-- Title -->
             <div>
-                <div class="font-semibold">{{ activity.content_object.title|striptags }}</div>
+                <div class="font-normal text-sm">{{ activity.content_object.title|striptags }}</div>
             </div>
         </a>
 

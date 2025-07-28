@@ -151,7 +151,7 @@ def update_student_progress(student, course):
 
     total_activities = len(activities)
     completed_activities = sum(1 for ac in completions if ac.completed)
-    progress = round((completed_activities / total_activities) * 100) if total_activities > 0 else 0
+    progress = round((completed_activities / total_activities) * 100, 1) if total_activities > 0 else 0
 
     # Weighted average score
     total_score = 0
