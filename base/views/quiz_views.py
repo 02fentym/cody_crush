@@ -117,19 +117,17 @@ def start_quiz(request, course_id, activity_id):
     activity = get_object_or_404(Activity, id=activity_id)
     course_topic = activity.course_topic
     template = activity.content_object
-    allow_resubmission = activity.allow_resubmission
 
-    # Check if the student has already completed this quiz
-    if allow_resubmission == False:
-        existing_completion = ActivityCompletion.objects.filter(
-            student=request.user,
-            activity=activity,
-            completed=True
-        ).first()
+    # Always check if a completed quiz already exists
+    existing_completion = ActivityCompletion.objects.filter(
+        student=request.user,
+        activity=activity,
+        completed=True
+    ).order_by("-date_completed").first()
 
-        if existing_completion:
-            return redirect("quiz-results", existing_completion.id)
-
+    # ⛔️ Redirect to results if already completed — regardless of allow_resubmission
+    if existing_completion and request.method == "GET":
+        return redirect("quiz-results", existing_completion.id)
 
     # Determine the question model
     if template.question_type == "multiple_choice":
@@ -163,6 +161,8 @@ def start_quiz(request, course_id, activity_id):
         )
 
     return redirect("take-quiz", quiz_id=quiz.id, activity_id=activity.id)
+
+
 
 
 @allowed_roles(["student"])
@@ -251,34 +251,36 @@ def normalize_output(text):
 @allowed_roles(["student"])
 @login_required(login_url="login")
 def quiz_results(request, ac_id):
-    courses = Course.objects.filter(students=request.user)
+    courses = get_all_courses("student", request.user)
     ac = get_object_or_404(ActivityCompletion, id=ac_id, student=request.user)
     activity = ac.activity
     quiz_template = activity.content_object
-    answers = Answer.objects.filter(activity_completion=ac).select_related('quiz_question')
     course_id = activity.course_topic.course.id
 
-    # Get all attempts for this student and activity
-    all_quizzes = Quiz.objects.filter(
-        activity=activity,
-        student=request.user
-    ).order_by("-created")
+    # All quiz attempts by this student
+    all_quizzes = Quiz.objects.filter(activity=activity, student=request.user).order_by("-created")
+    current_quiz = all_quizzes.filter(activity_completion=ac).first()
 
-    quiz = answers.first().quiz if answers.exists() else None
+    answers = Answer.objects.filter(activity_completion=ac).select_related('quiz_question')
     correct = answers.filter(is_correct=True).count()
     total = answers.count()
+
+    is_first_attempt = current_quiz is None
+    can_retake = activity.allow_resubmission
 
     context = {
         "activity_completion": ac,
         "activity": activity,
         "quiz_template": quiz_template,
+        "quiz": current_quiz,
         "answers": answers,
-        "quiz": quiz,
-        "course_id": course_id,
         "correct": correct,
         "total": total,
+        "course_id": course_id,
         "courses": courses,
-        "all_quizzes": all_quizzes
+        "all_quizzes": all_quizzes,
+        "can_retake": can_retake,
+        "is_first_attempt": is_first_attempt,
     }
 
     return render(request, "base/main/quiz_results.html", context)
