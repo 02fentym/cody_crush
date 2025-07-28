@@ -4,7 +4,8 @@ from base.decorators import allowed_roles
 from django.views.decorators.http import require_POST
 import random
 
-from base.models import CourseTopic, CourseUnit, CodeQuestion, Activity, ActivityCompletion
+from base.models import CourseTopic, CodeQuestion, Activity, ActivityCompletion
+from base.utils import get_all_courses
 
 
 @login_required
@@ -56,7 +57,7 @@ def take_code_question(request, activity_id):
     course_topic = activity.course_topic
     question = activity.content_object  # This is the CodeQuestion
     user = request.user
-    courses = user.enrolled_courses.all()
+    courses = get_all_courses("student", user)
 
     # For back button
     course_id = course_topic.course.id

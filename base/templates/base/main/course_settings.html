@@ -1,17 +1,25 @@
 {% extends "main.html" %}
 
 {% block content %}
-<h1 class="text-3xl font-bold mb-6">Settings for {{ course.title }}</h1>
 
-<div class="space-y-6">
-
-    <!-- Activity Weights Section -->
-    <div class="card bg-base-200 p-4 shadow-md w-fit">
-        <h2 class="text-xl font-semibold mb-2">Activity Weights</h2>
-        {% include "base/components/course_settings_components/course_weight_settings.html" %}
+<div class="py-1">
+    <!-- Back Button -->
+    <div class="btn btn-soft btn-sm mt-1 mb-3">
+        <a href="{% url 'course' course.id %}" class="back-button">← Back to Course</a>
     </div>
 
-    <!-- Future setting sections could go here -->
+    <h1 class="text-3xl font-bold mb-6">Settings for {{ course.title }}</h1>
 
+    <div class="space-y-6">
+
+        <!-- Activity Weights Section -->
+        <div class="card bg-base-200 p-4 shadow-md w-fit">
+            <h2 class="text-xl font-semibold mb-2">Activity Weights</h2>
+            {% include "base/components/course_settings_components/course_weight_settings.html" %}
+        </div>
+
+        <!-- Future setting sections could go here -->
+
+    </div>
 </div>
 {% endblock %}

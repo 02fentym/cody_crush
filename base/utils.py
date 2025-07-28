@@ -127,13 +127,14 @@ def extract_code_question_yaml(yaml_file):
     return test_cases, meta
 
 
-# Returns all courses a user is enrolled in
+# Returns all courses a user is enrolled in (alphabetically)
 def get_all_courses(role, user):
     if role == "student":
-        enrollments = StudentCourseEnrollment.objects.filter(student=user)
-        courses = [enrollment.course for enrollment in enrollments]
+        enrollments = StudentCourseEnrollment.objects.filter(student=user).select_related("course")
+        courses = [e.course for e in enrollments]
+        courses.sort(key=lambda c: c.title.lower())  # alphabetical sort by course title
     else:
-        courses = Course.objects.filter(teacher=user)
+        courses = Course.objects.filter(teacher=user).order_by("title")
     return courses
 
 

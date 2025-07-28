@@ -15,8 +15,7 @@ def student_progress(request, course_id, student_id=None):
         student = request.user
 
     # Get all courses this student is enrolled in (for sidebar)
-    enrollments = StudentCourseEnrollment.objects.select_related("course").filter(student=student)
-    courses = [e.course for e in enrollments]
+    courses = get_all_courses("student", student)
 
     # Get the specific course
     enrollment = get_object_or_404(StudentCourseEnrollment, student=student, course_id=course_id)
