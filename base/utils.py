@@ -144,30 +144,38 @@ def update_student_progress(student, course):
         course_topic__unit__courseunit__course=course
     )
 
-    completions = ActivityCompletion.objects.filter(
-        student=student,
-        activity__in=activities
-    ).select_related("activity")
+    completions = (
+        ActivityCompletion.objects
+        .filter(student=student, activity__in=activities)
+        .select_related("activity")
+        .order_by("activity_id", "-score")  # Ensures highest score comes first per activity
+    )
 
+    # Pick the best completion per activity
+    best_completions = {}
+    for ac in completions:
+        if ac.activity_id not in best_completions and ac.completed and ac.score is not None:
+            best_completions[ac.activity_id] = ac
+
+    # Progress: % of activities completed (best attempt per activity)
     total_activities = len(activities)
-    completed_activities = sum(1 for ac in completions if ac.completed)
+    completed_activities = len(best_completions)
     progress = round((completed_activities / total_activities) * 100, 1) if total_activities > 0 else 0
 
-    # Weighted average score
+    # Weighted average score using best attempts
     total_score = 0
     total_weight = 0
 
-    for ac in completions:
-        if ac.completed and ac.score is not None:
-            weight = ac.activity.weight or 1
-            total_weight += weight
-            total_score += ac.score
-           
+    for ac in best_completions.values():
+        weight = ac.activity.weight or 1
+        total_weight += weight
+        total_score += ac.score
 
-    score = round(total_score / total_weight * 100, 2) if total_weight > 0 else 0.0
+    score = round(total_score / total_weight * 100, 1) if total_weight > 0 else 0.0
 
     # Save to StudentCourseEnrollment
     enrollment = StudentCourseEnrollment.objects.get(student=student, course=course)
     enrollment.progress = progress
     enrollment.score = score
     enrollment.save()
+

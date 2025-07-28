@@ -34,11 +34,18 @@ def student_progress(request, course_id, student_id=None):
         .order_by("course_topic__order", "order")
     )
 
-    # Preload student completions
-    completions = {
-        ac.activity_id: ac
-        for ac in ActivityCompletion.objects.filter(student=student, activity__in=activities)
-    }
+    # Fetch all completions for the student in this course
+    all_completions = (
+        ActivityCompletion.objects
+        .filter(student=student, activity__in=activities)
+        .order_by("activity_id", "-score")  # highest score first per activity
+    )
+
+    # Keep only the highest score per activity
+    completions = {}
+    for ac in all_completions:
+        if ac.activity_id not in completions:
+            completions[ac.activity_id] = ac
 
     activity_rows = []
     for activity in activities:
@@ -84,6 +91,7 @@ def student_progress(request, course_id, student_id=None):
     }
 
     return render(request, "base/main/progress.html", context)
+
 
 
 
