@@ -4,6 +4,42 @@
     themes: all;
 }
 
+/* Define your custom theme */
+@plugin "daisyui/theme" {
+  name: "my_dark_theme";
+  color-scheme: dark;
+
+  --color-base-100: #1e1e2f;
+  --color-base-200: #2e2e3f;
+  --color-base-300: #3e3e4f;
+  --color-base-content: #f0f0f0;
+
+  --color-primary: #ff0000;
+  --color-primary-content: #ffffff;
+
+  --color-secondary: #00bcd4;
+  --color-secondary-content: #ffffff;
+
+  --color-accent: #4caf50;
+  --color-accent-content: #ffffff;
+
+  --color-neutral: #333333;
+  --color-neutral-content: #ffffff;
+
+  --color-info: #2196f3;
+  --color-info-content: #ffffff;
+
+  --color-success: #4caf50;
+  --color-success-content: #ffffff;
+
+  --color-warning: #ff9800;
+  --color-warning-content: #000000;
+
+  --color-error: #f44336;
+  --color-error-content: #ffffff;
+}
+
+
 
 /* Make textarea width 100% */
 @layer utilities {
