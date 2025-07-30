@@ -50,7 +50,7 @@
 								<span>#{{ forloop.counter }}</span>
 								<span class="text-xs text-base-content/60">{{ q.created|date:"Y-m-d H:i" }}</span>
 								<span class="text-xs font-medium">
-									{% if q.grade %}
+									{% if q.grade != None %}
 										{{ q.grade|floatformat:0 }}%
 									{% else %}
 										Pending
