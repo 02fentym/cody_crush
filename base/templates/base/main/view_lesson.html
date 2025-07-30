@@ -8,8 +8,13 @@
     <!-- Lesson title -->
     <h1 class="text-3xl font-bold mb-2">{{ lesson.title|safe }}</h1>
 
+    <!-- Lesson content -->
+    <div class="markdown-body">
+        {{ lesson_html|safe }}
+    </div>
+
     <!-- Mark as completed -->
-    <form method="POST" class="flex items-center gap-2">
+    <form method="POST" class="flex items-center gap-2 pb-12">
         {% csrf_token %}
         <label class="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" name="mark_as_complete" onchange="this.form.submit()"
@@ -18,11 +23,6 @@
             <span class="text-base-content">Mark as completed</span>
         </label>
     </form>
-
-    <!-- Lesson content -->
-    <div class="markdown-body">
-        {{ lesson_html|safe }}
-    </div>
 
 
 </div>
