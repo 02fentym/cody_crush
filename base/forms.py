@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Course, Unit, Topic, Lesson, DmojExercise, Profile, CourseUnit, CourseTopic, MultipleChoiceQuestion, TracingQuestion, CodeQuestion, CodeTestCase, CourseWeighting
+from .models import Course, Unit, Topic, Lesson, DmojExercise, Profile, CourseUnit, CourseTopic, MultipleChoiceQuestion, TracingQuestion, CodeQuestion, CodeTestCase, CourseWeighting, FillInTheBlankQuestion
 
 
 class UserForm(UserCreationForm):
@@ -79,8 +79,6 @@ class UserForm(UserCreationForm):
         )
 
         return user
-
-
 
 
 class CourseForm(ModelForm):
@@ -271,7 +269,6 @@ class CodeTestCaseForm(forms.ModelForm):
         }
 
 
-
 class CourseWeightingForm(forms.ModelForm):
     class Meta:
         model = CourseWeighting
@@ -281,3 +278,17 @@ class CourseWeightingForm(forms.ModelForm):
             "weight": forms.NumberInput(attrs={"class": "input input-bordered w-24"}),
         }
 
+
+class FillInTheBlankQuestionForm(forms.ModelForm):
+    class Meta:
+        model = FillInTheBlankQuestion
+        fields = [
+            "language", "prompt", "expected_answer", "explanation", "case_sensitive"
+        ]        
+        widgets = {
+            "language": forms.Select(attrs={"class": "select select-sm select-bordered text-sm auto-resize block"}),
+            "prompt": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
+            "expected_answer": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
+            "explanation": forms.Textarea(attrs={"class": "textarea textarea-xs textarea-bordered text-sm auto-resize", "rows": 1, "style": "overflow:hidden;", }),
+            "case_sensitive": forms.CheckboxInput(attrs={"class": "checkbox checkbox-primary"}),
+        }

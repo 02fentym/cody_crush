@@ -18,11 +18,11 @@
     <div class="form-control">
         <label class="label" for="question_count">Number of Questions</label>
         <select name="question_count" id="question_count" class="select select-bordered w-full" required>
-            <option value="5" {% if quiz_template and quiz_template.question_count == 5 %}selected{% endif %}>5</option>
-            <option value="10" {% if not quiz_template or quiz_template.question_count == 10 %}selected{% endif %}>10</option>
-            <option value="15" {% if quiz_template and quiz_template.question_count == 15 %}selected{% endif %}>15</option>
-            <option value="20" {% if quiz_template and quiz_template.question_count == 20 %}selected{% endif %}>20</option>
+            {% for count in question_counts %}
+            <option value="{{ count }}" {% if count == question_count %}selected{% endif %}>{{ count }}</option>
+            {% endfor %}
         </select>
+
     </div>
 
     <div class="form-control">
@@ -33,6 +33,9 @@
             </option>
             <option value="tracing" {% if quiz_template and quiz_template.question_type == "tracing" %}selected{% endif %}>
                 Tracing
+            </option>
+            <option value="fill_in_the_blank" {% if quiz_template and quiz_template.question_type == "fill_in_the_blank" %}selected{% endif %}>
+                Fill in the Blank
             </option>
         </select>
     </div>

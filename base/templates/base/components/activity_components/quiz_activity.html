@@ -1,14 +1,10 @@
 {% with quiz=activity.content_object %}
 <li id="activity-{{ activity.id }}"
     class="flex items-center justify-between mb-4 px-4 py-3 bg-base-100 rounded-md hover:bg-info/5">
-    <a class="flex items-center gap-4 flex-1" 
-        {% if user.profile.role == "teacher" %}
-        hx-get="{% url 'edit-quiz-form' quiz.id %}"
-        hx-target="#modal-body" hx-swap="innerHTML"
-        onclick="document.getElementById('modal-wrapper').checked = true" role="button"
-        {% else %}
-        href="{% url 'start-quiz' course_id activity.id %}"
-        {% endif %}>
+    <a class="flex items-center gap-4 flex-1" {% if user.profile.role == "teacher" %}
+        hx-get="{% url 'edit-quiz-form' quiz.id %}" hx-target="#modal-body" hx-swap="innerHTML"
+        onclick="document.getElementById('modal-wrapper').checked = true" role="button" {% else %}
+        href="{% url 'start-quiz' course_id activity.id %}" {% endif %}>
 
 
         {% if user.profile.role == "teacher" %}
@@ -27,6 +23,11 @@
                 <rect x="3" y="10" width="10" height="3" rx="1" />
                 <rect x="3" y="16" width="6" height="3" rx="1" />
                 <path d="M18 8l3 4-3 4" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            {% elif quiz.question_type == "fill_in_the_blank" %}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="20" height="20" stroke="#FFFFFF" stroke-width="1" fill="none" />
+                <text x="12" y="16" font-family="Arial" font-size="12" text-anchor="middle" fill="#FFFFFF">?</text>
             </svg>
             {% else %}
             <svg class="w-6 h-6 text-base-content" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none"
@@ -49,7 +50,16 @@
 
         <!-- Title -->
         <div class="truncate">
-            <div class="font-normal text-sm">{{ quiz.question_count }} Questions ({% if quiz.question_type == "tracing"%}Tracing{% else %}Multiple Choice{% endif %})</div>
+            <div class="font-normal text-sm">
+                {{ quiz.question_count }} Questions (
+                {% if quiz.question_type == "tracing"%}
+                Tracing
+                {% elif quiz.question_type == "fill_in_the_blank"%}
+                Fill in the Blank
+                {% else %}
+                Multiple Choice
+                {% endif %})
+            </div>
         </div>
     </a>
 

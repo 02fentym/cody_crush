@@ -89,6 +89,8 @@
 					{% include "base/components/quiz_components/mc_result_block.html" with answer=answer %}
 				{% elif quiz_template.question_type == "tracing" %}
 					{% include "base/components/quiz_components/tracing_result_block.html" with answer=answer %}
+				{% elif quiz_template.question_type == "fill_in_the_blank" %}
+					{% include "base/components/quiz_components/fill_in_the_blank_result_block.html" with answer=answer %}
 				{% else %}
 					<div class="text-error">Unsupported question type.</div>
 				{% endif %}

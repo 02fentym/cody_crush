@@ -23,6 +23,8 @@
             {% include "base/components/quiz_components/mc_question_block.html" with question=question %}
             {% elif quiz.question_type == "tracing" %}
             {% include "base/components/quiz_components/tracing_question_block.html" with question=question %}
+            {% elif quiz.question_type == "fill_in_the_blank" %}
+            {% include "base/components/quiz_components/fill_in_the_blank_question_block.html" with question=question %}
             {% else %}
             <p class="text-error">Unsupported question type.</p>
             {% endif %}

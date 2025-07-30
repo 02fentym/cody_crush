@@ -1,0 +1,34 @@
+<div class="card bg-base-100 shadow p-4 space-y-2">
+    <p class="text-base text-md font-semibold text-base-content">
+        {{ forloop.counter }}. 
+        {{ answer.formatted_prompt|safe|linebreaksbr }}
+    </p>
+
+    <div class="flex items-center gap-4 p-4 rounded-lg transition-colors 
+        {% if answer.is_correct %}
+            bg-success text-success-content
+        {% else %}
+            bg-error text-error-content
+        {% endif %}
+    ">
+        <div class="font-bold text-sm">Your Answer:</div>
+        <div class="text-sm break-words">{{ answer.text_answer }}</div>
+    </div>
+
+    {% if not answer.is_correct %}
+    <div class="flex items-center gap-4 p-4 rounded-lg bg-base-200">
+        <div class="font-bold text-sm">Correct Answer:</div>
+        <div class="text-sm break-words">{{ answer.quiz_question.question.expected_answer }}</div>
+    </div>
+
+    <div tabindex="0" class="collapse collapse-arrow bg-base-200 rounded-lg">
+        <input type="checkbox" id="explanation-{{ forloop.counter0 }}" class="peer" />
+        <div class="collapse-title text-sm font-medium">
+            Explanation
+        </div>
+        <div class="collapse-content text-sm text-base-content">
+            {{ answer.quiz_question.question.explanation|linebreaksbr }}
+        </div>
+    </div>
+    {% endif %}
+</div>

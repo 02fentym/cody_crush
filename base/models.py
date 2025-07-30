@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils import timezone
-from base.constants import ACTIVITY_TYPE_DISPLAY
+from base.constants import ACTIVITY_TYPE_DISPLAY, QUESTION_TYPE_CHOICES
 
 
 class Profile(models.Model):
@@ -138,12 +138,31 @@ class TracingQuestion(models.Model):
         return f"{self.topic.title}: {self.prompt[:40]}"
     
 
-class Quiz(models.Model):
-    QUESTION_TYPE_CHOICES = [
-        ("multiple_choice", "Multiple Choice"),
-        ("tracing", "Tracing"),
-    ]
+class FillInTheBlankQuestion(models.Model):
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    prompt = models.TextField(
+        help_text="Use [blank] to indicate where the missing word or phrase should go."
+    )
+    expected_answer = models.CharField(max_length=255)
 
+    explanation = models.TextField()
+    language = models.ForeignKey("Language", on_delete=models.SET_NULL, null=True)
+
+    case_sensitive = models.BooleanField(default=False)
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def is_correct(self, answer):
+        if self.case_sensitive:
+            return answer.strip() == self.expected_answer.strip()
+        return answer.strip().lower() == self.expected_answer.strip().lower()
+
+    def __str__(self):
+        return f"{self.topic.title}: {self.prompt[:40]}"
+
+    
+class Quiz(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE)
     activity = models.ForeignKey("Activity", on_delete=models.CASCADE)
     activity_completion = models.OneToOneField("ActivityCompletion", on_delete=models.SET_NULL, null=True, blank=True)
@@ -196,7 +215,7 @@ The template will have a set number of questions and a type (multiple choice or 
 class QuizTemplate(models.Model):
     course_topic = models.ForeignKey(CourseTopic, on_delete=models.CASCADE)
     question_count = models.PositiveIntegerField(default=5)
-    question_type = models.CharField(max_length=30, choices=Quiz.QUESTION_TYPE_CHOICES)
+    question_type = models.CharField(max_length=30, choices=QUESTION_TYPE_CHOICES)
     created = models.DateTimeField(auto_now_add=True)
 
     '''
@@ -309,10 +328,6 @@ class CodeQuestion(models.Model):
     language = models.ForeignKey(Language, on_delete=models.CASCADE)
     explanation = models.TextField(blank=True)
 
-    QUESTION_TYPE_CHOICES = [
-        ("stdin", "Standard Input"),
-        ("exec", "Python Exec Block"),  # for function/class-based testing
-    ]
     question_type = models.CharField(
         max_length=20,
         choices=QUESTION_TYPE_CHOICES,

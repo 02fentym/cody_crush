@@ -33,6 +33,7 @@ def update_activity_weights(course):
     print(f"Updating weights for course: {course.title}")
     weightings = CourseWeighting.objects.filter(course=course)
     weighting_map = {w.activity_type: w.weight for w in weightings}
+    print(f"Weighting map: {weighting_map}")
 
     for ct in course.coursetopic_set.all():
         print(f"  CourseTopic: {ct}")

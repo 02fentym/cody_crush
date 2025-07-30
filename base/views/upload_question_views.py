@@ -2,8 +2,6 @@ import csv
 import io
 
 from django.urls import reverse
-from base.utils import extract_code_question_zip, extract_code_question_yaml
-
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
@@ -11,9 +9,10 @@ from django.http import HttpResponseServerError
 from django.views.decorators.http import require_POST
 
 from base.decorators import allowed_roles
-from base.forms import MultipleChoiceQuestionForm, TracingQuestionForm, CodeQuestionForm, CodeTestCaseForm
-from base.models import Topic, MultipleChoiceQuestion, TracingQuestion, Course, Language, CodeQuestion, CodeTestCase
-from base.utils import get_all_courses
+from base.forms import MultipleChoiceQuestionForm, TracingQuestionForm, CodeQuestionForm, CodeTestCaseForm, FillInTheBlankQuestionForm
+from base.models import Topic, MultipleChoiceQuestion, TracingQuestion, Language, CodeQuestion, CodeTestCase, FillInTheBlankQuestion
+from base.utils import get_all_courses, extract_code_question_zip, extract_code_question_yaml
+
 
 # Question type configurations
 QUESTION_TYPE_CONFIG = {
@@ -39,15 +38,22 @@ QUESTION_TYPE_CONFIG = {
         "fields": [
             "title", "prompt", "starter_code", "language", "explanation", "question_type"
         ],
-    }
+    },
+    "fill_in_the_blank": {
+        "model": FillInTheBlankQuestion,
+        "form": FillInTheBlankQuestionForm,
+        "table_id": "fill-in-the-blank-table",
+        "title": "Fill-in-the-Blank Questions",
+        "fields": ["prompt", "expected_answer", "explanation", "language", "case_sensitive"],
+    },
 }
-
 
 
 @allowed_roles(["teacher"])
 @login_required(login_url="login")
 def question_bank_view(request, question_type):
     config = QUESTION_TYPE_CONFIG.get(question_type)
+    print(f"Question type: {question_type}")
     if not config:
         return HttpResponseServerError("Invalid question type.")
 

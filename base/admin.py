@@ -3,7 +3,8 @@ from .models import (
     Unit, Topic, Quiz, Answer, Profile, Course, Activity,
     QuizTemplate, Lesson, MultipleChoiceQuestion, TracingQuestion,
     DmojExercise, ActivityCompletion, Language, CourseUnit, CourseTopic,
-    CodeQuestion, CodeTestCase, CodeSubmission, CourseWeighting, StudentCourseEnrollment
+    CodeQuestion, CodeTestCase, CodeSubmission, CourseWeighting, StudentCourseEnrollment,
+    FillInTheBlankQuestion
 )
 
 # --- Customized Admin Classes ---
@@ -88,6 +89,12 @@ class DmojExerciseAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'problem_code', 'points')
     search_fields = ('title', 'problem_code')
     list_filter = ('points',)
+
+
+@admin.register(FillInTheBlankQuestion)
+class FillInTheBlankQuestionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'topic', 'prompt', 'language')
+    search_fields = ('topic__title', 'prompt', 'language')
 
 
 @admin.register(Language)

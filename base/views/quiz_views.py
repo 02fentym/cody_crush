@@ -9,9 +9,10 @@ from base.decorators import allowed_roles
 from base.models import (
     CourseTopic, Activity, Quiz, QuizTemplate, QuizQuestion,
     MultipleChoiceQuestion, TracingQuestion,
-    Answer, ActivityCompletion, Course
+    Answer, ActivityCompletion, FillInTheBlankQuestion
 )
 
+from base.constants import DEFAULT_QUIZ_QUESTION_COUNT, QUIZ_QUESTION_COUNT_OPTIONS
 from base.utils import get_all_courses, update_student_progress
 from django.db import transaction
 
@@ -23,7 +24,7 @@ def get_quiz_form(request, course_topic_id):
     course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
     course_id = course_topic.course.id
 
-    context = {"ct": course_topic, "course_id": course_id}
+    context = {"ct": course_topic, "course_id": course_id, "question_count": DEFAULT_QUIZ_QUESTION_COUNT, "question_counts": QUIZ_QUESTION_COUNT_OPTIONS,}
     return render(request, "base/components/quiz_components/quiz_form.html", context)
 
 
@@ -40,7 +41,9 @@ def edit_quiz_form(request, quiz_id):
         "quiz_template": quiz_template,
         "ct": course_topic,
         "course_id": course_topic.course.id,
-        "activity": activity
+        "activity": activity,
+        "question_count": quiz_template.question_count,
+        "question_counts": QUIZ_QUESTION_COUNT_OPTIONS
     }
     return render(request, "base/components/quiz_components/quiz_form.html", context)
 
@@ -110,6 +113,24 @@ def update_quiz_form(request, quiz_id):
     return HttpResponse("<div class='text-error'>Failed to update quiz</div>")
 
 
+# Helper function for take_quiz(): returns a list of questions that have the input fields within the prompt string
+def get_rendered_questions(quiz_questions, question_type):
+    rendered = []
+
+    for qq in quiz_questions:
+        q = qq.question
+
+        if question_type == "fill_in_the_blank":
+            input_html = f"<input type='text' name='q{q.id}' class='input input-bordered inline w-auto' required>"
+            q.rendered_prompt = q.prompt.replace("[blank]", input_html)
+        else:
+            q.rendered_prompt = q.prompt  # fallback for other question types
+
+        rendered.append(q)
+
+    return rendered
+
+
 
 @allowed_roles(["student"])
 @login_required(login_url="login")
@@ -134,9 +155,11 @@ def start_quiz(request, course_id, activity_id):
         model = MultipleChoiceQuestion
     elif template.question_type == "tracing":
         model = TracingQuestion
+    elif template.question_type == "fill_in_the_blank":
+        model = FillInTheBlankQuestion
     else:
         messages.error(request, "Unsupported question type.")
-        return redirect("topic", course_id, course_topic.topic.unit.id, course_topic.id)
+        return redirect("course", course_id)
 
     # Get content type for the selected question model
     content_type = ContentType.objects.get_for_model(model)
@@ -206,13 +229,19 @@ def take_quiz(request, quiz_id, activity_id):
                         student_output = normalize_output(user_input)
                         correct_output = normalize_output(question.expected_output)
                         is_correct = student_output == correct_output
+                    elif question_type == "fill_in_the_blank":
+                        correct = question.expected_answer
+                        if question.case_sensitive:
+                            is_correct = user_input == correct
+                        else:
+                            is_correct = user_input.strip().lower() == correct.strip().lower()
 
                     Answer.objects.create(
                         quiz=quiz,
                         quiz_question=qq,
                         activity_completion=ac,
                         selected_choice=user_input if question_type == "multiple_choice" else None,
-                        text_answer=user_input if question_type == "tracing" else None,
+                        text_answer=user_input if question_type in ["tracing", "fill_in_the_blank"] else None,
                         is_correct=is_correct
                     )
 
@@ -235,9 +264,11 @@ def take_quiz(request, quiz_id, activity_id):
             )
 
         return redirect("quiz-results", ac.id)
+    
+    rendered_questions = get_rendered_questions(quiz_questions, question_type)
 
     # GET request → show the quiz
-    context = {"quiz": quiz, "questions": [qq.question for qq in quiz_questions], "ct": course_topic, "courses": courses}
+    context = {"quiz": quiz, "questions": rendered_questions, "ct": course_topic, "courses": courses}
     return render(request, "base/main/quiz.html", context)
 
 
@@ -267,6 +298,15 @@ def quiz_results(request, ac_id):
 
     is_first_attempt = current_quiz is None
     can_retake = activity.allow_resubmission
+
+    # Replaces [blank] with "______________" for fill in the blank questions
+    for answer in answers:
+        question = answer.quiz_question.question
+        if hasattr(question, "prompt") and "[blank]" in question.prompt:
+            answer.formatted_prompt = question.prompt.replace("[blank]", "______________")
+        else:
+            answer.formatted_prompt = getattr(question, "prompt", "")
+
 
     context = {
         "activity_completion": ac,
