@@ -6,10 +6,11 @@ DEFAULT_COURSE_WEIGHTINGS = {
     "dmojexercise": 1,
 }
 
-WEIGHTING_DISPLAY_NAMES = {
+ACTIVITY_TYPE_DISPLAY = {
         "lesson": "Lesson",
         "dmojexercise": "DMOJ Exercise",
         "codequestion": "Code Question",
         "quiztemplate_multiple_choice": "Multiple Choice",
         "quiztemplate_tracing": "Tracing",
+        "quiztemplate": "Quiz Template"
     }

@@ -9,6 +9,7 @@ from base.models import Course, CourseUnit, CourseTopic, Activity, ActivityCompl
 from base.forms import EnrollmentPasswordForm
 from base.decorators import allowed_roles
 from base.utils import get_all_courses
+from base.constants import ACTIVITY_TYPE_DISPLAY
 
 
 @login_required(login_url="login")
@@ -104,15 +105,15 @@ def enrol_in_course(request):
             return HttpResponse("<div class='text-error'>Invalid course password.</div>")
     return HttpResponse("<div class='text-error'>Submission failed.</div>")
 
+
 @login_required
 @allowed_roles(["teacher"])
 def reorder_modal(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     course_units = CourseUnit.objects.filter(course=course).select_related("unit").order_by("order")
-    return render(request, "base/components/course_components/reorder_modal.html", {
-        "course": course,
-        "course_units": course_units,
-    })
+    context = {"course": course, "course_units": course_units, "activity_types": ACTIVITY_TYPE_DISPLAY}
+
+    return render(request, "base/components/course_components/reorder_modal.html", context)
 
 
 @login_required

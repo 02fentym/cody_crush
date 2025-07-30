@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils import timezone
-from base.constants import WEIGHTING_DISPLAY_NAMES
+from base.constants import ACTIVITY_TYPE_DISPLAY
 
 
 class Profile(models.Model):
@@ -371,4 +371,4 @@ class CourseWeighting(models.Model):
     @property
     def display_name(self):
         # Use the display name if it exists otherwise use the activity type and title case it
-        return WEIGHTING_DISPLAY_NAMES.get(self.activity_type, self.activity_type.replace("_", " ").title())
+        return ACTIVITY_TYPE_DISPLAY.get(self.activity_type, self.activity_type.replace("_", " ").title())

@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from base.decorators import allowed_roles
 from base.models import Activity, ActivityCompletion, Course, User, StudentCourseEnrollment
 from django.utils.timezone import localtime
-from base.constants import WEIGHTING_DISPLAY_NAMES
+from base.constants import ACTIVITY_TYPE_DISPLAY
 from base.utils import get_all_courses
 
 
@@ -57,7 +57,7 @@ def student_progress(request, course_id, student_id=None):
         else:
             key = model
 
-        display_type = WEIGHTING_DISPLAY_NAMES.get(key, model.title())
+        display_type = ACTIVITY_TYPE_DISPLAY.get(key, model.title())
 
         activity_rows.append({
             "activity": activity,

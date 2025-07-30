@@ -1,12 +1,14 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from base.models import Course, CourseWeighting
-from base.constants import WEIGHTING_DISPLAY_NAMES
+from base.constants import ACTIVITY_TYPE_DISPLAY
 from django.contrib import messages
+from base.utils import get_all_courses
 
 @login_required
 def course_settings(request, course_id):
     course = get_object_or_404(Course, id=course_id, teacher=request.user)
+    courses = get_all_courses("teacher", request.user)
 
     if request.method == "POST":
         for key, value in request.POST.items():
@@ -23,7 +25,7 @@ def course_settings(request, course_id):
 
     weightings = CourseWeighting.objects.filter(course=course).order_by("activity_type")
 
-    context = {"course": course, "weightings": weightings}
+    context = {"course": course, "weightings": weightings, "courses": courses}
     return render(request, "base/main/course_settings.html", context)
 
 

@@ -4,40 +4,50 @@
     themes: all;
 }
 
-/* Define your custom theme */
 @plugin "daisyui/theme" {
   name: "my_dark_theme";
   color-scheme: dark;
 
-  --color-base-100: #1e1e2f;
-  --color-base-200: #2e2e3f;
-  --color-base-300: #3e3e4f;
-  --color-base-content: #f0f0f0;
+  /* Base Colors - Deep and Professional Dark (unchanged) */
+  --color-base-100: #121212; /* Very deep charcoal, almost black */
+  --color-base-200: #1e1e1e; /* Dark charcoal for cards and sections */
+  --color-base-300: #2a2a2a; /* Slightly lighter charcoal for borders/dividers */
+  --color-base-content: #e0e0e0; /* Soft white for primary text on dark backgrounds */
 
-  --color-primary: #ff0000;
+  /* Primary Color - A more vibrant blue for main actions */
+  --color-primary: #5c6bc0; /* Medium Slate Blue */
   --color-primary-content: #ffffff;
 
-  --color-secondary: #00bcd4;
+  /* Secondary Color - A more vibrant teal */
+  --color-secondary: #26a69a; /* Bright Teal */
   --color-secondary-content: #ffffff;
 
-  --color-accent: #4caf50;
+  /* Accent Color - A more vibrant purple for subtle highlights */
+  --color-accent: #ab47bc; /* Medium Purple */
   --color-accent-content: #ffffff;
 
-  --color-neutral: #333333;
-  --color-neutral-content: #ffffff;
+  /* Neutral Colors - For subtle backgrounds, borders, and secondary text (unchanged) */
+  --color-neutral: #424242; /* Medium-dark gray for subtle elements */
+  --color-neutral-content: #bdbdbd; /* Lighter gray for neutral text, good contrast */
 
-  --color-info: #2196f3;
+  /* Info Color - A brighter blue for informational messages */
+  --color-info: #42a5f5; /* Bright Sky Blue */
   --color-info-content: #ffffff;
 
-  --color-success: #4caf50;
+  /* Success Color - A brighter green for success messages */
+  --color-success: #66bb6a; /* Vibrant Green */
   --color-success-content: #ffffff;
 
-  --color-warning: #ff9800;
-  --color-warning-content: #000000;
+  /* Warning Color - A brighter amber for warnings, with dark text */
+  --color-warning: #ffca28; /* Sunny Amber */
+  --color-warning-content: #121212; /* Dark content for light warning background */
 
-  --color-error: #f44336;
+  /* Error Color - A brighter red for error messages */
+  --color-error: #ef5350; /* Vibrant Red */
   --color-error-content: #ffffff;
 }
+
+
 
 
 
