@@ -4,17 +4,52 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class run {
+
+    // Extracts the public class name from a Java file
+    private static String findPublicClassName(File javaFile) throws IOException {
+        List<String> lines = Files.readAllLines(javaFile.toPath());
+        for (String line : lines) {
+            line = line.trim();
+            if (line.startsWith("public class")) {
+                String[] tokens = line.split("\\s+");
+                if (tokens.length >= 3) {
+                    return tokens[2].replace("{", "").trim();
+                }
+            }
+        }
+        throw new IOException("No public class found.");
+    }
+
     public static void main(String[] args) {
         File testDir = new File("tests");
-        File studentFile = new File("student/Solution.java");
         File classDir = new File("classes");
+
         List<Map<String, Object>> results = new ArrayList<>();
+
+        File studentFile = Arrays.stream(new File("student").listFiles())
+            .filter(f -> f.getName().endsWith(".java"))
+            .findFirst()
+            .orElse(null);
+
+        if (studentFile == null) {
+            outputError("Missing Java file", results);
+            return;
+        }
 
         classDir.mkdirs();
         if (!studentFile.exists()) {
             outputError("Missing Solution.java", results);
             return;
         }
+
+        String className;
+        try {
+            className = findPublicClassName(studentFile);
+        } catch (IOException e) {
+            outputError("Failed to determine public class: " + e.getMessage(), results);
+            return;
+        }
+
 
         // Check for missing imports
         try {
@@ -82,7 +117,7 @@ public class run {
                 String input = Files.readString(inFile.toPath());
                 String expected = outFile.exists() ? Files.readString(outFile.toPath()).trim() : "";
 
-                ProcessBuilder runPb = new ProcessBuilder("java", "-cp", classDir.getPath(), packageName + "Solution");
+                ProcessBuilder runPb = new ProcessBuilder("java", "-cp", classDir.getPath(), packageName + className);
                 Process run = runPb.start();
 
                 OutputStream stdin = run.getOutputStream();
@@ -154,3 +189,4 @@ public class run {
         System.out.println(new com.google.gson.Gson().toJson(output));
     }
 }
+

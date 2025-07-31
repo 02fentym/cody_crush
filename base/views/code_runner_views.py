@@ -11,14 +11,21 @@ from base.decorators import allowed_roles
 from base.utils import get_all_courses, update_student_progress
 from base.models import CodeQuestion, ActivityCompletion, Activity, CourseUnit, CodeSubmission
 from django.db import transaction
+import re
 
 # Create test files and test cases
 def write_test_files(code, question, student_path, tests_path, language):
     os.makedirs(student_path, exist_ok=True)
     os.makedirs(tests_path, exist_ok=True)
 
-    # Choose file name based on language
-    filename = "Solution.java" if language == "java" else "solution.py"
+    # Detect class name from student Java code
+    class_name = "Solution"  # fallback
+    if language == "java":
+        match = re.search(r'public\s+class\s+(\w+)', code)
+        if match:
+            class_name = match.group(1)
+
+    filename = f"{class_name}.java" if language == "java" else "solution.py"
 
     with open(os.path.join(student_path, filename), "w") as f:
         f.write(code)
