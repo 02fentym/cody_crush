@@ -60,6 +60,14 @@ def delete_course_unit(request, course_unit_id):
     course = course_unit.course
     course_unit.delete()
 
+    # ✅ Re-sequence CourseUnit orders within this course
+    remaining_units = CourseUnit.objects.filter(course=course).order_by("order", "id")
+    for index, cu in enumerate(remaining_units, start=1):
+        if cu.order != index:
+            cu.order = index
+            cu.save(update_fields=["order"])
+
     # Refresh CourseUnit list
     course_units = CourseUnit.objects.filter(course=course).select_related("unit")
-    return render(request, "base/components/course_unit_components/course_unit_list.html", {"course_units": course_units})
+    context = {"course_units": course_units}
+    return render(request, "base/components/course_unit_components/course_unit_list.html", context)

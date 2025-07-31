@@ -61,9 +61,17 @@ def delete_course_topic(request, course_topic_id):
     course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
     unit = course_topic.unit
     course_id = course_topic.course.id
+    course = course_topic.course
 
     course_topic.delete()
 
-    course_topics = CourseTopic.objects.filter(unit=unit).select_related("topic")
+    # ✅ Re-sequence remaining topics
+    remaining = CourseTopic.objects.filter(course=course, unit=unit).order_by("order", "id")
+    for index, ct in enumerate(remaining, start=1):
+        if ct.order != index:
+            ct.order = index
+            ct.save(update_fields=["order"])
+
+    course_topics = CourseTopic.objects.filter(unit=unit, course=course).select_related("topic")
     context = {"course_topics": course_topics, "unit": unit, "course_id": course_id }
     return render(request, "base/components/course_topic_components/course_topic_list.html", context)
