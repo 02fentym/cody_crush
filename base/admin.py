@@ -61,14 +61,14 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(CourseTopic)
 class CourseTopicAdmin(admin.ModelAdmin):
-    list_display = ("id", "unit", "topic", "order",)
-    list_filter = ("unit", "topic",)
-    search_fields = ("unit__title", "topic__title",)
+    list_display = ("order", "topic", "unit", "course",)
+    list_filter = ("course", "unit", "topic")
+    search_fields = ("course__title", "unit__title", "topic__title")
 
 
 @admin.register(CourseUnit)
 class CourseUnitAdmin(admin.ModelAdmin):
-    list_display = ("course", "unit", "order")
+    list_display = ("order", "unit", "course",)
     list_filter = ("course",)
     search_fields = ("course__title", "unit__title")
 
