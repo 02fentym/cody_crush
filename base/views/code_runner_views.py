@@ -30,7 +30,9 @@ def write_test_files(code, question, student_path, tests_path):
 
 
 # Run tests in Docker container and capture output
-def run_docker(student_path, tests_path):
+def run_docker(student_path, tests_path, language):
+    image = f"code-runner-{language}"
+
     docker_cmd = [
         "docker", "run", "--rm",
         "--memory=256m",
@@ -38,7 +40,7 @@ def run_docker(student_path, tests_path):
         "--pids-limit=64",
         "-v", os.path.abspath(student_path) + ":/app/student",
         "-v", os.path.abspath(tests_path) + ":/app/tests",
-        "code-runner-python"
+        image
     ]
 
     result = subprocess.run(
@@ -74,18 +76,20 @@ def submit_code(request):
     write_test_files(code, question, student_path, tests_path)
 
     try:
-        output = run_docker(student_path, tests_path)
+        # Run tests in Docker container
+        activity_id = request.POST.get("activity_id")
+        activity = get_object_or_404(Activity, id=activity_id)
+        language = activity.course_topic.course.language.name.lower()
+
+        output = run_docker(student_path, tests_path, language)
         data = json.loads(output)
 
         results = data.get("results", [])
         summary = data.get("summary", {})
         passed = summary.get("all_passed", False)
 
-        activity_id = request.POST.get("activity_id")
-        activity = get_object_or_404(Activity, id=activity_id)
 
         ac = None
-
         if activity and request.user.is_authenticated:
             # 🔒 Check for existing completion if resubmissions not allowed
             if not activity.allow_resubmission:
@@ -107,7 +111,6 @@ def submit_code(request):
             # Calculate score
             total_tests = len(results)
             passed_tests = sum(1 for r in results if r.get("passed"))
-            score = activity.weight * (passed_tests / total_tests) if total_tests > 0 else 0
             score = activity.weight * (passed_tests / total_tests) if total_tests > 0 else 0
 
             with transaction.atomic():

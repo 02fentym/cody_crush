@@ -36,10 +36,8 @@ class ActivityCompletionAdmin(admin.ModelAdmin):
 
 @admin.register(CodeQuestion)
 class CodeQuestionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'language')
-    search_fields = ('title', 'language')
-    list_filter = ('language',)
-
+    list_display = ('id', 'title',)
+    search_fields = ('title',)
 
 
 @admin.register(CodeSubmission) # Register the CodeSubmission model
@@ -47,13 +45,11 @@ class CodeSubmissionAdmin(admin.ModelAdmin):
     list_display = ('id', 'activity_completion', 'created')
 
 
-
-
 @admin.register(CodeTestCase)
 class CodeTestCaseAdmin(admin.ModelAdmin):
     list_display = ('id', 'question', 'input_data', 'expected_output', 'test_style')
     search_fields = ('question__title', 'input_data', 'expected_output')
-    list_filter = ('question__language',)
+    list_filter = ('question',)
 
 
 @admin.register(Course)
@@ -136,6 +132,7 @@ class QuizAdmin(admin.ModelAdmin):
     list_display = ('id', 'course_topic', 'created')
     search_fields = ('course_topic__title',)
 
+
 @admin.register(QuizTemplate)
 class QuizTemplateAdmin(admin.ModelAdmin):
     list_display = ('id', 'course_topic', 'question_type', 'question_count')
@@ -143,12 +140,12 @@ class QuizTemplateAdmin(admin.ModelAdmin):
     list_filter = ('question_type',)
 
 
-
 @admin.register(StudentCourseEnrollment)
 class StudentCourseEnrollmentAdmin(admin.ModelAdmin):
     list_display = ('student', 'course', 'enrollment_date')
     search_fields = ('student__username', 'course__title')
     list_filter = ('enrollment_date',)
+
 
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):

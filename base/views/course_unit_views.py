@@ -31,17 +31,19 @@ def submit_course_unit_form(request):
         if form.is_valid():
             unit = form.cleaned_data["unit"]
 
-            # Check if it already exists
-            course_unit, created = CourseUnit.objects.get_or_create(course=course, unit=unit)
-
-            if created:
-                # Assign next available order
+            if not CourseUnit.objects.filter(course=course, unit=unit).exists():
                 max_order = CourseUnit.objects.filter(course=course).aggregate(Max("order"))["order__max"] or 0
-                course_unit.order = max_order + 1
-                course_unit.save()
+                new_order = max_order + 1
+                CourseUnit.objects.create(course=course, unit=unit, order=new_order)
 
+        # Only one query and return
         course_units = CourseUnit.objects.filter(course=course).select_related("unit")
-        return render(request, "base/components/course_unit_components/course_unit_list.html", {"course_units": course_units})
+        return render(
+            request,
+            "base/components/course_unit_components/course_unit_list.html",
+            {"course_units": course_units}
+        )
+
 
 
 

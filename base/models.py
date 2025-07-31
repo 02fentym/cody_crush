@@ -325,7 +325,6 @@ class CodeQuestion(models.Model):
     title = models.CharField(max_length=200)
     prompt = models.TextField()
     starter_code = models.TextField(blank=True, help_text="Code pre-filled for the student")
-    language = models.ForeignKey(Language, on_delete=models.CASCADE)
     explanation = models.TextField(blank=True)
 
     question_type = models.CharField(
