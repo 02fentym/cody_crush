@@ -55,6 +55,7 @@ def submit_code_question_form(request, course_topic_id):
 def take_code_question(request, activity_id):
     activity = get_object_or_404(Activity, id=activity_id)
     course_topic = activity.course_topic
+    language = course_topic.course.language.name.lower()
     question = activity.content_object  # This is the CodeQuestion
     user = request.user
     courses = get_all_courses("student", user)
@@ -84,5 +85,12 @@ def take_code_question(request, activity_id):
             return redirect("code-question-results", existing_completion.id)
 
     # Either first attempt or resubmission is allowed
-    context = {"question": question, "activity": activity, "starter_code": question.starter_code, "course_id": course_id, "courses": courses}
+    context = {
+        "question": question,
+        "activity": activity,
+        "starter_code": question.starter_code,
+        "course_id": course_id,
+        "courses": courses,
+        "language": language
+    }
     return render(request, "base/main/take_code_question.html", context)

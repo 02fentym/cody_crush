@@ -24,9 +24,13 @@ public class run {
                 imports.add("import java.util.*;");
             }
             // Add more checks for other packages if needed, e.g., java.io
-            if (!imports.isEmpty() && !code.contains("import java.util")) {
-                Files.writeString(studentFile.toPath(), String.join("\n", imports) + "\n" + code);
+            boolean hasImports = Arrays.stream(code.split("\n"))
+                .anyMatch(line -> line.trim().startsWith("import"));
+
+            if (!imports.isEmpty() && !hasImports) {
+                Files.writeString(studentFile.toPath(), String.join("\n", imports) + "\n\n" + code);
             }
+
         } catch (IOException e) {
             outputError("Failed to process Solution.java: " + e.getMessage(), results);
             return;
