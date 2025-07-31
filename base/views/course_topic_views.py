@@ -36,11 +36,17 @@ def submit_course_topic_form(request):
 
     unit = get_object_or_404(Unit, id=unit_id)
     course = get_object_or_404(Course, id=course_id)
-    print(f"Unit: {unit}, Course: {course}")
 
     if form.is_valid():
         topic = form.cleaned_data["topic"]
-        CourseTopic.objects.get_or_create(course=course, unit=unit, topic=topic)
+        CourseTopic.objects.get_or_create(
+            course=course,
+            unit=unit,
+            topic=topic,
+            defaults={
+                "order": CourseTopic.objects.filter(course=course, unit=unit).count() + 1
+            }
+        )
 
     course_topics = CourseTopic.objects.filter(unit=unit, course=course).select_related("topic")
     context = {"course_topics": course_topics, "unit": unit, "course_id": course.id}
