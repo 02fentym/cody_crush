@@ -7,6 +7,7 @@
 <div class="flex flex-col">
 
 	<!-- Language selector -->
+	{% if language and all_languages %}
 	<div class="flex items-center gap-2 mb-4">
 		<label class="font-medium">Language:</label>
 		<select id="language-select" class="select">
@@ -16,8 +17,8 @@
 			</option>
 			{% endfor %}
 		</select>
-
 	</div>
+	{% endif %}
 
 	<!-- Table -->
 	<div id="{{ table_id }}-wrapper">

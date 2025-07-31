@@ -36,7 +36,7 @@ QUESTION_TYPE_CONFIG = {
         "table_id": "code-table",
         "title": "Programming Questions",
         "fields": [
-            "title", "prompt", "starter_code", "language", "explanation", "question_type"
+            "title", "prompt", "starter_code", "explanation", "question_type"
         ],
     },
     "fill_in_the_blank": {
@@ -53,7 +53,6 @@ QUESTION_TYPE_CONFIG = {
 @login_required(login_url="login")
 def question_bank_view(request, question_type):
     config = QUESTION_TYPE_CONFIG.get(question_type)
-    print(f"Question type: {question_type}")
     if not config:
         return HttpResponseServerError("Invalid question type.")
 
@@ -64,12 +63,7 @@ def question_bank_view(request, question_type):
     ordering = sort_by if sort_by in allowed_sorts else "created"
     ordering = ordering if order == "asc" else f"-{ordering}"
 
-    # ✅ Use 'language_name' throughout
-    language_name = request.GET.get("language", "python")
-    queryset = model.objects.select_related("topic__unit", "language")
-
-    if "language" in [f.name for f in model._meta.get_fields()]:
-        queryset = queryset.filter(language__name__iexact=language_name)
+    queryset = model.objects.select_related("topic__unit")
 
     context = {
         "courses": get_all_courses(request.user.profile.role, request.user),
@@ -79,10 +73,18 @@ def question_bank_view(request, question_type):
         "sort_by": sort_by,
         "order": order,
         "question_type": question_type,
-        "language": language_name,
-        "all_languages": Language.objects.order_by("name"),
     }
+
+    # Include language filter only for types that support it
+    if "language" in config["fields"]:
+        language_name = request.GET.get("language", "python")
+        queryset = queryset.filter(language__name__iexact=language_name)
+        context["questions"] = queryset.order_by(ordering)
+        context["language"] = language_name
+        context["all_languages"] = Language.objects.order_by("name")
+
     return render(request, "base/main/question_bank_base.html", context)
+
 
 
 
