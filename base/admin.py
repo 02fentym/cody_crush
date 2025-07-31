@@ -24,7 +24,10 @@ class ActivityAdmin(admin.ModelAdmin):
 
 @admin.register(ActivityCompletion)
 class ActivityCompletionAdmin(admin.ModelAdmin):
-    list_display = ('id','student', 'activity', 'activity_type', 'activity__weight', 'score','completed', 'date_completed')
+    list_display = (
+        'id', 'student', 'activity', 'course', 'activity_type', 'activity__weight',
+        'score', 'completed', 'date_completed'
+    )
     list_filter = ('completed', 'date_completed')
     search_fields = ('student__username', 'activity__id')
 
@@ -32,6 +35,15 @@ class ActivityCompletionAdmin(admin.ModelAdmin):
         return obj.activity.content_type.model
 
     activity_type.short_description = "Type"
+
+    def course(self, obj):
+        try:
+            return obj.activity.course_topic.course
+        except AttributeError:
+            return None
+
+    course.short_description = "Course"
+
 
 
 @admin.register(CodeQuestion)

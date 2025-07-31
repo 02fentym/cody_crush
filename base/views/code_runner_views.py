@@ -13,11 +13,14 @@ from base.models import CodeQuestion, ActivityCompletion, Activity, CourseUnit, 
 from django.db import transaction
 
 # Create test files and test cases
-def write_test_files(code, question, student_path, tests_path):
+def write_test_files(code, question, student_path, tests_path, language):
     os.makedirs(student_path, exist_ok=True)
     os.makedirs(tests_path, exist_ok=True)
 
-    with open(os.path.join(student_path, "solution.py"), "w") as f:
+    # Choose file name based on language
+    filename = "Solution.java" if language == "java" else "solution.py"
+
+    with open(os.path.join(student_path, filename), "w") as f:
         f.write(code)
 
     for i, case in enumerate(
@@ -27,6 +30,7 @@ def write_test_files(code, question, student_path, tests_path):
             f_in.write(case.input_data)
         with open(os.path.join(tests_path, f"{i}.out"), "w") as f_out:
             f_out.write(case.expected_output)
+
 
 
 # Run tests in Docker container and capture output
@@ -73,15 +77,17 @@ def submit_code(request):
     student_path = os.path.join(base_path, "student")
     tests_path = os.path.join(base_path, "tests")
 
-    write_test_files(code, question, student_path, tests_path)
+    # Run tests in Docker container
+    activity_id = request.POST.get("activity_id")
+    activity = get_object_or_404(Activity, id=activity_id)
+    language = activity.course_topic.course.language.name.lower()
+
+    write_test_files(code, question, student_path, tests_path, language)
 
     try:
-        # Run tests in Docker container
-        activity_id = request.POST.get("activity_id")
-        activity = get_object_or_404(Activity, id=activity_id)
-        language = activity.course_topic.course.language.name.lower()
-
         output = run_docker(student_path, tests_path, language)
+        print("[DEBUG Docker Output]", output)
+
         data = json.loads(output)
 
         results = data.get("results", [])
