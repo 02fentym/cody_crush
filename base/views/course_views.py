@@ -28,7 +28,7 @@ def course(request, course_id):
 
     # Attach topics to each CourseUnit's unit
     for cu in course_units:
-        cu.unit.course_topics = CourseTopic.objects.filter(unit=cu.unit).select_related("topic")
+        cu.unit.course_topics = CourseTopic.objects.filter(unit=cu.unit, course=course).select_related("topic")
 
     password_form = EnrollmentPasswordForm()
 

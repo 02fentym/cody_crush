@@ -2,6 +2,7 @@
   hx-swap="outerHTML" hx-on="htmx:afterRequest: document.getElementById('modal-wrapper').checked = false">
   {% csrf_token %}
   <input type="hidden" name="unit_id" value="{{ unit.id }}">
+  <input type="hidden" name="course_id" value="{{ course.id }}">
 
   <div class="form-control mb-4">
     {{ form.topic }}
