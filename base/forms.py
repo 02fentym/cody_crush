@@ -267,6 +267,11 @@ class CodeTestCaseForm(forms.ModelForm):
             }),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["input_data"].required = False
+
+
 
 class CourseWeightingForm(forms.ModelForm):
     class Meta:

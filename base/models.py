@@ -341,7 +341,7 @@ class CodeQuestion(models.Model):
 
 class CodeTestCase(models.Model):
     question = models.ForeignKey(CodeQuestion, on_delete=models.CASCADE, related_name="test_cases")
-    input_data = models.TextField(help_text="Raw stdin or Python test script (e.g., print(func(...)))")
+    input_data = models.TextField(blank=True, default="")
     expected_output = models.TextField()
     is_hidden = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
