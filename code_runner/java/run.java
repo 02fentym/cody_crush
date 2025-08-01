@@ -3,12 +3,16 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
 
-public class run {
+public class Run {
+
+    private static final Path TEST_DIR = Paths.get("tests");
+    private static final Path CLASS_DIR = Paths.get("classes");
+    private static final Path STUDENT_DIR = Paths.get("student");
+    private static final int EXECUTION_TIMEOUT_SECONDS = 2;
 
     // Extracts the public class name from a Java file
-    private static String findPublicClassName(File javaFile) throws IOException {
-        List<String> lines = Files.readAllLines(javaFile.toPath());
-        for (String line : lines) {
+    private static String findPublicClassName(Path javaFile) throws IOException {
+        for (String line : Files.readAllLines(javaFile)) {
             line = line.trim();
             if (line.startsWith("public class")) {
                 String[] tokens = line.split("\\s+");
@@ -17,151 +21,97 @@ public class run {
                 }
             }
         }
-        throw new IOException("No public class found.");
+        throw new IOException("No public class found in " + javaFile.getFileName());
     }
 
-    public static void main(String[] args) {
-        File testDir = new File("tests");
-        File classDir = new File("classes");
-
-        List<Map<String, Object>> results = new ArrayList<>();
-
-        File studentFile = Arrays.stream(new File("student").listFiles())
-            .filter(f -> f.getName().endsWith(".java"))
-            .findFirst()
-            .orElse(null);
-
-        if (studentFile == null) {
-            outputError("Missing Java file", results);
-            return;
-        }
-
-        classDir.mkdirs();
-        if (!studentFile.exists()) {
-            outputError("Missing Solution.java", results);
-            return;
-        }
-
-        String className;
-        try {
-            className = findPublicClassName(studentFile);
-        } catch (IOException e) {
-            outputError("Failed to determine public class: " + e.getMessage(), results);
-            return;
-        }
-
-
-        // Check for missing imports
-        try {
-            String code = Files.readString(studentFile.toPath());
-            List<String> imports = new ArrayList<>();
-            if (code.contains("Scanner") || code.contains("ArrayList")) {
-                imports.add("import java.util.*;");
-            }
-            // Add more checks for other packages if needed, e.g., java.io
-            boolean hasImports = Arrays.stream(code.split("\n"))
-                .anyMatch(line -> line.trim().startsWith("import"));
-
-            if (!imports.isEmpty() && !hasImports) {
-                Files.writeString(studentFile.toPath(), String.join("\n", imports) + "\n\n" + code);
-            }
-
-        } catch (IOException e) {
-            outputError("Failed to process Solution.java: " + e.getMessage(), results);
-            return;
-        }
-
-        // Compile Solution.java
-        try {
-            ProcessBuilder compilePb = new ProcessBuilder("javac", "-d", classDir.getPath(), studentFile.getPath());
-            compilePb.redirectErrorStream(true);
-            Process compile = compilePb.start();
-            String compileOutput = new String(compile.getInputStream().readAllBytes()).trim();
-            if (compile.waitFor() != 0) {
-                outputError("Compilation failed: " + compileOutput.replace("\"", "\\\""), results);
-                return;
-            }
-        } catch (Exception e) {
-            outputError("Compilation error: " + e.getMessage().replace("\"", "\\\""), results);
-            return;
-        }
-
-        // Detect package
-        String packageName = "";
-        try (BufferedReader br = new BufferedReader(new FileReader(studentFile))) {
+    // Detects package declaration
+    private static String findPackageName(Path javaFile) throws IOException {
+        try (BufferedReader br = Files.newBufferedReader(javaFile)) {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
                 if (line.startsWith("package ")) {
-                    packageName = line.replace("package ", "").replace(";", "").trim() + ".";
-                    break;
+                    return line.replace("package ", "").replace(";", "").trim() + ".";
                 }
             }
-        } catch (IOException e) {
-            // No package
         }
-
-        File[] inputs = testDir.listFiles((dir, name) -> name.endsWith(".in"));
-        if (inputs == null || inputs.length == 0) {
-            outputError("No test inputs", results);
-            return;
-        }
-
-        Arrays.sort(inputs, Comparator.comparing(File::getName));
-        int passed = 0;
-
-        for (File inFile : inputs) {
-            String testName = inFile.getName().replace(".in", "");
-            File outFile = new File(testDir, testName + ".out");
-            try {
-                String input = Files.readString(inFile.toPath());
-                String expected = outFile.exists() ? Files.readString(outFile.toPath()).trim() : "";
-
-                ProcessBuilder runPb = new ProcessBuilder("java", "-cp", classDir.getPath(), packageName + className);
-                Process run = runPb.start();
-
-                OutputStream stdin = run.getOutputStream();
-                stdin.write(input.getBytes());
-                stdin.flush();
-                stdin.close();
-
-                String actual = new String(run.getInputStream().readAllBytes()).trim();
-                String error = new String(run.getErrorStream().readAllBytes()).trim();
-                boolean pass = actual.equals(expected);
-                if (pass) passed++;
-
-                Map<String, Object> result = new HashMap<>();
-                result.put("test", testName);
-                result.put("passed", pass);
-                result.put("expected", expected);
-                result.put("actual", actual);
-                result.put("error", error);
-                results.add(result);
-
-                if (!run.waitFor(2, TimeUnit.SECONDS)) {
-                    run.destroy();
-                    throw new Exception("Timeout");
-                }
-            } catch (Exception e) {
-                Map<String, Object> result = new HashMap<>();
-                result.put("test", testName);
-                result.put("passed", false);
-                String expected;
-                try {
-                    expected = outFile.exists() ? Files.readString(outFile.toPath()).trim() : "";
-                } catch (IOException ex) {
-                    expected = "";
-                }
-                result.put("expected", expected);
-                result.put("actual", "");
-                result.put("error", e.getMessage());
-                results.add(result);
-            }
-        }
-
-        outputResults(results, passed);
+        return "";
     }
 
+    // Compiles the Java file
+    private static String compileJavaFile(Path javaFile, Path classDir) throws IOException, InterruptedException {
+        classDir.toFile().mkdirs();
+        ProcessBuilder pb = new ProcessBuilder("javac", "-d", classDir.toString(), javaFile.toString());
+        pb.redirectErrorStream(true);
+        Process process = pb.start();
+        String output = new String(process.getInputStream().readAllBytes()).trim();
+        if (process.waitFor(10, TimeUnit.SECONDS) && process.exitValue() != 0) {
+            return output.isEmpty() ? "Compilation failed" : output;
+        }
+        return null; // Success
+    }
+
+    // Runs a test case and returns the result
+    private static Map<String, Object> runTestCase(Path inFile, Path outFile, String className, String packageName, Path classDir) {
+        Map<String, Object> result = new HashMap<>();
+        String testName = inFile.getFileName().toString().replace(".in", "");
+        result.put("test", testName);
+
+        try {
+            String input = Files.readString(inFile).trim();
+            String expected = outFile.toFile().exists() ? Files.readString(outFile).trim() : "";
+
+            ProcessBuilder pb = new ProcessBuilder("java", "-cp", classDir.toString(), packageName + className);
+            pb.redirectErrorStream(false); // Separate error stream for clarity
+            Process process = pb.start();
+
+            // Write input to process
+            try (OutputStream stdin = process.getOutputStream()) {
+                stdin.write(input.getBytes());
+                stdin.flush();
+            }
+
+            // Read output and error
+            String actual = new String(process.getInputStream().readAllBytes()).trim();
+            String error = new String(process.getErrorStream().readAllBytes()).trim();
+
+            // Check timeout
+            if (!process.waitFor(EXECUTION_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                process.destroy();
+                throw new TimeoutException("Execution timed out");
+            }
+
+            boolean passed = actual.equals(expected);
+            result.put("passed", passed);
+            result.put("expected", expected);
+            result.put("actual", actual);
+            result.put("error", error);
+
+        } catch (IOException | InterruptedException | TimeoutException e) {
+            result.put("passed", false);
+            result.put("expected", outFile.toFile().exists() ? Files.readString(outFile).trim() : "");
+            result.put("actual", "");
+            result.put("error", e.getMessage());
+        }
+
+        return result;
+    }
+
+    // Outputs results as JSON
+    private static void outputResults(List<Map<String, Object>> results, int passed) {
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("passed", passed);
+        summary.put("total", results.size());
+        summary.put("all_passed", passed == results.size());
+
+        Map<String, Object> output = new HashMap<>();
+        output.put("results", results);
+        output.put("summary", summary);
+
+        System.out.println(new com.google.gson.Gson().toJson(output));
+    }
+
+    // Outputs error as JSON
     private static void outputError(String error, List<Map<String, Object>> results) {
         Map<String, Object> summary = new HashMap<>();
         summary.put("passed", 0);
@@ -176,17 +126,66 @@ public class run {
         System.out.println(new com.google.gson.Gson().toJson(output));
     }
 
-    private static void outputResults(List<Map<String, Object>> results, int passed) {
-        Map<String, Object> summary = new HashMap<>();
-        summary.put("passed", passed);
-        summary.put("total", results.size());
-        summary.put("all_passed", passed == results.size());
+    public static void main(String[] args) {
+        List<Map<String, Object>> results = new ArrayList<>();
 
-        Map<String, Object> output = new HashMap<>();
-        output.put("results", results);
-        output.put("summary", summary);
+        // Find student Java file
+        Path javaFile = Arrays.stream(STUDENT_DIR.toFile().listFiles((dir, name) -> name.endsWith(".java")))
+                .findFirst()
+                .map(File::toPath)
+                .orElse(null);
 
-        System.out.println(new com.google.gson.Gson().toJson(output));
+        if (javaFile == null) {
+            outputError("No Java file found in student directory", results);
+            return;
+        }
+
+        // Extract class and package names
+        String className;
+        String packageName;
+        try {
+            className = findPublicClassName(javaFile);
+            packageName = findPackageName(javaFile);
+        } catch (IOException e) {
+            outputError("Failed to parse Java file: " + e.getMessage(), results);
+            return;
+        }
+
+        // Compile the Java file
+        try {
+            String compileError = compileJavaFile(javaFile, CLASS_DIR);
+            if (compileError != null) {
+                outputError("Compilation failed: " + compileError.replace("\"", "\\\""), results);
+                return;
+            }
+        } catch (IOException | InterruptedException e) {
+            outputError("Compilation error: " + e.getMessage().replace("\"", "\\\""), results);
+            return;
+        }
+
+        // Security: Apply SecurityManager or Docker restrictions here
+        // Example: System.setSecurityManager(new SecurityManager());
+        // Docker: Limit CPU, memory, and network access
+
+        // Run test cases
+        File[] inputFiles = TEST_DIR.toFile().listFiles((dir, name) -> name.endsWith(".in"));
+        if (inputFiles == null || inputFiles.length == 0) {
+            outputError("No test input files found", results);
+            return;
+        }
+
+        Arrays.sort(inputFiles, Comparator.comparing(File::getName));
+        int passed = 0;
+
+        for (File inFile : inputFiles) {
+            Path outFile = TEST_DIR.resolve(inFile.getName().replace(".in", ".out"));
+            Map<String, Object> result = runTestCase(inFile.toPath(), outFile, className, packageName, CLASS_DIR);
+            if ((boolean) result.get("passed")) {
+                passed++;
+            }
+            results.add(result);
+        }
+
+        outputResults(results, passed);
     }
 }
-
