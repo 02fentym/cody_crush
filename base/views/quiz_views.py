@@ -333,27 +333,39 @@ def quiz_results(request, ac_id):
 def forfeit_quiz(request, quiz_id, activity_id):
     print(f"Received forfeit request for quiz {quiz_id} and activity {activity_id}")
     if request.method == "POST":
-        quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
-        activity = get_object_or_404(Activity, id=activity_id)
-        course_id = activity.course_topic.course.id
+        try:
+            quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
+            activity = get_object_or_404(Activity, id=activity_id)
 
-        if not ActivityCompletion.objects.filter(student=request.user, activity=activity, completed=True).exists():
-            previous_attempts = ActivityCompletion.objects.filter(student=request.user, activity=activity).count()
-            ac = ActivityCompletion.objects.create(
-                student=request.user,
-                activity=activity,
-                completed=True,
-                attempt_number=previous_attempts + 1,
-                date_completed=timezone.now(),
-                score=0
-            )
-            quiz.activity_completion = ac
-            quiz.grade = 0
-            quiz.save()
+            # Check if quiz is already completed
+            if not ActivityCompletion.objects.filter(student=request.user, activity=activity, completed=True).exists():
+                with transaction.atomic():
+                    previous_attempts = ActivityCompletion.objects.filter(student=request.user, activity=activity).count()
+                    ac = ActivityCompletion.objects.create(
+                        student=request.user,
+                        activity=activity,
+                        completed=True,
+                        attempt_number=previous_attempts + 1,
+                        date_completed=timezone.now(),
+                        score=0
+                    )
+                    quiz.activity_completion = ac
+                    quiz.grade = 0
+                    quiz.save()
 
-            messages.warning(request, "You left the quiz page. Your attempt was forfeited and scored 0.")
+                    # Update student progress
+                    update_student_progress(request.user, activity.course_topic.course)
+                    print(f"Created ActivityCompletion ID: {ac.id} for quiz {quiz_id}")
 
-        return redirect("course", course_id=course_id)
+                return JsonResponse({"ac_id": ac.id})
+            else:
+                # Return existing completion ID
+                ac = ActivityCompletion.objects.filter(student=request.user, activity=activity, completed=True).order_by("-date_completed").first()
+                print(f"Found existing ActivityCompletion ID: {ac.id} for quiz {quiz_id}")
+                return JsonResponse({"ac_id": ac.id})
+
+        except Exception as e:
+            print(f"Error in forfeit_quiz: {str(e)}")
+            return JsonResponse({"error": f"Failed to process forfeit: {str(e)}"}, status=500)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
-

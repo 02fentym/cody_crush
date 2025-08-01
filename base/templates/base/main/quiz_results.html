@@ -3,103 +3,130 @@
 {% block content %}
 <div class="flex flex-col" style="height: calc(100vh - 4rem);">
 
-	<!-- Fixed Top Summary -->
-	<div class="shrink-0 bg-base-200 z-10 sticky top-0 py-3 px-4">
+    <!-- Fixed Top Summary -->
+    <div class="shrink-0 bg-base-200 z-10 sticky top-0 py-3 px-4">
+        <!-- Flash Message Container -->
+        <div id="flash-message-container" class="mb-4"></div>
 
-		<!-- Back Button -->
-		<div class="btn btn-soft btn-sm mt-1 mb-3">
-			<a href="{% url 'course' course_id %}" class="back-button">← Back to Course</a>
-		</div>
+        <!-- Back Button -->
+        <div class="btn btn-soft btn-sm mt-1 mb-3">
+            <a href="{% url 'course' course_id %}" class="back-button">← Back to Course</a>
+        </div>
 
-		<!-- Header -->
-		<div class="flex justify-between gap-6 items-center flex-wrap">
+        <!-- Header -->
+        <div class="flex justify-between gap-6 items-center flex-wrap">
+            <!-- Left: Radial + Title -->
+            <div class="flex items-center gap-4">
+                {% if quiz %}
+                <div class="radial-progress text-secondary"
+                    style="--value: {{ quiz.grade|floatformat:0 }}; --size:4rem; --thickness:6px;">
+                    {{ quiz.grade|floatformat:0 }}%
+                </div>
+                {% endif %}
 
-			<!-- Left: Radial + Title -->
-			<div class="flex items-center gap-4">
-				{% if quiz %}
-				<div class="radial-progress text-secondary"
-					style="--value: {{ quiz.grade|floatformat:0 }}; --size:4rem; --thickness:6px;">
-					{{ quiz.grade|floatformat:0 }}%
-				</div>
-				{% endif %}
+                <div class="flex flex-col">
+                    <h2 class="text-3xl font-bold">{{ quiz_template.course_topic.topic.title }} Quiz</h2>
+                    {% if quiz %}
+                    <span class="text-base-content/70 text-sm">Correct: {{ correct }} / {{ total }}</span>
+                    {% endif %}
+                </div>
+            </div>
 
-				<div class="flex flex-col">
-					<h2 class="text-3xl font-bold">{{ quiz_template.course_topic.topic.title }} Quiz</h2>
-					{% if quiz %}
-					<span class="text-base-content/70 text-sm">Correct: {{ correct }} / {{ total }}</span>
-					{% endif %}
-				</div>
-			</div>
+            <!-- Right: Past Attempts + Retake/Start -->
+            <div class="flex items-center gap-2 ml-auto">
+                {% if all_quizzes|length > 1 %}
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="btn btn-sm btn-outline w-40">
+                        Past Attempts
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-64">
+                        {% for q in all_quizzes %}
+                        {% if q.activity_completion %}
+                        <li>
+                            <a href="{% url 'quiz-results' q.activity_completion.id %}" class="flex justify-between gap-2">
+                                <span>#{{ forloop.counter }}</span>
+                                <span class="text-xs text-base-content/60">{{ q.created|date:"Y-m-d H:i" }}</span>
+                                <span class="text-xs font-medium">
+                                    {% if q.grade != None %}
+                                        {{ q.grade|floatformat:0 }}%
+                                    {% else %}
+                                        Pending
+                                    {% endif %}
+                                </span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
 
-			<!-- Right: Past Attempts + Retake/Start -->
-			<div class="flex items-center gap-2 ml-auto">
+                <form method="POST" action="{% url 'start-quiz' course_id activity.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-accent btn-outline w-32">
+                        <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                            <path fill="currentColor" fill-rule="evenodd"
+                                d="M8 1.5a6.5 6.5 0 1 1-6.445 7.348a.75.75 0 1 1 1.487-.194A5.001 5.001 0 1 0 4.43 4.5h1.32a.75.75 0 0 1 0 1.5h-3A.75.75 0 0 1 2 5.25v-3a.75.75 0 0 1 1.5 0v1.06A6.48 6.48 0 0 1 8 1.5"
+                                clip-rule="evenodd" />
+                        </svg>
+                        {% if quiz %}Retake{% else %}Start Quiz{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 
-				{% if all_quizzes|length > 1 %}
-				<div class="dropdown dropdown-end">
-					<div tabindex="0" role="button" class="btn btn-sm btn-outline w-40">
-						Past Attempts
-						<svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-						</svg>
-					</div>
-					<ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-64">
-						{% for q in all_quizzes %}
-						{% if q.activity_completion %}
-						<li>
-							<a href="{% url 'quiz-results' q.activity_completion.id %}" class="flex justify-between gap-2">
-								<span>#{{ forloop.counter }}</span>
-								<span class="text-xs text-base-content/60">{{ q.created|date:"Y-m-d H:i" }}</span>
-								<span class="text-xs font-medium">
-									{% if q.grade != None %}
-										{{ q.grade|floatformat:0 }}%
-									{% else %}
-										Pending
-									{% endif %}
-								</span>
-							</a>
-						</li>
-						{% endif %}
-						{% endfor %}
-					</ul>
-				</div>
-				{% endif %}
+    <div class="divider"></div>
 
-				<form method="POST" action="{% url 'start-quiz' course_id activity.id %}">
-					{% csrf_token %}
-					<button class="btn btn-sm btn-accent btn-outline w-32">
-						<svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-							<path fill="currentColor" fill-rule="evenodd"
-								d="M8 1.5a6.5 6.5 0 1 1-6.445 7.348a.75.75 0 1 1 1.487-.194A5.001 5.001 0 1 0 4.43 4.5h1.32a.75.75 0 0 1 0 1.5h-3A.75.75 0 0 1 2 5.25v-3a.75.75 0 0 1 1.5 0v1.06A6.48 6.48 0 0 1 8 1.5"
-								clip-rule="evenodd" />
-						</svg>
-						{% if quiz %}Retake{% else %}Start Quiz{% endif %}
-					</button>
-				</form>
-			</div>
-		</div>
-	</div>
-
-	<div class="divider"></div>
-
-	<!-- Answers Section -->
-	<div class="flex-1 overflow-y-auto px-4 space-y-4" style="min-height: 0;">
-		{% if answers %}
-			{% for answer in answers %}
-				{% if quiz_template.question_type == "multiple_choice" %}
-					{% include "base/components/quiz_components/mc_result_block.html" with answer=answer %}
-				{% elif quiz_template.question_type == "tracing" %}
-					{% include "base/components/quiz_components/tracing_result_block.html" with answer=answer %}
-				{% elif quiz_template.question_type == "fill_in_the_blank" %}
-					{% include "base/components/quiz_components/fill_in_the_blank_result_block.html" with answer=answer %}
-				{% else %}
-					<div class="text-error">Unsupported question type.</div>
-				{% endif %}
-			{% endfor %}
-		{% elif not quiz %}
-			<div class="text-base-content/70 mt-6">
-				You haven't taken this quiz yet. Click <strong>Start Quiz</strong> above to begin.
-			</div>
-		{% endif %}
-	</div>
+    <!-- Answers Section -->
+    <div class="flex-1 overflow-y-auto px-4 space-y-4" style="min-height: 0;">
+        {% if answers %}
+            {% for answer in answers %}
+                {% if quiz_template.question_type == "multiple_choice" %}
+                    {% include "base/components/quiz_components/mc_result_block.html" with answer=answer %}
+                {% elif quiz_template.question_type == "tracing" %}
+                    {% include "base/components/quiz_components/tracing_result_block.html" with answer=answer %}
+                {% elif quiz_template.question_type == "fill_in_the_blank" %}
+                    {% include "base/components/quiz_components/fill_in_the_blank_result_block.html" with answer=answer %}
+                {% else %}
+                    <div class="text-error">Unsupported question type.</div>
+                {% endif %}
+            {% endfor %}
+        {% elif not quiz %}
+            <div class="text-base-content/70 mt-6">
+                You haven't taken this quiz yet. Click <strong>Start Quiz</strong> above to begin.
+            </div>
+        {% endif %}
+    </div>
 </div>
+
+<!-- Flash Message JavaScript -->
+{% if not activity.allow_resubmission %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const flashMessage = localStorage.getItem("flashMessage");
+        if (flashMessage) {
+            const container = document.getElementById("flash-message-container");
+
+            const alertDiv = document.createElement("div");
+            alertDiv.className = "alert alert-error shadow-lg";
+            alertDiv.innerHTML = `
+                <div class="flex flex-col gap-1">
+                    <div class="font-bold text-lg">Quiz Forfeited</div>
+                    <div>You navigated away from the quiz for too long.</div>
+                    <div>Your attempt has been <strong>forfeited</strong> and marked as <strong>0</strong>.</div>
+                    <div class="text-sm text-base-100/80">Please contact your teacher if this was a mistake.</div>
+                </div>
+            `;
+
+            container.appendChild(alertDiv);
+            localStorage.removeItem("flashMessage");
+        }
+    });
+</script>
+{% endif %}
+
 {% endblock %}

@@ -15,7 +15,7 @@
 </div>
 
 <div class="overflow-y-auto max-h-[80vh] pr-2">
-    <form method="POST" action="" class="space-y-6">
+    <form method="POST" action="" class="space-y-6" onsubmit="hasSubmittedQuiz = true;">
         {% csrf_token %}
 
         {% for question in questions %}
@@ -33,7 +33,6 @@
 
         </div>
         {% endfor %}
-
 
         <button type="submit" class="btn btn-primary w-full mt-6">Submit Quiz</button>
     </form>
@@ -69,30 +68,160 @@
     });
 </script>
 
-<!-- Forfeiting quiz -->
+
 <script>
+    console.log("Activity allow_resubmission:", "{{ activity.allow_resubmission }}");
+</script>
+
+<!-- Forfeiting quiz with confirmation modal -->
+{% if not activity.allow_resubmission %}
+<script>
+    let hasSubmittedQuiz = false;
+    let forfeitModalShown = false;
+    let tabSwitchTimer = null;
+    const gracePeriod = 5000; // 5 seconds
+
     const quizId = "{{ quiz.id }}";
     const activityId = "{{ activity.id }}";
     const courseId = "{{ course_id }}";
     const forfeitUrl = `/quiz/${quizId}/${activityId}/forfeit/`;
-    const redirectUrl = `/course/${courseId}/`;
 
-    function forfeitQuiz() {
-        fetch(forfeitUrl, {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
-            },
-        }).then(() => {
-            localStorage.setItem("flashMessage", "You forfeited the quiz. Score: 0");
-            window.location.href = redirectUrl;
-        }).catch((err) => {
-            console.error("Forfeit request failed:", err);
-        });
+    // Create modal and toast
+    const modalHtml = `
+        <div id="forfeit-modal" class="modal">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg">Warning: Forfeit Quiz?</h3>
+                <p class="py-4">Leaving the quiz page will forfeit your attempt and assign a score of 0. Are you sure you want to continue?</p>
+                <div class="modal-action">
+                    <button id="forfeit-confirm" class="btn btn-error">Confirm</button>
+                    <button id="forfeit-cancel" class="btn btn-outline">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <div id="grace-toast" class="toast toast-top toast-center hidden z-50">
+            <div class="alert alert-warning shadow-lg">
+                <span>You left the quiz. It will be forfeited in 5 seconds if you don't return.</span>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modal = document.getElementById('forfeit-modal');
+    const confirmButton = document.getElementById('forfeit-confirm');
+    const cancelButton = document.getElementById('forfeit-cancel');
+    const graceToast = document.getElementById('grace-toast');
+
+    function showForfeitModal(callback, targetUrl = null) {
+        if (forfeitModalShown || hasSubmittedQuiz) return;
+        forfeitModalShown = true;
+
+        modal.classList.add('modal-open');
+        confirmButton.onclick = () => {
+            modal.classList.remove('modal-open');
+            callback(targetUrl);
+        };
+        cancelButton.onclick = () => {
+            modal.classList.remove('modal-open');
+            forfeitModalShown = false;
+        };
     }
 
-    window.addEventListener("beforeunload", forfeitQuiz);
-    window.addEventListener("pagehide", forfeitQuiz);
+    function forfeitQuiz(targetUrl = null) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", forfeitUrl, false); // Synchronous
+        xhr.setRequestHeader("X-CSRFToken", document.querySelector("[name=csrfmiddlewaretoken]").value);
+        xhr.send();
+
+        if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            localStorage.setItem("flashMessage", `
+                <div class="font-bold text-lg">Quiz Forfeited</div>
+                <div>You navigated away from the quiz for too long.</div>
+                <div>Your attempt has been <strong>forfeited</strong> and marked as <strong>0</strong>.</div>
+                <div class="text-sm text-base-100/80">Please contact your teacher if this was a mistake.</div>
+            `);
+            window.location.href = targetUrl || `/quiz/${response.ac_id}/results/`;
+        } else {
+            console.error("Forfeit request failed:", xhr.status, xhr.statusText);
+            window.location.href = `/course/${courseId}/`;
+        }
+    }
+
+    // Handle internal navigation
+    document.addEventListener("click", function (event) {
+        const target = event.target.closest("a");
+        if (
+            target &&
+            target.href &&
+            !hasSubmittedQuiz &&
+            target.origin === window.location.origin &&
+            (!target.target || target.target === "_self")
+        ) {
+            event.preventDefault();
+            showForfeitModal(forfeitQuiz, target.href);
+        }
+    });
+
+    function startGraceTimer() {
+        graceToast.classList.remove("hidden");
+        tabSwitchTimer = setTimeout(() => {
+            graceToast.classList.add("hidden");
+
+            // Extra check to make sure student didn't return in time
+            if (!hasSubmittedQuiz && document.visibilityState === "hidden") {
+                forfeitQuiz();
+            } else {
+                console.log("🟢 Student returned before timeout — forfeit cancelled.");
+            }
+        }, gracePeriod);
+
+    }
+
+    function clearGraceTimer() {
+        if (tabSwitchTimer) {
+            clearTimeout(tabSwitchTimer);
+            tabSwitchTimer = null;
+            graceToast.classList.add("hidden");
+        }
+    }
+
+    // Tab switch or minimize
+    document.addEventListener("visibilitychange", function () {
+        if (hasSubmittedQuiz) return;
+        if (document.visibilityState === "hidden") {
+            startGraceTimer();
+        } else {
+            clearGraceTimer();
+        }
+    });
+
+    // Switch to another browser window
+    window.addEventListener("blur", function () {
+        if (!hasSubmittedQuiz && document.visibilityState === "visible") {
+            startGraceTimer();
+        }
+    });
+
+    window.addEventListener("focus", clearGraceTimer);
 </script>
+
+<style>
+    .modal {
+        display: none;
+        place-items: center;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-open {
+        display: grid;
+    }
+
+    .toast {
+        position: fixed;
+        top: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+</style>
+{% endif %}
 
 {% endblock %}
