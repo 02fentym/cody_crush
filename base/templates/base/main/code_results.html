@@ -86,8 +86,9 @@
 
 
     <!-- Scrollable Test Results -->
-    <div class="flex-1 overflow-y-auto px-4 space-y-4" style="min-height: 0; margin-top: 80px;">
-        <table class="table table-zebra w-full text-sm">
+    <div class="overflow-y-auto pt-8">
+		<h3 class="text-xl font-semibold mb-2">Test Results</h3>
+        <table class="table table-zebra w-fit text-sm">
             <thead class="sticky top-0 bg-base-100 z-10">
                 <tr>
                     <th>Test #</th>
@@ -110,5 +111,15 @@
             </tbody>
         </table>
     </div>
+
+	{% if submission %}
+	<div class="my-2">
+		<h3 class="text-xl font-semibold mb-2">Your Submitted Code</h3>
+		<pre class="p-2 rounded-md overflow-auto bg-base-200 text-sm whitespace-pre-wrap w-full">
+			<code>{{ submission.code|escape }}</code>
+		</pre>
+	</div>
+	{% endif %}
+
 </div>
 {% endblock %}

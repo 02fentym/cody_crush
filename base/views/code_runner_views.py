@@ -218,6 +218,7 @@ def code_question_results(request, ac_id):
         "course_id": course_id,
         "all_attempts": all_attempts,
         "courses": courses,
+        "submission": latest_submission,
     }
 
     return render(request, "base/main/code_results.html", context)
