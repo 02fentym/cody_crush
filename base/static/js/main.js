@@ -291,3 +291,4 @@ function getMonacoTheme() {
     if (window.VALID_LIGHT_THEMES.includes(theme)) return "vs";
     return "vs-dark";
 }
+

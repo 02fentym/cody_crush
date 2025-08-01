@@ -82,6 +82,7 @@ urlpatterns = [
     # Taking
     path("course/<int:course_id>/activity/<int:activity_id>/start-quiz/", views.start_quiz, name="start-quiz"),
     path('quiz/<int:quiz_id>/activity/<int:activity_id>/take/', views.take_quiz, name='take-quiz'),
+     path("quiz/<int:quiz_id>/<int:activity_id>/forfeit/", views.forfeit_quiz, name="forfeit-quiz"),
 
     # Results
     path("quiz/<int:ac_id>/results/", views.quiz_results, name="quiz-results"),

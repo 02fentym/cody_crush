@@ -6,9 +6,11 @@
 
     <div class="w-full">
         <div class="w-full bg-base-100 rounded-full h-4 overflow-hidden">
-            <div id="quiz-progress-bar" class="h-full bg-secondary transition-all duration-300" style="width: 0%;"></div>
+            <div id="quiz-progress-bar" class="h-full bg-secondary transition-all duration-300" style="width: 0%;">
+            </div>
         </div>
-        <p id="quiz-progress-label" class="text-sm text-right mt-1 text-base-content/70">0 of {{ questions|length }} answered</p>
+        <p id="quiz-progress-label" class="text-sm text-right mt-1 text-base-content/70">0 of {{ questions|length }}
+            answered</p>
     </div>
 </div>
 
@@ -37,6 +39,7 @@
     </form>
 </div>
 
+<!-- Debugging information -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const progressBar = document.getElementById("quiz-progress-bar");
@@ -66,7 +69,30 @@
     });
 </script>
 
+<!-- Forfeiting quiz -->
+<script>
+    const quizId = "{{ quiz.id }}";
+    const activityId = "{{ activity.id }}";
+    const courseId = "{{ course_id }}";
+    const forfeitUrl = `/quiz/${quizId}/${activityId}/forfeit/`;
+    const redirectUrl = `/course/${courseId}/`;
 
+    function forfeitQuiz() {
+        fetch(forfeitUrl, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+            },
+        }).then(() => {
+            localStorage.setItem("flashMessage", "You forfeited the quiz. Score: 0");
+            window.location.href = redirectUrl;
+        }).catch((err) => {
+            console.error("Forfeit request failed:", err);
+        });
+    }
 
+    window.addEventListener("beforeunload", forfeitQuiz);
+    window.addEventListener("pagehide", forfeitQuiz);
+</script>
 
 {% endblock %}

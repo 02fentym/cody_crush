@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
+from django.views.decorators.csrf import csrf_exempt
 
 from base.decorators import allowed_roles
 from base.models import (
@@ -268,7 +269,7 @@ def take_quiz(request, quiz_id, activity_id):
     rendered_questions = get_rendered_questions(quiz_questions, question_type)
 
     # GET request → show the quiz
-    context = {"quiz": quiz, "questions": rendered_questions, "ct": course_topic, "courses": courses}
+    context = {"quiz": quiz, "questions": rendered_questions, "ct": course_topic, "courses": courses, "activity": activity}
     return render(request, "base/main/quiz.html", context)
 
 
@@ -324,3 +325,35 @@ def quiz_results(request, ac_id):
     }
 
     return render(request, "base/main/quiz_results.html", context)
+
+
+@csrf_exempt
+@login_required
+@allowed_roles(["student"])
+def forfeit_quiz(request, quiz_id, activity_id):
+    print(f"Received forfeit request for quiz {quiz_id} and activity {activity_id}")
+    if request.method == "POST":
+        quiz = get_object_or_404(Quiz, id=quiz_id, student=request.user)
+        activity = get_object_or_404(Activity, id=activity_id)
+        course_id = activity.course_topic.course.id
+
+        if not ActivityCompletion.objects.filter(student=request.user, activity=activity, completed=True).exists():
+            previous_attempts = ActivityCompletion.objects.filter(student=request.user, activity=activity).count()
+            ac = ActivityCompletion.objects.create(
+                student=request.user,
+                activity=activity,
+                completed=True,
+                attempt_number=previous_attempts + 1,
+                date_completed=timezone.now(),
+                score=0
+            )
+            quiz.activity_completion = ac
+            quiz.grade = 0
+            quiz.save()
+
+            messages.warning(request, "You left the quiz page. Your attempt was forfeited and scored 0.")
+
+        return redirect("course", course_id=course_id)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
