@@ -52,18 +52,19 @@ def student_progress(request, course_id, student_id=None):
 
         model = activity.content_type.model
         if model == "quiztemplate":
-            quiz_obj = activity.content_object
-            key = f"{model}_{quiz_obj.question_type}"
+            key = model  # for filtering
+            display_type = ACTIVITY_TYPE_DISPLAY.get(f"{model}_{activity.content_object.question_type}", "Quiz")
         else:
             key = model
+            display_type = ACTIVITY_TYPE_DISPLAY.get(key, model.title())
 
-        display_type = ACTIVITY_TYPE_DISPLAY.get(key, model.title())
 
         activity_rows.append({
             "activity": activity,
             "course_unit": activity.course_topic.unit.title,
             "course_topic": activity.course_topic.topic.title,
-            "type": display_type,
+            "type": key,  # used for filtering
+            "display_type": display_type,  # shown in the table
             "weight": activity.weight,
             "completed": ac.completed if ac else False,
             "score": ac.score if ac else None,

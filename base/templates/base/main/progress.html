@@ -1,268 +1,240 @@
 {% extends "main.html" %}
 {% block content %}
 
-<div class="py-1">
+<div class="drawer drawer-start">
+    <input id="filter-drawer" type="checkbox" class="drawer-toggle" />
 
-    <!-- Back Button -->
-    <div class="btn btn-soft btn-sm mt-1 mb-3">
-        <a href="{% url 'course' course.id %}" class="back-button">← Back to Course</a>
-    </div>
+    <!-- Page Content -->
+    <div class="drawer-content">
 
-    <!-- Course Title -->
-    <div>
-        <h1 class="text-3xl font-bold mb-4">
-            {% if request.user.id != student.id %}
-            {{ student.get_full_name }}'s Progress
-            {% else %}
-            Course Progress
-            {% endif %}
-        </h1>
-    </div>
+        <div class="py-1">
 
-    <!-- Progress and Mark Stats -->
-    <div class="flex gap-6">
-        <div class="stat bg-base-200 rounded-box p-4 shadow-md w-fit">
-            <div class="stat-title text-lg">Progress</div>
-            <div class="stat-value text-primary text-3xl">{{ progress }}%</div>
-        </div>
-        <div class="stat bg-base-200 rounded-box p-4 shadow-md w-fit">
-            <div class="stat-title text-lg">Score</div>
-            <div class="stat-value text-secondary text-3xl">{{ score }}%</div>
-        </div>
-    </div>
+            <!-- Back Button -->
+            <div class="btn btn-soft btn-sm mt-1 mb-3">
+                <a href="{% url 'course' course.id %}" class="back-button">← Back to Course</a>
+            </div>
 
-    <!-- Filter: Activity Type -->
-    <div class="flex justify-end relative z-50">
-        <div class="dropdown dropdown-end">
-            <label tabindex="0" class="btn btn-outline btn-sm">Filters</label>
-            <div tabindex="0"
-                class="dropdown-content bg-base-200 p-4 shadow-md rounded-box space-y-4 w-max min-w-max border">
+            <!-- Title -->
+            <div>
+                <h1 class="text-3xl font-bold mb-4">
+                    {% if request.user.id != student.id %}
+                    {{ student.get_full_name }}'s Progress
+                    {% else %}
+                    Course Progress
+                    {% endif %}
+                </h1>
+            </div>
 
-                <!-- Unit Filters -->
-                <div>
-                    <div class="font-medium mb-1">Unit</div>
-                    <div class="flex gap-1 flex-wrap">
-                        {% for unit in course_units %}
-                        <button class="btn btn-xs unit-btn" data-unit="{{ unit }}">{{ unit }}</button>
+            <!-- Stats -->
+            <div class="flex gap-6">
+                <div class="stat bg-base-200 rounded-box p-4 shadow-md w-fit">
+                    <div class="stat-title text-lg">Progress</div>
+                    <div class="stat-value text-primary text-3xl">{{ progress }}%</div>
+                </div>
+                <div class="stat bg-base-200 rounded-box p-4 shadow-md w-fit">
+                    <div class="stat-title text-lg">Score</div>
+                    <div class="stat-value text-secondary text-3xl">{{ score }}%</div>
+                </div>
+            </div>
+
+            <!-- Drawer Toggle Button -->
+            <div class="flex justify-start my-4">
+                <label for="filter-drawer" class="btn btn-outline btn-sm">☰ Filters</label>
+            </div>
+
+            <!-- Activity Table -->
+            <div class="max-h-[60vh] overflow-y-auto rounded-lg">
+                <table class="table table-zebra w-full">
+                    <thead class="sticky top-0 bg-base-200 z-10">
+                        <tr>
+                            <th>Status</th>
+                            <th>Activity</th>
+                            <th>Unit</th>
+                            <th>Topic</th>
+                            <th>Type</th>
+                            <th>Weight</th>
+                            <th>Score</th>
+                            <th>Date Completed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in activity_rows %}
+                        <tr data-type="{{ row.type }}"
+                            data-status="{% if row.completed %}complete{% else %}incomplete{% endif %}"
+                            data-unit="{{ row.course_unit }}">
+                            <td>
+                                {% if row.completed %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                                    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="1" class="text-success">
+                                        <rect width="18" height="18" x="3" y="3" rx="4" />
+                                        <path d="m9 12l2.25 2L15 10" />
+                                    </g>
+                                </svg>
+                                {% else %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                                    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="1" class="text-error">
+                                        <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                                        <path d="m9 9l6 6m0-6l-6 6" />
+                                    </g>
+                                </svg>
+                                {% endif %}
+                            </td>
+                            <td><span title="{{ row.activity.content_object }}">{{ row.activity.content_object|truncatechars:35 }}</span></td>
+                            <td>{{ row.course_unit }}</td>
+                            <td>{{ row.course_topic }}</td>
+                            <td>{{ row.display_type }}</td>
+                            <td>{{ row.weight }}</td>
+                            <td>{% if row.score != None %}{{ row.score|floatformat:1 }}{% else %}—{% endif %}</td>
+                            <td>{% if row.date_completed %}{{ row.date_completed|timesince }} ago{% else %}—{% endif %}
+                            </td>
+                        </tr>
                         {% endfor %}
-                        <button class="btn btn-xs unit-btn" data-unit="all">Clear</button>
-                    </div>
-                </div>
-
-                <!-- Activity Type Filters -->
-                <div>
-                    <div class="font-medium mb-1">Activity Type</div>
-                    <div class="flex gap-1 flex-wrap">
-                        <button class="btn btn-xs filter-btn" data-type="lesson">Lesson</button>
-                        <button class="btn btn-xs filter-btn" data-type="quiztemplate">Quiz</button>
-                        <button class="btn btn-xs filter-btn" data-type="codequestion">Code</button>
-                        <button class="btn btn-xs filter-btn" data-type="dmojexercise">DMOJ</button>
-                        <button class="btn btn-xs filter-btn" data-type="all">Clear</button>
-                    </div>
-                </div>
-
-                <!-- Completion Status Filters -->
-                <div>
-                    <div class="font-medium mb-1">Status</div>
-                    <div class="flex gap-1 flex-wrap">
-                        <button class="btn btn-xs status-btn" data-status="complete">Complete</button>
-                        <button class="btn btn-xs status-btn" data-status="incomplete">Incomplete</button>
-                        <button class="btn btn-xs status-btn" data-status="all">Clear</button>
-                    </div>
-                </div>
-
-                <!-- Clear All Filters -->
-                <div class="pt-2 border-t border-base-300">
-                    <button id="clear-all-btn" class="btn btn-sm btn-outline w-full">Clear All Filters</button>
-                </div>
-
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
+    <!-- Drawer Sidebar -->
+    <div class="drawer-side z-50">
+        <label for="filter-drawer" class="drawer-overlay"></label>
+        <div class="menu p-4 w-80 min-h-full bg-base-200 text-base-content space-y-4">
+            <h2 class="text-xl font-semibold">Filters</h2>
 
+            <div>
+                <div class="font-medium mb-1">Unit</div>
+                <div class="flex gap-1 flex-wrap">
+                    {% for unit in course_units %}
+                    <button class="btn btn-xs unit-btn" data-unit="{{ unit }}">{{ unit }}</button>
+                    {% endfor %}
+                    <button class="btn btn-xs unit-btn" data-unit="all">Clear</button>
+                </div>
+            </div>
 
-    <!-- Activity Completion Table -->
-    <div class="max-h-[60vh] overflow-y-auto rounded-lg">
-        <table class="table table-zebra w-full">
-            <thead class="sticky top-0 bg-base-200 z-10">
-                <tr>
-                    <th>Status</th>
-                    <th>Activity</th>
-                    <th>Unit</th>
-                    <th>Topic</th>
-                    <th>Type</th>
-                    <th>Weight</th>
-                    <th>Score</th>
-                    <th>Date Completed</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in activity_rows %}
-                <tr data-type="{{ row.type }}"
-                    data-status="{% if row.completed %}complete{% else %}incomplete{% endif %}"
-                    data-unit="{{ row.course_unit }}">
-                    <td>
-                        {% if row.completed %}
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                            <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                stroke-width="1" class="text-success">
-                                <rect width="18" height="18" x="3" y="3" rx="4" />
-                                <path d="m9 12l2.25 2L15 10" />
-                            </g>
-                        </svg>
-                        {% else %}
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                            <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                stroke-width="1" class="text-error">
-                                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                                <path d="m9 9l6 6m0-6l-6 6" />
-                            </g>
-                        </svg>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <span title="{{ row.activity.content_object }}">
-                            {{ row.activity.content_object|truncatechars:35 }}
-                        </span>
-                    </td>
-                    <td>{{ row.course_unit }}</td>
-                    <td>{{ row.course_topic }}</td>
-                    <td>{{ row.type|title }}</td>
-                    <td>{{ row.weight }}</td>
-                    <td>
-                        {% if row.score != None %}
-                        {{ row.score|floatformat:1 }}
-                        {% else %}
-                        —
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if row.date_completed %}
-                        {{ row.date_completed|timesince }} ago
-                        {% else %}
-                        —
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            <div>
+                <div class="font-medium mb-1">Activity Type</div>
+                <div class="flex gap-1 flex-wrap">
+                    <button class="btn btn-xs filter-btn" data-type="lesson">Lesson</button>
+                    <button class="btn btn-xs filter-btn" data-type="quiztemplate">Quiz</button>
+                    <button class="btn btn-xs filter-btn" data-type="codequestion">Code</button>
+                    <button class="btn btn-xs filter-btn" data-type="dmojexercise">DMOJ</button>
+                    <button class="btn btn-xs filter-btn" data-type="all">Clear</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="font-medium mb-1">Status</div>
+                <div class="flex gap-1 flex-wrap">
+                    <button class="btn btn-xs status-btn" data-status="complete">Complete</button>
+                    <button class="btn btn-xs status-btn" data-status="incomplete">Incomplete</button>
+                    <button class="btn btn-xs status-btn" data-status="all">Clear</button>
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-base-300">
+                <button id="clear-all-btn" class="btn btn-sm btn-outline w-full">Clear All Filters</button>
+            </div>
+        </div>
     </div>
-
 </div>
-
 
 <!-- Filter table rows -->
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const rows = document.querySelectorAll("tbody tr");
-        const typeButtons = document.querySelectorAll(".filter-btn");
-        const statusButtons = document.querySelectorAll(".status-btn");
-        const unitButtons = document.querySelectorAll(".unit-btn");
-        const activeUnits = new Set();
+  document.addEventListener("DOMContentLoaded", () => {
+    const rows = document.querySelectorAll("tbody tr");
 
-        const activeTypes = new Set();
-        const activeStatuses = new Set();
+    const typeButtons = document.querySelectorAll(".filter-btn");
+    const statusButtons = document.querySelectorAll(".status-btn");
+    const unitButtons = document.querySelectorAll(".unit-btn");
 
-        function updateTable() {
-            rows.forEach(row => {
-                const rowType = row.getAttribute("data-type");
-                const rowStatus = row.getAttribute("data-status");
-                const rowUnit = row.getAttribute("data-unit");
+    const activeTypes = new Set();
+    const activeStatuses = new Set();
+    const activeUnits = new Set();
 
-                const typeMatch = activeTypes.size === 0 || activeTypes.has(rowType);
-                const statusMatch = activeStatuses.size === 0 || activeStatuses.has(rowStatus);
-                const unitMatch = activeUnits.size === 0 || activeUnits.has(rowUnit);
+    function updateTable() {
+      rows.forEach(row => {
+        const rowType = row.getAttribute("data-type");
+        const rowStatus = row.getAttribute("data-status");
+        const rowUnit = row.getAttribute("data-unit");
 
-                if (typeMatch && statusMatch && unitMatch) {
-                    row.classList.remove("hidden");
-                } else {
-                    row.classList.add("hidden");
-                }
-            });
+        const typeMatch = activeTypes.size === 0 || activeTypes.has(rowType);
+        const statusMatch = activeStatuses.size === 0 || activeStatuses.has(rowStatus);
+        const unitMatch = activeUnits.size === 0 || activeUnits.has(rowUnit);
+
+        if (typeMatch && statusMatch && unitMatch) {
+          row.classList.remove("hidden");
+        } else {
+          row.classList.add("hidden");
         }
+      });
+    }
 
+    function toggleFilter(set, value, button) {
+      if (set.has(value)) {
+        set.delete(value);
+        button.classList.remove("bg-primary", "text-white");
+      } else {
+        set.add(value);
+        button.classList.add("bg-primary", "text-white");
+      }
+      updateTable();
+    }
 
-        function toggleFilter(set, value, button) {
-            if (set.has(value)) {
-                set.delete(value);
-                button.classList.remove("bg-primary", "text-white");
-            } else {
-                set.add(value);
-                button.classList.add("bg-primary", "text-white");
-            }
-            updateTable();
+    // Type filters (multi-toggle)
+    typeButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const type = button.getAttribute("data-type");
+        if (type === "all") {
+          activeTypes.clear();
+          typeButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
+        } else {
+          toggleFilter(activeTypes, type, button);
         }
-
-        // Unit filters
-        unitButtons.forEach(button => {
-            button.addEventListener("click", () => {
-                const unit = button.getAttribute("data-unit");
-
-                // Clear all visual states first
-                unitButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
-                activeUnits.clear();
-
-                if (unit !== "all") {
-                    activeUnits.add(unit);
-                    button.classList.add("bg-primary", "text-white");
-                }
-
-                updateTable();
-            });
-        });
-
-
-        // Type filters
-        typeButtons.forEach(button => {
-            button.addEventListener("click", () => {
-                const type = button.getAttribute("data-type");
-                if (type === "all") {
-                    activeTypes.clear();
-                    typeButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
-                } else {
-                    toggleFilter(activeTypes, type, button);
-                }
-                updateTable();
-            });
-        });
-
-        // Status filters
-        statusButtons.forEach(button => {
-            button.addEventListener("click", () => {
-                const status = button.getAttribute("data-status");
-
-                // Clear all visual states first
-                statusButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
-
-                if (status === "all") {
-                    activeStatuses.clear();
-                } else {
-                    activeStatuses.clear();           // only one at a time
-                    activeStatuses.add(status);
-                    button.classList.add("bg-primary", "text-white");
-                }
-
-                updateTable();
-            });
-        });
-
-        // Clear all filters
-        document.getElementById("clear-all-btn").addEventListener("click", () => {
-            activeTypes.clear();
-            activeStatuses.clear();
-            activeUnits.clear();
-
-            typeButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
-            statusButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
-            unitButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
-
-            updateTable();
-        });
+      });
     });
-</script>
 
+    // Status filters (multi-toggle)
+    statusButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const status = button.getAttribute("data-status");
+        if (status === "all") {
+          activeStatuses.clear();
+          statusButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
+        } else {
+          toggleFilter(activeStatuses, status, button);
+        }
+      });
+    });
+
+    // Unit filters (multi-toggle)
+    unitButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const unit = button.getAttribute("data-unit");
+        if (unit === "all") {
+          activeUnits.clear();
+          unitButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
+        } else {
+          toggleFilter(activeUnits, unit, button);
+        }
+      });
+    });
+
+    // Clear all filters
+    document.getElementById("clear-all-btn").addEventListener("click", () => {
+      activeTypes.clear();
+      activeStatuses.clear();
+      activeUnits.clear();
+
+      typeButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
+      statusButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
+      unitButtons.forEach(btn => btn.classList.remove("bg-primary", "text-white"));
+
+      updateTable();
+    });
+  });
+</script>
 
 
 
