@@ -22,6 +22,8 @@ from django.db import transaction
 def create_lesson(request, course_topic_id):
     course_topic = get_object_or_404(CourseTopic, id=course_topic_id)
     courses = get_all_courses("teacher", request.user)
+    course_id = course_topic.course.id
+
     form = LessonForm()
 
     if request.method == "POST":
@@ -43,7 +45,7 @@ def create_lesson(request, course_topic_id):
             messages.error(request, "Please fix the errors below.")
 
         
-    context = {"courses": courses, "topic": course_topic, "form": form, "is_edit": False}
+    context = {"courses": courses, "topic": course_topic, "form": form, "is_edit": False, "course_id": course_id}
     return render(request, "base/main/create_edit_lesson.html", context)
 
 

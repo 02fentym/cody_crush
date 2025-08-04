@@ -2,52 +2,65 @@
 
 {% block content %}
 
-{% if form.errors %}
-<div class="alert alert-error text-sm">
-    {{ form.errors }}
-</div>
-{% endif %}
+<div class="flex flex-col h-[calc(100vh-4rem)]">
 
-<div class="p-2 min-h-screen pb-28">
-    <h2 class="text-2xl font-semibold mb-3">
-        {% if is_edit %}Edit Lesson{% else %}Create Lesson{% endif %}
-    </h2>
+    <!-- Sticky Back Button -->
+    <div class="shrink-0 bg-base-200 z-10 sticky top-0 py-3 px-4 border-b border-base-300">
+        <div class="btn btn-soft btn-sm">
+            <a href="{% url 'course' course_id %}" class="back-button">← Back to Course</a>
+        </div>
+    </div>
 
-    <form method="POST" class="lesson-form flex flex-col">
-        {% csrf_token %}
+    <!-- Scrollable Lesson Content -->
+    <div class="flex-1 overflow-y-auto p-4 pb-36">
 
-        {% if form.non_field_errors %}
-        <div class="alert alert-error text-sm">
-            {{ form.non_field_errors }}
+        {% if form.errors %}
+        <div class="alert alert-error text-sm mb-4">
+            {{ form.errors }}
         </div>
         {% endif %}
 
-        <!-- Title Field -->
-        <div class="form-control mb-2">
-            <label for="{{ form.title.id_for_label }}" class="label">
-                <span class="label-text font-medium">Title</span>
-            </label>
-            {{ form.title }}
-            {% if form.title.errors %}
-            <p class="text-error text-sm">{{ form.title.errors }}</p>
+        <h2 class="text-2xl font-semibold mb-3">
+            {% if is_edit %}Edit Lesson{% else %}Create Lesson{% endif %}
+        </h2>
+
+        <form method="POST" class="lesson-form flex flex-col">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-error text-sm mb-2">
+                {{ form.non_field_errors }}
+            </div>
             {% endif %}
-        </div>
 
-        <!-- Markdown Editor using Toast UI -->
-        <div class="form-control min-h-0">
-            <!-- Mount point for Toast UI -->
-            <div id="toast-editor"></div>
+            <!-- Title Field -->
+            <div class="form-control mb-2">
+                <label for="{{ form.title.id_for_label }}" class="label">
+                    <span class="label-text font-medium">Title</span>
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                <p class="text-error text-sm">{{ form.title.errors }}</p>
+                {% endif %}
+            </div>
 
-            <!-- Hidden textarea to store markdown for form submission -->
-            <textarea id="id_content" name="content" hidden>{{ form.content.value|default_if_none:"" }}</textarea>
+            <!-- Markdown Editor using Toast UI -->
+            <div class="form-control min-h-0">
+                <!-- Mount point for Toast UI -->
+                <div id="toast-editor"></div>
 
-            {% if form.content.errors %}
-            <p class="text-error text-sm">{{ form.content.errors }}</p>
-            {% endif %}
-        </div>
-    </form>
+                <!-- Hidden textarea to store markdown for form submission -->
+                <textarea id="id_content" name="content" hidden>{{ form.content.value|default_if_none:"" }}</textarea>
 
-    <!-- Buttons (fixed to bottom) -->
+                {% if form.content.errors %}
+                <p class="text-error text-sm">{{ form.content.errors }}</p>
+                {% endif %}
+            </div>
+        </form>
+
+    </div>
+
+    <!-- Fixed Bottom Buttons -->
     <div class="fixed bottom-0 left-0 w-full bg-base-300 py-2 px-4 flex justify-end gap-2 z-50">
         <button type="submit" class="btn btn-primary btn-outline">
             {% if is_edit %}Save{% else %}Create{% endif %}
@@ -76,34 +89,25 @@
 </script>
 
 <style>
-    /* Keep layout intact — just override colors */
     .toastui-editor-defaultUI,
     .toastui-editor-contents {
         background-color: #ffffff;
         color: #1f2937;
-        /* slate-800 */
     }
 
     .toastui-editor-contents pre,
     .toastui-editor-contents code {
         background-color: #f3f4f6;
-        /* gray-100 */
         color: #111827;
-        /* gray-900 */
     }
 
-    /* Optional: force borders and icons to look normal */
     .toastui-editor-defaultUI .toastui-editor-toolbar {
         border-bottom: 1px solid #e5e7eb;
-        /* gray-200 */
     }
 
     .toastui-editor-toolbar-icons button {
         filter: none !important;
     }
 </style>
-
-
-
 
 {% endblock %}
