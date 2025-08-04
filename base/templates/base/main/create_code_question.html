@@ -34,7 +34,7 @@
     <h3 class="text-xl font-semibold mt-3">Test Cases</h3>
 
     {% if question %}
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between my-4">
         <!-- Left: Add Test Case -->
         <button
             class="btn btn-secondary btn-outline btn-sm w-full sm:w-auto"
@@ -100,6 +100,80 @@
     {% else %}
     <p class="text-base-content/50">No test cases available yet.</p>
     {% endif %}
+
+
+    <!-- Side-by-side collapses for YAML and ZIP -->
+    <div class="flex flex-col lg:flex-row gap-6 my-4">
+    
+        <!-- YAML Test Case Format Explanation -->
+        <div class="collapse collapse-arrow bg-base-200 rounded-box w-full lg:w-1/2">
+            <input type="checkbox" id="yaml-collapse-toggle" />
+            <div class="collapse-title text-sm font-medium text-base-content">
+                YAML Test Case Format
+            </div>
+            <div class="collapse-content text-sm leading-relaxed space-y-2 max-w-xl" id="yaml-collapse-body" tabindex="-1">
+                <p>
+                    You can upload a <code>.yaml</code> or <code>.yml</code> file containing test cases
+                    for code questions that accept standard input.
+                </p>
+    
+                <p><strong>Example format:</strong></p>
+                <pre class="bg-base-100 p-3 rounded text-xs overflow-x-auto"><code>test_style: stdin
+    test_cases:
+      - input: "2\n3\n"
+        output: "5\n"
+      - input: "10\n20\n"
+        output: "30\n"
+      - input: "-5\n5\n"
+        output: "0\n"</code></pre>
+    
+                <ul class="list-disc list-inside text-sm">
+                    <li><code>test_style</code> must be <code>stdin</code> or <code>function</code> (if supported).</li>
+                    <li>Each entry under <code>test_cases</code> should include <code>input</code> and <code>output</code>.
+                    </li>
+                    <li>Use <code>\n</code> for newlines inside the quoted strings.</li>
+                    <li>Make sure your YAML uses spaces, not tabs, and is properly indented.</li>
+                </ul>
+            </div>
+        </div>
+    
+        <!-- ZIP File Test Case Format Explanation -->
+        <div class="collapse collapse-arrow bg-base-200 rounded-box w-full lg:w-1/2">
+            <input type="checkbox" id="zip-collapse-toggle" />
+            <div class="collapse-title text-sm font-medium text-base-content">
+                ZIP Test Case Format
+            </div>
+            <div class="collapse-content text-sm leading-relaxed space-y-2 max-w-xl" id="zip-collapse-body" tabindex="-1">
+                <p>
+                    You can upload a <code>.zip</code> file that contains:
+                </p>
+                <ul class="list-disc list-inside text-sm">
+                    <li>A YAML file (e.g. <code>meta.yaml</code>) that lists <code>.in</code> / <code>.out</code> file names
+                    </li>
+                    <li>The actual <code>.in</code> and <code>.out</code> files with test content</li>
+                </ul>
+    
+                <p><strong>Example <code>meta.yaml</code>:</strong></p>
+                <pre class="bg-base-100 p-3 rounded text-xs overflow-x-auto"><code>test_style: stdin
+    test_cases:
+      - input: "1.in"
+        output: "1.out"
+      - input: "2.in"
+        output: "2.out"</code></pre>
+    
+                <p>
+                    The ZIP must include the files <code>1.in</code>, <code>1.out</code>, <code>2.in</code>, and
+                    <code>2.out</code> at the root level.
+                    Inline strings will be ignored — inputs and outputs must be stored in separate text files and referenced
+                    by
+                    name in the YAML.
+                </p>
+            </div>
+        </div>
+    
+    </div>
+
+
 </div>
 
 
@@ -179,5 +253,77 @@
     });
   });
 </script>
+
+<!-- Automatically scroll to YAML explanation when opened -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.getElementById("yaml-collapse-toggle");
+    const collapse = document.querySelector(".collapse");
+
+    toggle.addEventListener("change", () => {
+      if (toggle.checked) {
+        // Wait for DaisyUI's collapse animation (default 300ms)
+        setTimeout(() => {
+          collapse.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest"
+          });
+        }, 300);
+      }
+    });
+  });
+</script>
+
+<!-- Automatically scroll to ZIP explanation when opened -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.getElementById("zip-collapse-toggle");
+    const collapse = document.getElementById("zip-collapse-body").closest(".collapse");
+
+    toggle.addEventListener("change", () => {
+      if (toggle.checked) {
+        setTimeout(() => {
+          collapse.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest"
+          });
+        }, 300);
+      }
+    });
+  });
+</script>
+
+<!-- Syncs the opening/closing of both explanation collapses -->
+ <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const yamlToggle = document.getElementById("yaml-collapse-toggle");
+    const zipToggle = document.getElementById("zip-collapse-toggle");
+
+    const yamlCollapse = document.getElementById("yaml-collapse-body").closest(".collapse");
+    const zipCollapse = document.getElementById("zip-collapse-body").closest(".collapse");
+
+    function handleToggle(source, target, targetCollapse) {
+      target.checked = source.checked;
+
+      if (source.checked) {
+        setTimeout(() => {
+          targetCollapse.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest"
+          });
+          targetCollapse.querySelector(".collapse-content")?.focus();
+        }, 300); // Allow time for animation
+      }
+    }
+
+    yamlToggle.addEventListener("change", () => handleToggle(yamlToggle, zipToggle, yamlCollapse));
+    zipToggle.addEventListener("change", () => handleToggle(zipToggle, yamlToggle, zipCollapse));
+  });
+</script>
+
+
 
 {% endblock %}
