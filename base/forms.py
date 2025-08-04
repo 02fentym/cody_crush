@@ -133,7 +133,7 @@ class CourseUnitForm(forms.ModelForm):
 class TopicForm(forms.ModelForm):
     class Meta:
         model = Topic
-        fields = ['title', 'description', 'unit']
+        fields = ['title', 'description']
         widgets = {
             'title': forms.TextInput(attrs={
                 'placeholder': 'Topic title...',
@@ -143,9 +143,6 @@ class TopicForm(forms.ModelForm):
                 'placeholder': 'Brief description...',
                 'class': 'textarea textarea-bordered w-full',
                 'rows': 1
-            }),
-            'unit': forms.Select(attrs={
-                'class': 'select select-bordered w-full'
             }),
         }
         

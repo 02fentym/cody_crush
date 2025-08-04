@@ -13,19 +13,21 @@ from base.forms import UnitForm, TopicForm
 @allowed_roles(["teacher"])
 def manage_units(request):
     courses = Course.objects.filter(teacher=request.user)
-    sort_by = request.GET.get("sort_by", "updated")  # Default sort by updated
-    order = request.GET.get("order", "desc")  # Default descending
 
-    # Define valid sort fields
+    # Default sort: alphabetically by title (ascending)
+    sort_by = request.GET.get("sort_by", "title")
+    order = request.GET.get("order", "asc")
+
+    # Allow only safe fields
     valid_sort_fields = ["title", "description", "updated"]
     if sort_by not in valid_sort_fields:
-        sort_by = "updated"
+        sort_by = "title"
 
-    # Apply sorting
+    # Choose ordering direction
     if order == "asc":
-        units = Unit.objects.all().order_by(sort_by)
+        units = Unit.objects.prefetch_related("topics").order_by(sort_by)
     else:
-        units = Unit.objects.all().order_by(f"-{sort_by}")
+        units = Unit.objects.prefetch_related("topics").order_by(f"-{sort_by}")
 
     return render(request, "base/main/manage_units.html", {
         "units": units,
@@ -38,24 +40,40 @@ def manage_units(request):
 @login_required
 @allowed_roles(["teacher"])
 def get_unit_form(request):
-    form = UnitForm()
-    return render(request, "base/components/unit_components/unit_form.html", {"form": form})
+    unit_id = request.GET.get("unit_id")
+
+    unit = None
+    if unit_id:
+        try:
+            unit = Unit.objects.get(id=unit_id)
+        except Unit.DoesNotExist:
+            unit = None
+
+    form = UnitForm(instance=unit)
+
+    return render(request, "base/components/unit_components/unit_form.html", {
+        "form": form,
+        "unit": unit  # ✅ required for template logic
+    })
 
 
 @login_required
 @allowed_roles(["teacher"])
 def submit_unit_form_manage(request):
     if request.method == "POST":
-        form = UnitForm(request.POST)
+        unit_id = request.POST.get("unit_id")
+        instance = get_object_or_404(Unit, id=unit_id) if unit_id else None
+
+        form = UnitForm(request.POST, instance=instance)
+
         if form.is_valid():
             form.save()
-            return redirect("manage-units")  # Redirect to manage-units page
+            messages.success(request, "Unit saved.")
         else:
-            # Re-render the form with errors in the modal
-            return render(request, "base/components/unit_components/unit_form.html", {"form": form})
-    else:
-        form = UnitForm()
-        return render(request, "base/components/unit_components/unit_form.html", {"form": form})
+            messages.error(request, "Something went wrong.")
+
+    return redirect("manage-units")
+
     
 
 @require_POST
@@ -72,6 +90,7 @@ def delete_selected_units(request):
     else:
         messages.warning(request, "No units selected for deletion.")
     return redirect("manage-units")
+
 
 # Managing Topics
 @login_required
@@ -102,18 +121,38 @@ def manage_topics(request):
 @login_required
 @allowed_roles(["teacher"])
 def get_topic_form(request):
-    form = TopicForm()
-    return render(request, "base/components/topic_components/topic_form.html", {"form": form})
+    topic_id = request.GET.get("topic_id")
+    topic = get_object_or_404(Topic, id=topic_id) if topic_id else None
+    unit = topic.unit if topic else get_object_or_404(Unit, id=request.GET.get("unit_id"))
+    form = TopicForm(instance=topic)
 
-@require_POST
+    return render(request, "base/components/topic_components/topic_form.html", {
+        "form": form,
+        "unit": unit,
+        "topic": topic
+    })
+
+
+
 @login_required
 @allowed_roles(["teacher"])
 def submit_topic_form(request):
-    form = TopicForm(request.POST)
-    if form.is_valid():
-        form.save()
-        return redirect("manage-topics")
-    return render(request, "base/components/topic_components/topic_form.html", {"form": form})
+    if request.method == "POST":
+        topic_id = request.POST.get("topic_id")
+        unit_id = request.POST.get("unit")
+        instance = get_object_or_404(Topic, id=topic_id) if topic_id else None
+
+        form = TopicForm(request.POST, instance=instance)
+
+        if form.is_valid() and unit_id:
+            topic = form.save(commit=False)
+            topic.unit_id = unit_id
+            topic.save()
+            messages.success(request, "Topic saved.")
+        else:
+            messages.error(request, "There was a problem saving the topic.")
+
+    return redirect("manage-units")
 
 
 @require_POST
@@ -129,4 +168,4 @@ def delete_selected_topics(request):
             messages.warning(request, "No topics were deleted.")
     else:
         messages.warning(request, "No topics selected for deletion.")
-    return redirect("manage-topics")
+    return redirect("manage-units")

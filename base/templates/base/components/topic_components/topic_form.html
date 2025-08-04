@@ -1,17 +1,27 @@
 <form method="POST" action="{% url 'submit-topic-form' %}">
     {% csrf_token %}
-    <h3 class="text-xl font-semibold mb-2">Add Topic</h3>
+    <input type="hidden" name="unit" value="{{ unit.id }}">
 
-    <div class="form-control mb-4">
-        {{ form.unit }}
+    <h3 class="text-xl font-semibold mb-2">
+        {% if topic %}Edit Topic in{% else %}Add Topic to{% endif %} "{{ unit.title }}"
+    </h3>
+
+    {% if topic %}
+    <input type="hidden" name="topic_id" value="{{ topic.id }}">
+    {% endif %}
+
+
+    <div class="mb-4">
+        Unit: {{ unit.title}}
     </div>
+
     <div class="form-control mb-4">
         {{ form.title }}
     </div>
     <div class="form-control mb-4">
         {{ form.description }}
     </div>
-    
+
 
     <div class="modal-action">
         <button type="submit" class="btn btn-primary">Create</button>

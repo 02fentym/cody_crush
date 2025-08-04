@@ -1,108 +1,125 @@
 <div id="unit-table-wrapper" class="relative">
-    <form method="POST" action="{% url 'delete-selected-units' %}" id="bulk-delete-form"
-          onsubmit="return confirm('Are you sure you want to delete the selected units?');">
-        {% csrf_token %}
-        <div class="mb-4 flex gap-2">
-            <button hx-get="{% url 'get-unit-form' %}" hx-target="#modal-body" hx-swap="innerHTML"
-                    onclick="document.getElementById('modal-wrapper').checked = true"
-                    class="btn btn-primary btn-sm btn-outline">
-                + Add Unit
-            </button>
-            <button type="submit" class="btn btn-error btn-sm" id="delete-selected-btn" disabled>
-                Delete Selected
-            </button>
+    <div class="mb-4 flex gap-2">
+        <button hx-get="{% url 'get-unit-form' %}" hx-target="#modal-body" hx-swap="innerHTML"
+            onclick="document.getElementById('modal-wrapper').checked = true"
+            class="btn btn-primary btn-sm btn-outline">
+            + Add Unit
+        </button>
+    </div>
+
+    <div class="space-y-4">
+        {% for unit in units %}
+        <div class="flex items-start justify-between gap-2">
+
+            <!-- Collapse (Unit Block) -->
+            <div class="collapse collapse-arrow bg-base-100 shadow flex-1 unit-collapse">
+                <input type="checkbox" class="unit-toggle" id="unit-toggle-{{ unit.id }}" />
+                <div class="collapse-title relative pt-4 pr-12 flex justify-between items-center">
+
+                    <!-- Title -->
+                    <div class="font-bold text-lg">
+                        {{ unit.title }}
+                    </div>
+
+                    <!-- Topic Count Indicator -->
+                    <div class="indicator">
+                        <div class="indicator-item badge badge-secondary mr-4">
+                            {{ unit.topics.count }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapse-content">
+                    <!-- Unit Description -->
+                    <p class="text-sm text-base-content mb-2">{{ unit.description }}</p>
+
+                    <!-- Topic List -->
+                    <ul class="space-y-2 mt-2">
+                        {% for topic in unit.topics.all %}
+                        <li class="bg-base-200 p-2 rounded flex justify-between items-center">
+                            <span>{{ topic.title }}</span>
+                            <div class="flex items-center gap-2">
+
+                                <!-- Edit Button (pencil) -->
+                                <button hx-get="{% url 'get-topic-form' %}?topic_id={{ topic.id }}"
+                                    hx-target="#modal-body" hx-swap="innerHTML"
+                                    onclick="document.getElementById('modal-wrapper').checked = true"
+                                    class="text-gray-400 hover:text-blue-500" title="Edit Topic">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15.232 5.232l3.536 3.536M9 13l6.536-6.536a2 2 0 112.828 2.828L11.828 16H9v-2.828z" />
+                                    </svg>
+                                </button>
+
+                                <!-- Delete Topic Button -->
+                                <form method="POST" action="{% url 'delete-selected-topics' %}"
+                                    onsubmit="return confirm('Delete this topic?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="topic_ids" value="{{ topic.id }}">
+                                    <button type="submit" class="text-gray-400 hover:text-red-500" title="Delete Topic">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6 18 18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </form>
+
+
+                            </div>
+                        </li>
+
+                        {% empty %}
+                        <p class="text-sm text-gray-400 italic">No topics in this unit yet.</p>
+                        {% endfor %}
+                    </ul>
+
+                    <!-- Add Topic Button -->
+                    <div class="mt-3 flex justify-end">
+                        <button hx-get="{% url 'get-topic-form' %}?unit_id={{ unit.id }}" hx-target="#modal-body"
+                            hx-swap="innerHTML" onclick="document.getElementById('modal-wrapper').checked = true"
+                            class="btn btn-sm btn-primary btn-outline">
+                            + Add Topic
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Edit + Delete Buttons (side-by-side, horizontally aligned) -->
+            <div class="flex items-center gap-2 pt-4">
+
+                <!-- Edit Unit Button -->
+                <button hx-get="{% url 'get-unit-form' %}?unit_id={{ unit.id }}" hx-target="#modal-body"
+                    hx-swap="innerHTML" onclick="document.getElementById('modal-wrapper').checked = true"
+                    class="text-gray-400 hover:text-blue-500" title="Edit Unit">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.232 5.232l3.536 3.536M9 13l6.536-6.536a2 2 0 112.828 2.828L11.828 16H9v-2.828z" />
+                    </svg>
+                </button>
+
+                <!-- Delete Unit Button -->
+                <form method="POST" action="{% url 'delete-selected-units' %}"
+                    onsubmit="return confirm('Delete this unit?');">
+                    {% csrf_token %}
+                    <input type="hidden" name="unit_ids" value="{{ unit.id }}">
+                    <button type="submit" class="text-gray-400 hover:text-red-500" title="Delete Unit">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </form>
+
+            </div>
+
+
         </div>
-        <table class="table table-sm table-zebra w-full">
-            <thead class="sticky top-0 bg-base-200 z-10">
-                <tr>
-                    <th class="w-12">
-                        <input type="checkbox" id=" rádio-all" class="checkbox checkbox-sm" />
-                    </th>
-                    <th>
-                        <a href="{% url 'manage-units' %}?sort_by=title&order={% if sort_by == 'title' and order == 'asc' %}desc{% else %}asc{% endif %}"
-                           class="flex items-center gap-2">
-                            Title
-                            {% if sort_by == 'title' %}
-                                {% if order == 'asc' %}
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
-                                {% else %}
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                {% endif %}
-                            {% endif %}
-                        </a>
-                    </th>
-                    <th>
-                        <a href="{% url 'manage-units' %}?sort_by=description&order={% if sort_by == 'description' and order == 'asc' %}desc{% else %}asc{% endif %}"
-                           class="flex items-center gap-2">
-                            Description
-                            {% if sort_by == 'description' %}
-                                {% if order == 'asc' %}
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
-                                {% else %}
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                {% endif %}
-                            {% endif %}
-                        </a>
-                    </th>
-                    <th>
-                        <a href="{% url 'manage-units' %}?sort_by=updated&order={% if sort_by == 'updated' and order == 'asc' %}desc{% else %}asc{% endif %}"
-                           class="flex items-center gap-2">
-                            Last Updated
-                            {% if sort_by == 'updated' %}
-                                {% if order == 'asc' %}
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
-                                {% else %}
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                {% endif %}
-                            {% endif %}
-                        </a>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for unit in units %}
-                <tr>
-                    <td class="w-12">
-                        <input type="checkbox" name="unit_ids" value="{{ unit.id }}"
-                               class="checkbox checkbox-sm unit-checkbox" />
-                    </td>
-                    <td class="font-semibold">{{ unit.title }}</td>
-                    <td>{{ unit.description|truncatechars:80 }}</td>
-                    <td>{{ unit.updated|date:"M d, Y" }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="text-center text-gray-400">No units found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </form>
+        {% empty %}
+        <p class="text-center text-gray-400">No units found.</p>
+        {% endfor %}
+    </div>
 </div>
-
-<script>
-    // Enable/disable Delete Selected button based on checkbox selection
-    document.addEventListener('DOMContentLoaded', () => {
-        const deleteBtn = document.getElementById('delete-selected-btn');
-        const checkboxes = document.querySelectorAll('.unit-checkbox');
-        const selectAll = document.getElementById('select-all');
-
-        const updateDeleteButton = () => {
-            const anyChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
-            deleteBtn.disabled = !anyChecked;
-        };
-
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', updateDeleteButton);
-        });
-
-        selectAll.addEventListener('change', () => {
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = selectAll.checked;
-            });
-            updateDeleteButton();
-        });
-
-        updateDeleteButton();
-    });
-</script>

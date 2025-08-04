@@ -1,6 +1,0 @@
-<label class="label font-semibold" for="topic_id">Topic:</label>
-<select name="topic_id" class="select select-bordered w-full" required>
-  {% for topic in topics %}
-    <option value="{{ topic.id }}">{{ topic.title }}</option>
-  {% endfor %}
-</select>

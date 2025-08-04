@@ -55,10 +55,8 @@
             <button type="submit" class="btn btn-sm btn-outline btn-accent w-full sm:w-auto">Upload</button>
         </form>
     </div>
-    {% endif %}
 
-
-    {% if question %}
+    <!-- Test Cases Table -->
     <form method="POST" action="{% url 'delete-code-testcases' question.id %}"
         onsubmit="return confirm('Delete selected test cases?');">
         {% csrf_token %}
@@ -99,6 +97,8 @@
         </div>
         <button type="submit" class="btn btn-error btn-sm mt-4" disabled id="delete-selected-btn">Delete Selected</button>
     </form>
+    {% else %}
+    <p class="text-base-content/50">No test cases available yet.</p>
     {% endif %}
 </div>
 

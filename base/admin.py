@@ -168,7 +168,7 @@ class TopicAdmin(admin.ModelAdmin):
 
 @admin.register(Unit) # Register the Unit model with a custom admin class
 class UnitAdmin(admin.ModelAdmin):
-    list_display = ('title',)
+    list_display = ('title', 'description')
     search_fields = ('title',)
 
 
