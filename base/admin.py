@@ -11,7 +11,11 @@ from .models import (
 
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
-    list_display = ('id',  'object_id', 'order', 'topic_title', 'activity_type', 'weight', 'created')
+    list_display = ('id', 'object_id', 'order', 'course_title', 'topic_title', 'activity_type', 'weight', 'created')
+
+    def course_title(self, obj):
+        return obj.course_topic.course.title
+    course_title.short_description = "Course"
 
     def topic_title(self, obj):
         return obj.course_topic.topic.title

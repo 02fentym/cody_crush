@@ -28,10 +28,11 @@ def student_progress(request, course_id, student_id=None):
     # Get all activities in this course
     activities = (
         Activity.objects
-        .filter(course_topic__unit__courseunit__course=course)
+        .filter(course_topic__course=course)
         .select_related("course_topic__unit", "course_topic__topic", "content_type")
         .order_by("course_topic__order", "order")
     )
+
 
     # Fetch all completions for the student in this course
     all_completions = (

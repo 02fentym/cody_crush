@@ -1,26 +1,26 @@
-<div class="flex justify-between items-center bg-base-100 px-6 py-2 drop-shadow-xl">
+<div class="navbar bg-base-100 drop-shadow-xl px-6">
 	<!-- Left: Logo -->
-	<div>
+	<div class="navbar-start">
 		<a class="btn btn-ghost normal-case text-xl" href="{% url 'home' %}">CodeX</a>
 	</div>
 
 	<!-- Center: Nav links -->
-	<div class="hidden md:flex gap-8 justify-between">
+	<div class="navbar-center hidden md:flex">
 		{% if user.profile.role == "student" %}
-		{% if course_id %}
-		<a href="{% url 'progress' course_id %}" class="btn btn-ghost btn-md rounded-btn">Progress</a>
-		<a class="btn btn-ghost btn-md rounded-btn">Settings</a>
+		{% if course.id %}
+		<a href="{% url 'progress' course.id %}" class="btn btn-ghost btn-md rounded-btn text-lg">Progress</a>
+		<a class="btn btn-ghost btn-md rounded-btn text-lg">Settings</a>
 		{% endif %}
 		{% elif user.profile.role == "teacher" %}
 		{% if course %}
-		<a href={% url 'student-list' course.id %} class="btn btn-ghost btn-md rounded-btn">Students</a>
-		<a href="{% url 'course-settings' course.id %}" class="btn btn-ghost btn-md rounded-btn">Settings</a>
+		<a href={% url 'student-list' course.id %} class="btn btn-ghost btn-md rounded-btn text-lg">Students</a>
+		<a href="{% url 'course-settings' course.id %}" class="btn btn-ghost btn-md rounded-btn text-lg">Settings</a>
 		{% endif %}
 		{% endif %}
 	</div>
 
 	<!-- Right: Theme toggle + User dropdown -->
-	<div class="flex items-center gap-4">
+	<div class="navbar-end">
 		<!-- Theme Selector Dropdown -->
 		<select id="theme-select" class="select select-bordered select-sm w-40">
 			<option disabled value="">Select Theme</option>
@@ -28,7 +28,7 @@
 
 
 		<!-- User Dropdown -->
-		<div class="dropdown dropdown-end">
+		<div class="dropdown dropdown-end ml-4">
 			<label tabindex="0" class="flex items-center gap-2 cursor-pointer">
 				<div class="w-8 h-8 bg-neutral text-neutral-content rounded-full flex items-center justify-center">
 					<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
@@ -44,7 +44,6 @@
 			</label>
 
 			<ul tabindex="0" class="dropdown-content mt-3 z-50 menu p-2 shadow bg-base-100 rounded-box w-40">
-				<li><a href="#">Settings</a></li>
 				<li><a href="{% url 'logout' %}">Logout</a></li>
 			</ul>
 		</div>
