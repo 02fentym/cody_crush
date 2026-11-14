@@ -39,7 +39,7 @@ scipy==1.13.1
 screeninfo==0.8.1
 six==1.15.0
 skia-pathops==0.8.0.post2
-soupsieve==2.6
+soupsieve==4.0.1
 sqlparse==0.5.3
 srt==3.5.3
 svgelements==1.9.6
